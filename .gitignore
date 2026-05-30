@@ -5,6 +5,7 @@ coverage/
 .DS_Store
 *.log
 .env*
+!.env.production
 !.env.example
 .netlify/
 .netlify/*
