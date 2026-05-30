@@ -106,7 +106,7 @@ export function createApp() {
       if (!priceId || !uid || !email) {
         return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
       }
-      const appUrl = process.env.VITE_APP_URL || "http://localhost:3000";
+      const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://primecv-mu.vercel.app";
       const mode = planType === "donation" ? "payment" as const : "subscription" as const;
       const session = await stripe.checkout.sessions.create({
         customer_email: email,
@@ -143,7 +143,7 @@ export function createApp() {
       if (!customerId) {
         return res.status(400).json({ error: "Stripe Customer ID not found for this user" });
       }
-      const appUrl = process.env.VITE_APP_URL || "http://localhost:3000";
+      const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://primecv-mu.vercel.app";
       const session = await stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: appUrl,
