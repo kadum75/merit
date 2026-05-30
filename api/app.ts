@@ -2,7 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-export function createApp() {
+// Triggering redeploy\nexport function createApp() {
   const app = express();
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
