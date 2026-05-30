@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, UserPlus, Chrome, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { supabase, isSupabaseConfigValid, syncUserDocument } from '../supabase';
+import { supabase, getCurrentMonthString, handleSupabaseError, OperationType, isSupabaseConfigValid, syncUserDocument } from '../supabase';
 import { LegalModal, LegalType } from './LegalModal';
 
 interface AuthModalProps {
@@ -43,6 +43,28 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         if (error) throw error;
         if (data.user) {
           await syncUserDocument(data.user);
+        }
+        onClose();
+      } else {
+        if (!agreeToTerms) {
+          throw new Error('You must agree to the Privacy Policy and Terms of Service.');
+        }
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        if (data.user) {
+          await syncUserDocument(data.user, agreeToTerms);
+        }
+        onClose();
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
         }
         onClose();
       } else {
