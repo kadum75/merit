@@ -1,0 +1,5 @@
+{
+  "name": "PrimeCV",
+  "description": "Professional UK-based CV builder with Stripe-powered Pro features and donations.",
+  "requestFramePermissions": []
+}

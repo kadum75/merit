@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+@variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Override zinc palette with hex to avoid oklch parsing errors in html2canvas */
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #71717a;
+  --color-zinc-600: #52525b;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+  --color-zinc-900: #18181b;
+  --color-zinc-950: #09090b;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-green-500: #22c55e;
+  --color-red-600: #dc2626;
+}
+
+@layer base {
+  html, body, #root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  body {
+    @apply bg-zinc-50 text-zinc-900 font-sans antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  }
+}
+
+/* CV Preview Styles - Professional UK Standard */
+.cv-preview {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  padding: 20mm !important;
+  box-sizing: border-box;
+}
+
+.dark .cv-preview {
+  background-color: #1a1a2e;
+  color: #e2e8f0;
+}
+
+.markdown-body {
+  font-family: 'Inter', sans-serif;
+  color: #1a1a1a;
+}
+
+.dark .markdown-body {
+  color: #e2e8f0;
+}
+
+/* Header Section */
+.markdown-body h1 { 
+  font-size: 26pt; 
+  font-weight: 800; 
+  margin-bottom: 8pt; 
+  color: #000; 
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Contact Info (usually follows H1) */
+.markdown-body p:first-of-type {
+  text-align: center;
+  font-size: 10pt;
+  color: #4b5563;
+  margin-top: -5pt;
+  margin-bottom: 20pt;
+  font-weight: 500;
+}
+
+/* Section Headings */
+.markdown-body h2 { 
+  font-size: 14pt; 
+  font-weight: 700; 
+  margin-top: 22pt; 
+  margin-bottom: 12pt; 
+  border-bottom: 1.5px solid #111827; 
+  padding-bottom: 4pt; 
+  color: #000; 
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+}
+
+/* Sub-headings (Job Titles/Degrees) */
+.markdown-body h3 { 
+  font-size: 12pt; 
+  font-weight: 700; 
+  margin-top: 14pt; 
+  margin-bottom: 4pt; 
+  color: #111827; 
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+/* Body Text */
+.markdown-body p { 
+  margin-bottom: 8pt; 
+  line-height: 1.6; 
+  color: #1f2937; 
+  font-size: 10.5pt;
+  text-align: justify;
+}
+
+/* Lists & Achievements */
+.markdown-body ul { 
+  list-style-type: none; 
+  padding-left: 0; 
+  margin-bottom: 14pt; 
+}
+
+.markdown-body li { 
+  margin-bottom: 5pt; 
+  line-height: 1.5;
+  font-size: 10.5pt;
+  position: relative;
+  padding-left: 14pt;
+  color: #374151;
+}
+
+.markdown-body li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #111827;
+  font-weight: bold;
+}
+
+.markdown-body strong { 
+  font-weight: 700; 
+  color: #000; 
+}
+
+/* Horizontal Rule */
+.markdown-body hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 20pt 0;
+}
+
+/* Dark mode markdown overrides */
+.dark .markdown-body h1,
+.dark .markdown-body h2,
+.dark .markdown-body h3,
+.dark .markdown-body strong {
+  color: #f1f5f9;
+}
+
+.dark .markdown-body h1 {
+  border-bottom-color: #334155;
+}
+
+.dark .markdown-body h2 {
+  border-bottom-color: #334155;
+}
+
+.dark .markdown-body li::before {
+  color: #94a3b8;
+}
+
+.dark .markdown-body li {
+  color: #cbd5e1;
+}
+
+.dark .markdown-body p {
+  color: #cbd5e1;
+}
+
+.dark .markdown-body p:first-of-type {
+  color: #94a3b8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .cv-preview {
+    padding: 8mm !important;
+  }
+  .markdown-body h1 {
+    font-size: 18pt;
+  }
+  .markdown-body h2 {
+    font-size: 12pt;
+  }
+  .markdown-body h3 {
+    font-size: 11pt;
+  }
+  .markdown-body p,
+  .markdown-body li {
+    font-size: 9pt;
+  }
+}
+
+/* Print optimization */
+@media print {
+  body {
+    background: white;
+  }
+  .cv-preview {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
