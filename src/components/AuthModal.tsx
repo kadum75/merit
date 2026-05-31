@@ -78,14 +78,17 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
+          skipBrowserRedirect: true,
         }
       });
 
       if (error) throw error;
 
-      // For popup-based OAuth (not redirect), Supabase handles it via onAuthStateChange
-      // The modal will close when the auth state changes
-      onClose();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No OAuth URL returned from Supabase');
+      }
     } catch (err: any) {
       console.error('Google Sign-in Error:', err);
       setError(`Sign-in failed: ${err.message}`);
