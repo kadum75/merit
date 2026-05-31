@@ -16,3 +16,4 @@ create-*.cjs
 create-*.js
 .vercel
 tsconfig.tsbuildinfo
+primecv-opencode
