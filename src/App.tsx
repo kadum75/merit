@@ -109,6 +109,7 @@ export default function App() {
   const [isPro, setIsPro] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [resetPasswordMode, setResetPasswordMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [cvs, setCVs] = useState<SavedCV[]>(() => loadCVs());
   const [activeCVId, setActiveCVId] = useState<string | null>(null);
@@ -296,7 +297,12 @@ export default function App() {
 
   // Auth Listener
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setResetPasswordMode(true);
+        setIsAuthModalOpen(true);
+        return;
+      }
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
@@ -1108,15 +1114,15 @@ export default function App() {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-2 p-1 pr-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-all"
                 >
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full border border-white" />
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="" className="w-8 h-8 rounded-full border border-white" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold">
                       {user.email?.[0].toUpperCase()}
                     </div>
                   )}
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hidden sm:inline">
-                    {user.displayName || user.email?.split('@')[0]}
+                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
                   </span>
                 </button>
 
@@ -1986,7 +1992,9 @@ export default function App() {
     <AuthModal 
         key="global-auth-modal"
         isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
+        onClose={() => { setIsAuthModalOpen(false); setResetPasswordMode(false); }}
+        resetPasswordMode={resetPasswordMode}
+        onPasswordReset={() => setResetPasswordMode(false)}
     />
 
     <AnimatePresence mode="popLayout">

@@ -35,7 +35,7 @@ interface LandingPageProps {
 
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
 const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
-const STRIPE_PRICE_DONATION = "price_1TJa0cFWr5mLxG6s4mgygOvY"; // Using monthly as fallback or a specific donation price if known
+const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL"; // Donation price
 
 export default function LandingPage({ 
   onStart, 
@@ -113,15 +113,15 @@ export default function LandingPage({
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center gap-1 sm:gap-2 p-1 pr-2 sm:pr-3 bg-white/10 hover:bg-white/20 rounded-full transition-all text-white"
                 >
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20" />
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20" />
                   ) : (
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">
                       {user.email?.[0].toUpperCase()}
                     </div>
                   )}
                   <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-                    {user.displayName || user.email?.split('@')[0]}
+                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
                   </span>
                 </button>
 
@@ -275,7 +275,7 @@ export default function LandingPage({
                 {[
                   'ATS-Optimised',
                   'A4 PDF',
-                  'No sign-up needed'
+                  'Free to try'
                 ].map((badge, i) => (
                   <div key={`hero-badge-item-${i}`} className="flex items-center gap-2 text-white/60 text-sm font-medium">
                     <CheckCircle2 className="w-4 h-4 text-green-400" />

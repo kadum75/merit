@@ -12,6 +12,16 @@ export default defineConfig(({mode}) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            pdf: ['jspdf', 'html2canvas'],
+            vendor: ['react', 'react-dom', 'motion'],
+          },
+        },
+      },
+    },
     server: {
       port: 3000,
       proxy: {
