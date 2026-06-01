@@ -322,9 +322,6 @@ export default function App() {
       if (currentUser) {
         await syncUserDocument(currentUser);
       }
-      if (currentUser?.email === 'rjcosta@gmail.com') {
-        setIsPro(true);
-      }
     });
 
     return () => subscription?.unsubscribe();
@@ -338,11 +335,6 @@ export default function App() {
     }
 
     const fetchUserData = async () => {
-      const isAdmin = user.email === 'rjcosta@gmail.com';
-      if (isAdmin) {
-        setIsPro(true);
-      }
-
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -357,16 +349,14 @@ export default function App() {
 
       if (data) {
         const currentMonth = getCurrentMonthString();
-        if (!isAdmin && data.last_preview_reset !== currentMonth) {
+        if (data.last_preview_reset !== currentMonth) {
           setPreviewCount(0);
           setLastPreviewReset(currentMonth);
         } else {
           setPreviewCount(data.preview_count || 0);
           setLastPreviewReset(data.last_preview_reset);
         }
-        if (!isAdmin) {
-          setIsPro(data.is_pro || false);
-        }
+        setIsPro(data.is_pro || false);
       }
     };
 
@@ -868,12 +858,19 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const getAuthToken = async (): Promise<string | null> => {
+    const { data } = await supabase.auth.getSession();
+    return data?.session?.access_token ?? null;
+  };
+
   const handleManageSubscription = async () => {
     if (!user) return;
+    const token = await getAuthToken();
+    if (!token) { alert('Session expired. Please sign in again.'); return; }
     try {
       const response = await fetch('/api/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ uid: user.id }),
       });
       const data = await response.json();
@@ -917,11 +914,15 @@ export default function App() {
       return;
     }
 
+    const token = await getAuthToken();
+    if (!token) { alert('Session expired. Please sign in again.'); return; }
+
     try {
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ 
           uid: user.id,

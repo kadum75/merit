@@ -194,8 +194,6 @@ export function handleSupabaseError(error: unknown, operationType: OperationType
 export async function syncUserDocument(supabaseUser: any, consent: boolean = true) {
   if (!supabaseUser) return;
 
-  const isAdmin = supabaseUser.email === 'rjcosta@gmail.com';
-
   try {
     const { data: existing } = await supabase
       .from('users')
@@ -211,27 +209,16 @@ export async function syncUserDocument(supabaseUser: any, consent: boolean = tru
           email: supabaseUser.email,
           display_name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
           photo_url: supabaseUser.user_metadata?.avatar_url || null,
-          is_pro: isAdmin,
-          preview_count: 0,
-          last_preview_reset: getCurrentMonthString(),
-          subscription_status: isAdmin ? 'pro_bypass' : 'free',
-          plan_type: isAdmin ? 'admin' : null,
           gdpr_consent: consent,
         });
 
       if (error) throw error;
     } else {
-      const updates: any = {
-        last_login_at: new Date().toISOString(),
-      };
-      if (isAdmin) {
-        updates.is_pro = true;
-        updates.subscription_status = 'pro_bypass';
-        updates.plan_type = 'admin';
-      }
       const { error } = await supabase
         .from('users')
-        .update(updates)
+        .update({
+          last_login_at: new Date().toISOString(),
+        })
         .eq('uid', supabaseUser.id);
 
       if (error) throw error;

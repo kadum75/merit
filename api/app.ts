@@ -2,8 +2,42 @@ import express from "express";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
+const RATE_LIMIT_WINDOW = 60_000;
+const RATE_LIMIT_MAX = 10;
+const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimitKey(ip: string, uid?: string): string {
+  return uid ? `uid:${uid}` : `ip:${ip}`;
+}
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateBuckets.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
+function getClientIp(req: express.Request): string {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
+  return req.socket.remoteAddress || "unknown";
+}
+
 export function createApp() {
   const app = express();
+
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("X-XSS-Protection", "0");
+    next();
+  });
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
@@ -24,6 +58,20 @@ export function createApp() {
     (stripeKey.startsWith("sk_test_") || stripeKey.startsWith("sk_live_"))
   );
   const stripe = isStripeConfigured ? new Stripe(stripeKey) : (null as unknown as Stripe);
+
+  async function verifyAuth(req: express.Request): Promise<{ uid: string; email: string } | null> {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+    const token = authHeader.slice(7);
+    if (!token) return null;
+    try {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data?.user) return null;
+      return { uid: data.user.id, email: data.user.email || "" };
+    } catch {
+      return null;
+    }
+  }
 
   app.get("/api/config", (_req, res) => {
     res.json({ isStripeConfigured, isSupabaseConfigured });
@@ -126,10 +174,26 @@ export function createApp() {
       if (!isStripeConfigured) {
         return res.status(503).json({ error: "Stripe not yet configured", configured: false });
       }
+
+      const user = await verifyAuth(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized: valid session required" });
+      }
+
+      const rlKey = rateLimitKey(getClientIp(req), user.uid);
+      if (!checkRateLimit(rlKey)) {
+        return res.status(429).json({ error: "Too many requests. Please try again later." });
+      }
+
       const { uid, email, priceId, planType } = req.body;
       if (!priceId || !uid || !email) {
         return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
       }
+
+      if (uid !== user.uid || email !== user.email) {
+        return res.status(403).json({ error: "Forbidden: uid/email does not match authenticated user" });
+      }
+
       const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://primecv-mu.vercel.app";
       const mode = planType === "donation" ? "payment" as const : "subscription" as const;
       const session = await stripe.checkout.sessions.create({
@@ -152,8 +216,24 @@ export function createApp() {
       if (!isStripeConfigured) {
         return res.status(503).json({ error: "Stripe not yet configured", configured: false });
       }
+
+      const user = await verifyAuth(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized: valid session required" });
+      }
+
+      const rlKey = rateLimitKey(getClientIp(req), user.uid);
+      if (!checkRateLimit(rlKey)) {
+        return res.status(429).json({ error: "Too many requests. Please try again later." });
+      }
+
       const { uid } = req.body;
       if (!uid) return res.status(400).json({ error: "UID is required" });
+
+      if (uid !== user.uid) {
+        return res.status(403).json({ error: "Forbidden: uid does not match authenticated user" });
+      }
+
       if (!supabase) {
         return res.status(500).json({ error: "Database not initialized" });
       }
