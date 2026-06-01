@@ -71,8 +71,8 @@ const INITIAL_DATA: CVData = {
   transferableSkillsFocus: '',
 };
 
-const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TH0CMFWr5mLxG6sYBTGgmb3";
-const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1TH0CMFWr5mLxG6sYBTGgmb3_annual";
+const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
+const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
 const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL";
 const CV_STORAGE_KEY = 'primecv-cvs';
 
