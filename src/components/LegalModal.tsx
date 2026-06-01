@@ -21,7 +21,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <p>
             Merit ("we", "our", "us") respects your privacy and is committed to protecting your
             personal data. This policy explains how we collect, use, and safeguard your information
-            when you use our service at <span className="text-white">merit.vercel.app</span>.
+            when you use our service at <span className="text-white">merit-cv.vercel.app</span>.
           </p>
 
           <h4 className="text-white font-bold pt-2">1. Who We Are & Contact</h4>
