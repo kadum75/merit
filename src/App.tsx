@@ -174,7 +174,7 @@ export default function App() {
     if (d.experience?.length) {
       sections.push('## Work Experience');
       d.experience.forEach(exp => {
-        const dates = `${exp.startDate} — ${exp.isCurrent ? 'Present' : exp.endDate}`;
+        const dates = `${formatDate(exp.startDate)} — ${exp.isCurrent ? 'Present' : formatDate(exp.endDate)}`;
         sections.push(`### ${exp.role} at ${exp.company}\n*${exp.location} | ${dates}*`);
         if (exp.achievements) sections.push(exp.achievements.split('\n').map(a => `- ${a}`).join('\n'));
       });
@@ -184,20 +184,34 @@ export default function App() {
       d.education.forEach(edu => {
         const parts = [`**${edu.degree}** — ${edu.institution}`];
         if (edu.location) parts.push(`*${edu.location}*`);
-        if (edu.graduationDate) parts.push(`*${edu.graduationDate}*`);
+        if (edu.graduationDate) parts.push(`*${formatDate(edu.graduationDate)}*`);
         if (edu.grade) parts.push(`*${edu.grade}*`);
         sections.push(parts.join('  \n'));
       });
     }
     if (d.skills) sections.push(`## Skills\n\n${d.skills.split(',').map(s => s.trim()).filter(Boolean).join(', ')}`);
-    if (d.jobDescription) {
-      const lines = d.jobDescription.split('\n').filter(l => l.trim()).slice(0, 3);
-      sections.push(`## Target Role\n\n${lines.map(l => `- ${l.trim()}`).join('\n')}`);
-    }
     return sections.join('\n\n');
   };
 
   const livePreview = React.useMemo(() => buildLivePreview(data), [data]);
+
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const months: Record<string, string> = {
+      'january': 'Jan', 'february': 'Feb', 'march': 'Mar', 'april': 'Apr',
+      'may': 'May', 'june': 'Jun', 'july': 'Jul', 'august': 'Aug',
+      'september': 'Sep', 'october': 'Oct', 'november': 'Nov', 'december': 'Dec'
+    };
+    const lower = dateStr.toLowerCase().trim();
+    for (const [full, abbr] of Object.entries(months)) {
+      if (lower.includes(full)) return dateStr.replace(new RegExp(full, 'gi'), abbr);
+    }
+    if (/^\d{4}-\d{2}$/.test(dateStr)) {
+      const [y, m] = dateStr.split('-');
+      return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
+    }
+    return dateStr;
+  };
 
   const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.experience.length > 0 || data.education.length > 0 || data.skills;
 
@@ -690,16 +704,14 @@ export default function App() {
       pdf.setFontSize(fontSize);
       const lines = pdf.splitTextToSize(text, contentWidth);
       
-      // Check for page break
-      if (yPos + (lines.length * (fontSize * 0.35)) > pdf.internal.pageSize.getHeight() - margin) {
+      if (yPos + (lines.length * (fontSize * 0.32)) > pdf.internal.pageSize.getHeight() - margin) {
         pdf.addPage();
         yPos = margin;
-        // Re-add watermark on new page if not pro
         if (!isPro) addWatermark(pdf);
       }
 
       pdf.text(lines, margin, yPos);
-      yPos += (lines.length * (fontSize * 0.35)) + marginBottom;
+      yPos += (lines.length * (fontSize * 0.32)) + marginBottom;
     };
 
     const addWatermark = (doc: jsPDF) => {
@@ -725,54 +737,49 @@ export default function App() {
 
     // Simple Markdown Parser for jsPDF
     const lines = content.split('\n');
-    
+
     if (!isPro) addWatermark(pdf);
 
     lines.forEach(line => {
       const trimmed = line.trim();
       if (!trimmed) {
-        yPos += 3; // Spacer for empty lines
+        yPos += 2;
         return;
       }
 
       if (trimmed.startsWith('# ')) {
-        // H1 - Name
-        yPos += 5;
+        yPos += 3;
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(24);
+        pdf.setFontSize(22);
         const name = trimmed.replace('# ', '');
         pdf.text(name, pageWidth / 2, yPos, { align: 'center' });
-        yPos += 12;
-        // Draw a line under the name
+        yPos += 10;
         pdf.setLineWidth(0.5);
         pdf.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 8;
+        yPos += 6;
       } else if (trimmed.startsWith('## ')) {
-        // H2 - Section Heading
-        yPos += 8;
+        yPos += 6;
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
+        pdf.setFontSize(12);
         const heading = trimmed.replace('## ', '');
         pdf.text(heading, margin, yPos);
-        yPos += 2;
-        pdf.setLineWidth(0.2);
+        yPos += 1;
+        pdf.setLineWidth(0.3);
         pdf.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 6;
+        yPos += 5;
       } else if (trimmed.startsWith('### ')) {
-        // H3 - Job Title/Company
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(11);
+        pdf.setFontSize(10);
         const subHeading = trimmed.replace('### ', '');
         pdf.text(subHeading, margin, yPos);
-        yPos += 6;
+        yPos += 5;
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        // Bullet points
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(10);
+        pdf.setFontSize(9);
         const bulletText = trimmed.substring(2);
         const bulletLines = pdf.splitTextToSize(bulletText, contentWidth - 5);
-        
-        if (yPos + (bulletLines.length * 4) > pdf.internal.pageSize.getHeight() - margin) {
+
+        if (yPos + (bulletLines.length * 3.5) > pdf.internal.pageSize.getHeight() - margin) {
           pdf.addPage();
           yPos = margin;
           if (!isPro) addWatermark(pdf);
@@ -780,20 +787,18 @@ export default function App() {
 
         pdf.text('•', margin, yPos);
         pdf.text(bulletLines, margin + 5, yPos);
-        yPos += (bulletLines.length * 4) + 2;
+        yPos += (bulletLines.length * 3.5) + 1.5;
       } else {
-        // Regular text
-        // Check if it's the contact info line (usually follows H1)
-        const isContactInfo = yPos < 60 && trimmed.includes('|');
+        const isContactInfo = yPos < 50 && trimmed.includes('|');
         if (isContactInfo) {
           pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(10);
+          pdf.setFontSize(9);
           pdf.setTextColor(100, 100, 100);
           pdf.text(trimmed, pageWidth / 2, yPos, { align: 'center' });
           pdf.setTextColor(0, 0, 0);
-          yPos += 10;
+          yPos += 8;
         } else {
-          addWrappedText(trimmed, 10, 'normal', 4);
+          addWrappedText(trimmed, 9, 'normal', 3);
         }
       }
     });

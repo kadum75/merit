@@ -1,40 +1,50 @@
 import { CVData } from "../types";
 
-/**
- * Generates a professional UK-standard CV using static template logic.
- * This ensures the app remains functional for all users with consistent formatting.
- */
-export async function generateCareerContent(data: CVData, type: 'cv', isPro: boolean = false) {
-  // Clone data to avoid mutating original state
-  const generationData = { ...data };
+function formatUKDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const months: Record<string, string> = {
+    'january': 'Jan', 'february': 'Feb', 'march': 'Mar', 'april': 'Apr',
+    'may': 'May', 'june': 'Jun', 'july': 'Jul', 'august': 'Aug',
+    'september': 'Sep', 'october': 'Oct', 'november': 'Nov', 'december': 'Dec'
+  };
+  const lower = dateStr.toLowerCase().trim();
+  for (const [full, abbr] of Object.entries(months)) {
+    if (lower.includes(full)) return dateStr.replace(new RegExp(full, 'gi'), abbr);
+  }
+  if (/^\d{4}-\d{2}$/.test(dateStr)) {
+    const [y, m] = dateStr.split('-');
+    return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
+  }
+  return dateStr;
+}
 
-  const { personalDetails, professionalSummary, experience, education, skills, jobDescription, transferableSkillsFocus } = generationData;
+export async function generateCareerContent(data: CVData, type: 'cv', isPro: boolean = false) {
+  const generationData = { ...data };
+  const { personalDetails, professionalSummary, experience, education, skills } = generationData;
 
   let markdown = `# ${personalDetails.fullName}\n\n`;
-  
+
   const contactParts = [
     personalDetails.email,
     personalDetails.phone,
     personalDetails.location,
     personalDetails.linkedin
   ].filter(Boolean);
-  
+
   markdown += `${contactParts.join(" | ")}\n\n`;
 
-  let summarySection = professionalSummary || '';
-  if (transferableSkillsFocus) {
-    summarySection += summarySection ? `\n\n${transferableSkillsFocus}` : transferableSkillsFocus;
-  }
-  if (summarySection) {
-    markdown += `## PROFESSIONAL SUMMARY\n\n${summarySection}\n\n`;
+  if (professionalSummary) {
+    markdown += `## Professional Summary\n\n${professionalSummary}\n\n`;
   }
 
   if (experience && experience.length > 0) {
-    markdown += `## WORK EXPERIENCE\n\n`;
+    markdown += `## Work Experience\n\n`;
     experience.forEach((exp) => {
-      markdown += `### ${exp.role}, ${exp.company} (${exp.startDate} - ${exp.isCurrent ? "Present" : exp.endDate})\n`;
+      const start = formatUKDate(exp.startDate);
+      const end = exp.isCurrent ? "Present" : formatUKDate(exp.endDate);
+      markdown += `### ${exp.role}, ${exp.company} (${start} - ${end})\n`;
       if (exp.location) markdown += `*${exp.location}*\n\n`;
-      
+
       if (exp.achievements) {
         const bullets = exp.achievements.split('\n').filter(line => line.trim());
         bullets.forEach(bullet => {
@@ -47,9 +57,9 @@ export async function generateCareerContent(data: CVData, type: 'cv', isPro: boo
   }
 
   if (education && education.length > 0) {
-    markdown += `## EDUCATION\n\n`;
+    markdown += `## Education\n\n`;
     education.forEach((edu) => {
-      markdown += `### ${edu.degree}, ${edu.institution} (${edu.graduationDate})\n`;
+      markdown += `### ${edu.degree}, ${edu.institution} (${formatUKDate(edu.graduationDate)})\n`;
       if (edu.location || edu.grade) {
         markdown += `*${[edu.location, edu.grade].filter(Boolean).join(", ")}*\n`;
       }
@@ -58,22 +68,12 @@ export async function generateCareerContent(data: CVData, type: 'cv', isPro: boo
   }
 
   if (skills) {
-    markdown += `## SKILLS\n\n${skills}\n`;
+    markdown += `## Skills\n\n${skills}\n`;
   }
-
-  if (jobDescription) {
-    markdown += `\n## TARGET ROLE\n\n${jobDescription.split('\n').filter(l => l.trim()).slice(0, 3).map(l => `- ${l.trim()}`).join('\n')}\n`;
-  }
-
-  markdown += `\n---\nCreated with PrimeCV Free · Remove watermark at primecv.co.uk/pro`;
 
   return markdown;
 }
 
-/**
- * Parsing function for processing uploaded documents.
- * In the current version, automatic extraction is disabled in favour of manual data entry.
- */
 export async function parseExistingCV(fileBase64: string, mimeType: string): Promise<Partial<CVData>> {
   console.info("Automatic document extraction is disabled.");
   return {};
