@@ -678,8 +678,8 @@ export default function App() {
     (pdf as any).setProperties({
       title: 'Merit Generated CV',
       subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
-      author: 'ZenStack',
-      keywords: 'ZenStack, ATS-Optimised',
+      author: 'Zenstack',
+      keywords: 'Zenstack, ATS-Optimised',
       creator: 'Merit',
       producer: isPro ? 'Merit Pro' : 'Merit Free Tier'
     });
@@ -1981,7 +1981,7 @@ export default function App() {
       {/* Footer */}
       <footer className="py-6 px-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-sm text-zinc-500">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">ZenStack</a>. All rights reserved.</p>
+          <p className="text-sm text-zinc-500">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">Zenstack</a>. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-6">
             {[
               { icon: CheckCircle2, label: 'ATS Compatible' },

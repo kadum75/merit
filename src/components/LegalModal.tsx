@@ -26,7 +26,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
 
           <h4 className="text-white font-bold pt-2">1. Who We Are & Contact</h4>
           <p>
-            Merit is operated by ZenStack. Our Data Protection Officer can be reached at:{' '}
+            Merit is operated by Zenstack. Our Data Protection Officer can be reached at:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
             For UK GDPR purposes, we are a data controller registered with the Information Commissioner's Office (ICO).
           </p>
@@ -220,7 +220,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <p className="font-semibold text-white">Last Updated: 1 June 2026</p>
           <p>
             These Terms of Service ("Terms") govern your use of Merit (the "Service"), operated by 
-            ZenStack ("we", "our", "us"). By creating an account or using the Service, you agree to 
+            Zenstack ("we", "our", "us"). By creating an account or using the Service, you agree to 
             these Terms. If you do not agree, do not use the Service.
           </p>
 
@@ -274,7 +274,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <h4 className="text-white font-bold pt-2">6. Intellectual Property</h4>
           <ul className="list-disc pl-5 space-y-1">
             <li><span className="text-white">Your content</span> — you retain full ownership of the CV content, work history, and personal information you provide</li>
-            <li><span className="text-white">Our IP</span> — Merit templates, design, branding, software, and underlying technology are owned by ZenStack</li>
+            <li><span className="text-white">Our IP</span> — Merit templates, design, branding, software, and underlying technology are owned by Zenstack</li>
             <li><span className="text-white">License</span> — you grant us a limited license to process, store, and display your content solely to provide the Service</li>
             <li><span className="text-white">AI training</span> — we do not use your CV content to train AI or machine learning models</li>
           </ul>

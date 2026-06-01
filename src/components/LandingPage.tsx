@@ -228,7 +228,6 @@ export default function LandingPage({
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-[1.1]">
                 Land Your Next Job Faster.
-                <span className="block text-[#3B82F6] mt-2">Built for the UK Job Market.</span>
               </h1>
               <p className="text-xl text-white/70 max-w-xl leading-relaxed">
                 Merit helps you write, structure and optimise your CV for every role you apply for — in minutes.
@@ -370,7 +369,7 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">Everything you need to stand out</h2>
-            <p className="text-white/60 max-w-2xl mx-auto text-lg">Powerful features designed to give you a competitive edge in the UK job market.</p>
+            <p className="text-white/60 max-w-2xl mx-auto text-lg">Powerful features designed to give you a competitive edge in every application.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -385,7 +384,7 @@ export default function LandingPage({
                 icon: CheckCircle2,
                 iconColor: 'text-green-400',
                 title: 'ATS-Optimised',
-                body: 'Your CV is structured to pass automated screening systems used by major UK recruiters and employers.'
+                body: 'Your CV is structured to pass automated screening systems used by major recruiters and employers.'
               },
               {
                 icon: Download,
@@ -410,7 +409,7 @@ export default function LandingPage({
       <section className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900" aria-label="Testimonials">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Trusted by UK job seekers</h2>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Trusted by job seekers</h2>
             <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Join thousands of professionals who have landed their dream roles using Merit.</p>
           </div>
 
@@ -422,7 +421,7 @@ export default function LandingPage({
                 title: 'Software Engineer, London'
               },
               {
-                quote: 'Finally a CV tool that understands UK employer expectations.',
+                quote: 'Finally a CV tool that understands what employers are looking for.',
                 name: 'James T.',
                 title: 'Project Manager, Manchester'
               },
@@ -547,7 +546,7 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Support Merit</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep Merit free for UK job seekers. Your support helps us cover hosting and infrastructure costs.</p>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep Merit free for all job seekers. Your support helps us cover hosting and infrastructure costs.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -613,7 +612,7 @@ export default function LandingPage({
               </button>
             </div>
           </div>
-          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (ZenStack account)</p>
+          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (Zenstack account)</p>
         </div>
       </section>
 
@@ -623,7 +622,7 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-extrabold">Ready to land your next role?</h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">Join thousands of UK job seekers building better CVs with Merit.</p>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">Join thousands of job seekers building better CVs with Merit.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
@@ -676,11 +675,11 @@ export default function LandingPage({
                 <Coffee className="w-4 h-4" />
                 Support Merit
               </motion.a>
-              <p className="text-xs text-white/40">Help keep Merit free for UK job seekers</p>
+              <p className="text-xs text-white/40">Help keep Merit free for all job seekers</p>
             </div>
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
-              <p className="text-sm">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">ZenStack</a>. All rights reserved.</p>
+              <p className="text-sm">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">Zenstack</a>. All rights reserved.</p>
               <div className="flex flex-wrap justify-center gap-6">
               {[
                 { icon: ShieldCheck, label: 'ATS Compatible' },
