@@ -663,20 +663,13 @@ export default function App() {
   };
 
   const downloadPDF = async () => {
-    if (!previewRef.current || !generatedContent) return;
-    
-    if (!isPro) {
-      setShowUpgradeModal(true);
-      return;
-    }
-    
-    // For ATS optimization, we want a text-based PDF.
-    // While html2canvas is great for visuals, it produces an image-based PDF.
-    // We will use jsPDF's text methods to ensure the PDF is searchable and parseable by ATS.
+    if (!previewRef.current) return;
+    if (!isPro) { setShowUpgradeModal(true); return; }
+    const content = generatedContent || livePreview;
+    if (!content) return;
     
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    // Set PDF metadata for ATS and professional standards
     (pdf as any).setProperties({
       title: 'PrimeCV Generated CV',
       subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
@@ -731,7 +724,7 @@ export default function App() {
     };
 
     // Simple Markdown Parser for jsPDF
-    const lines = generatedContent.split('\n');
+    const lines = content.split('\n');
     
     if (!isPro) addWatermark(pdf);
 
@@ -829,15 +822,12 @@ export default function App() {
   };
 
   const downloadDOC = () => {
-    if (!generatedContent) return;
-    
-    if (!isPro) {
-      setShowUpgradeModal(true);
-      return;
-    }
+    if (!isPro) { setShowUpgradeModal(true); return; }
+    const content = generatedContent || livePreview;
+    if (!content) return;
     
     // Very basic markdown to simple HTML conversion for better Word compatibility
-    const htmlContent = generatedContent
+    const htmlContent = content
       .replace(/^# (.*$)/gm, '<h1>$1</h1>')
       .replace(/^## (.*$)/gm, '<h2>$1</h2>')
       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
@@ -1249,7 +1239,7 @@ export default function App() {
                 />
               </label>
             </div>
-            {generatedContent && (
+            {(generatedContent || isPro) && (
               <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center w-full sm:w-auto mt-1 sm:mt-0">
                 {isPro ? (
                   <>
@@ -1266,14 +1256,14 @@ export default function App() {
                       <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> DOC
                     </button>
                   </>
-                ) : (
+                ) : generatedContent ? (
                   <button 
                     onClick={() => handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
                     className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-lg text-[11px] sm:text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
                   >
                     <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> Go Pro to Download
                   </button>
-                )}
+                ) : null}
               </div>
             )}
           </div>
