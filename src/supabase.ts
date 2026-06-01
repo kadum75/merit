@@ -156,7 +156,7 @@ console.info(
 export const supabase: any = isSupabaseConfigValid
   ? (() => {
       try {
-        return createClient(supabaseUrl, supabaseAnonKey, {
+        const client = createClient(supabaseUrl, supabaseAnonKey, {
           auth: {
             flowType: 'pkce',
             detectSessionInUrl: true,
@@ -164,6 +164,8 @@ export const supabase: any = isSupabaseConfigValid
             autoRefreshToken: true,
           },
         });
+        (window as any).__SUPABASE_CLIENT__ = client;
+        return client;
       } catch (error) {
         console.error('Supabase init failed:', error);
         return createStubSupabase();
