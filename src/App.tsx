@@ -329,7 +329,7 @@ export default function App() {
     const searchParams = new URLSearchParams(window.location.search);
     const authCode = searchParams.get('code');
     if (authCode) {
-      supabase.auth.exchangeCodeForSession(window.location.href).then(() => {
+      supabase.auth.exchangeCodeForSession(authCode).then(() => {
         window.history.replaceState({}, '', window.location.pathname);
       }).catch(err => {
         console.error('PKCE exchange failed:', err);
