@@ -154,13 +154,9 @@ console.info(
 );
 
 function createRealSupabase() {
-  // NOTE: Using implicit flow for OAuth — Supabase's GoTrue server
-  // doesn't support grant_type=pkce for social providers (returns
-  // "unsupported_grant_type"). Implicit flow returns tokens directly
-  // in the URL fragment after OAuth redirect.
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      flowType: 'implicit',
+      flowType: 'pkce',
       detectSessionInUrl: true,
       persistSession: true,
       autoRefreshToken: true,

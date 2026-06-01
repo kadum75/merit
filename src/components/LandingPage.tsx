@@ -36,7 +36,7 @@ interface LandingPageProps {
 
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
 const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
-const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL"; // Donation price
+const STRIPE_PRICE_DONATION = "price_1TH0klFWr5mLxG6s4ys0XZ0i"; // Custom amount donation (min £1)
 const STRIPE_PRICE_ORG = import.meta.env.VITE_STRIPE_ORG_PRICE_ID || "price_1TdVLYFWr5mLxG6sxRNuJTB8";
 
 export default function LandingPage({ 
@@ -74,6 +74,7 @@ export default function LandingPage({
     }
 
     if (!user) {
+      sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType }));
       onSignInClick();
       return;
     }
@@ -276,7 +277,7 @@ export default function LandingPage({
                   }}
                   className="text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full border border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-500 transition-all"
                 >
-                  Donate £5
+                  Donate
                 </button>
               </div>
               <p className="text-white/40 text-xs text-center sm:text-left italic">
@@ -593,13 +594,13 @@ export default function LandingPage({
                 </div>
                 <h3 className="text-xl font-bold dark:text-white">One-time Donation</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">£5.00</span>
-                  <span className="text-zinc-400 text-sm font-normal"> / one-time</span>
+                  <span className="text-4xl font-extrabold">£1+</span>
+                  <span className="text-zinc-400 text-sm font-normal"> / any amount</span>
                 </div>
               </div>
               <div className="space-y-4 flex-1">
                 <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                  Support the development of Merit with a small financial contribution. This helps us maintain our platform for everyone.
+                  Support the development of Merit with a contribution of any amount. This helps us maintain our platform for everyone.
                 </p>
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
                   <p className="text-[10px] uppercase tracking-widest font-bold text-amber-700 flex items-center gap-1.5">
@@ -612,7 +613,7 @@ export default function LandingPage({
                 onClick={() => handleCheckout(STRIPE_PRICE_DONATION, "donation")}
                 className="w-full py-4 bg-[#F59E0B] hover:bg-[#D97706] text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
               >
-                Donate £5
+                Donate
               </button>
             </div>
 

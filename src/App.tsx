@@ -73,7 +73,7 @@ const INITIAL_DATA: CVData = {
 
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
 const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
-const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL";
+const STRIPE_PRICE_DONATION = "price_1TH0klFWr5mLxG6s4ys0XZ0i"; // Custom amount donation (min £1)
 const CV_STORAGE_KEY = 'merit-cvs';
 
 function generateId() {
@@ -325,8 +325,40 @@ export default function App() {
       }
     });
 
+    // Manual PKCE code exchange (handles OAuth redirects)
+    const searchParams = new URLSearchParams(window.location.search);
+    const authCode = searchParams.get('code');
+    if (authCode) {
+      supabase.auth.exchangeCodeForSession(window.location.href).then(() => {
+        window.history.replaceState({}, '', window.location.pathname);
+      }).catch(err => {
+        console.error('PKCE exchange failed:', err);
+      });
+    }
+
+    // Fallback: try to recover session from server
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+      }
+    });
+
     return () => subscription?.unsubscribe();
   }, []);
+
+  // Handle pending checkout after sign-in
+  const pendingCheckoutRef = useRef(false);
+  useEffect(() => {
+    if (!user || pendingCheckoutRef.current) return;
+    const pending = sessionStorage.getItem('merit-pending-checkout');
+    if (!pending) return;
+    pendingCheckoutRef.current = true;
+    sessionStorage.removeItem('merit-pending-checkout');
+    try {
+      const { priceId, planType } = JSON.parse(pending);
+      handleCheckout(priceId, planType);
+    } catch { /* ignore */ }
+  }, [user]);
 
   // Supabase User Data Listener (for isPro status)
   useEffect(() => {
@@ -911,6 +943,7 @@ export default function App() {
     }
 
     if (!user) {
+      sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType }));
       setIsAuthModalOpen(true);
       return;
     }
