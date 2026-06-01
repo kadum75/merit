@@ -58,6 +58,12 @@ export default function LandingPage({
     setLegalModal({ isOpen: true, type });
   };
 
+  React.useEffect(() => {
+    const handler = () => openLegal('privacy');
+    window.addEventListener('open-privacy', handler);
+    return () => window.removeEventListener('open-privacy', handler);
+  }, []);
+
   const handleCheckout = async (priceId: string, planType: string) => {
     if (!isStripeConfigured) {
       alert("Payments coming soon - please check back shortly!");

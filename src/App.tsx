@@ -37,6 +37,7 @@ import { cn } from './lib/utils';
 import { Sun, Moon, FolderOpen, Edit3, X, Pencil, Monitor } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
+import { CookieConsent } from './components/CookieConsent';
 import { supabase, getCurrentMonthString, handleSupabaseError, OperationType, isSupabaseConfigValid, syncUserDocument, missingConfigVars } from './supabase';
 import { UK_LOCATIONS } from './data/uk-locations';
 import { SKILLS } from './data/skills';
@@ -946,6 +947,7 @@ export default function App() {
 
   return (
     <>
+      <CookieConsent />
        {!isSupabaseConfigValid && (
          <div className="bg-red-600 text-white py-2 px-4 text-center text-sm font-bold sticky top-0 z-[100] flex flex-col items-center justify-center gap-1">
            <div className="flex items-center gap-2">
