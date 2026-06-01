@@ -881,16 +881,24 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid: user.id }),
       });
-      const { url } = await response.json();
-      if (url) window.location.href = url;
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not open subscription management. Please try again.');
+      }
     } catch (err) {
       console.error('Portal error:', err);
+      alert('Something went wrong. Please try again later.');
     }
   };
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+      ]);
     } catch (err) {
       console.error('Sign out error:', err);
     }
@@ -900,11 +908,7 @@ export default function App() {
         localStorage.removeItem(key);
       }
     }
-    setShowUserMenu(false);
-    setCurrentView('home');
-    setData(INITIAL_DATA);
-    setGeneratedContent(null);
-    setStep(0);
+    window.location.href = '/';
   };
 
   const handleCheckout = async (priceId: string, planType: string) => {
