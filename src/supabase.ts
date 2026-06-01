@@ -191,13 +191,15 @@ export enum OperationType {
 }
 
 export function handleSupabaseError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    operationType,
-    path,
-  };
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null
+        ? (error as any).message || (error as any).error_description || JSON.stringify(error)
+        : String(error);
+  const errInfo = { error: message, operationType, path };
   console.error('Supabase Error Details:', JSON.stringify(errInfo, null, 2));
-  throw new Error(JSON.stringify(errInfo));
+  throw new Error(message);
 }
 
 export async function syncUserDocument(supabaseUser: any, consent: boolean = true) {
@@ -208,7 +210,7 @@ export async function syncUserDocument(supabaseUser: any, consent: boolean = tru
       .from('users')
       .select('id')
       .eq('uid', supabaseUser.id)
-      .single();
+      .maybeSingle();
 
     if (!existing) {
       const { error } = await supabase
@@ -221,7 +223,10 @@ export async function syncUserDocument(supabaseUser: any, consent: boolean = tru
           gdpr_consent: consent,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('User sync insert failed (auth session may not be ready yet):', error);
+        return;
+      }
     } else {
       const { error } = await supabase
         .from('users')
@@ -230,11 +235,12 @@ export async function syncUserDocument(supabaseUser: any, consent: boolean = tru
         })
         .eq('uid', supabaseUser.id);
 
-      if (error) throw error;
+      if (error) {
+        console.warn('User sync update failed:', error);
+      }
     }
   } catch (err: any) {
     console.error('Error syncing user document:', err);
-    handleSupabaseError(err, OperationType.WRITE, `users/${supabaseUser.id}`);
   }
 }
 

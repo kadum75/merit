@@ -58,10 +58,12 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
           password,
         });
         if (error) throw error;
-        if (data.user) {
+        if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
+          onClose();
+        } else {
+          setError('Check your email for the confirmation link.');
         }
-        onClose();
       }
     } catch (err: any) {
       setError(err.message);
@@ -74,7 +76,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
     setLoading(true);
     setError(null);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
@@ -82,10 +84,12 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
       });
 
       if (error) throw error;
+      if (!data?.url) {
+        throw new Error('Failed to get OAuth URL');
+      }
     } catch (err: any) {
       console.error('Google Sign-in Error:', err);
       setError(`Sign-in failed: ${err.message}`);
-    } finally {
       setLoading(false);
     }
   };
