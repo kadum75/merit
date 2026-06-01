@@ -325,23 +325,30 @@ export default function App() {
       }
     });
 
-    // Manual PKCE code exchange (handles OAuth redirects)
-    const searchParams = new URLSearchParams(window.location.search);
-    const authCode = searchParams.get('code');
+    // Handle OAuth redirect (PKCE code exchange)
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    const authError = urlParams.get('error') || urlParams.get('error_description');
     if (authCode) {
-      supabase.auth.exchangeCodeForSession(authCode).then(() => {
+      supabase.auth.exchangeCodeForSession(authCode).then(({ data: { session } }) => {
         window.history.replaceState({}, '', window.location.pathname);
+        if (session?.user) {
+          setUser(session.user);
+        }
       }).catch(err => {
         console.error('PKCE exchange failed:', err);
       });
+    } else if (authError) {
+      console.error('OAuth error:', authError);
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      // Try to recover existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          setUser(session.user);
+        }
+      });
     }
-
-    // Fallback: try to recover session from server
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-      }
-    });
 
     return () => subscription?.unsubscribe();
   }, []);

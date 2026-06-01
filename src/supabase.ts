@@ -157,9 +157,10 @@ function createRealSupabase() {
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       flowType: 'pkce',
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       persistSession: true,
       autoRefreshToken: true,
+      lockAcquireTimeout: 10000,
     },
   });
 
