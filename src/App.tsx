@@ -74,7 +74,7 @@ const INITIAL_DATA: CVData = {
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
 const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
 const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL";
-const CV_STORAGE_KEY = 'primecv-cvs';
+const CV_STORAGE_KEY = 'merit-cvs';
 
 function generateId() {
   return Math.random().toString(36).substring(2, 11);
@@ -126,7 +126,7 @@ export default function App() {
   const [newCVRole, setNewCVRole] = useState('');
   const [showNewCVInput, setShowNewCVInput] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('primecv-theme');
+    const saved = localStorage.getItem('merit-theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'dark';
   });
   const previewRef = useRef<HTMLDivElement>(null);
@@ -152,7 +152,7 @@ export default function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('primecv-theme', theme);
+    localStorage.setItem('merit-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
@@ -676,12 +676,12 @@ export default function App() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     (pdf as any).setProperties({
-      title: 'PrimeCV Generated CV',
+      title: 'Merit Generated CV',
       subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
       author: 'ZenStack',
       keywords: 'ZenStack, ATS-Optimised',
-      creator: 'PrimeCV - primecv.app',
-      producer: isPro ? 'PrimeCV Pro' : 'PrimeCV Free Tier'
+      creator: 'Merit',
+      producer: isPro ? 'Merit Pro' : 'Merit Free Tier'
     });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -716,13 +716,13 @@ export default function App() {
       doc.setTextColor(107, 114, 128);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'italic');
-      doc.text('⚡ Created with PrimeCV Free — Upgrade to remove this watermark at primecv.co.uk', pWidth / 2, pHeight - 7, { align: 'center' });
+      doc.text('⚡ Created with Merit Free — Upgrade to Pro to remove this watermark', pWidth / 2, pHeight - 7, { align: 'center' });
       
       doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(60);
       doc.setFont('helvetica', 'bold');
-      doc.text('PRIMECV FREE', pWidth / 2, pHeight / 2, { align: 'center', angle: 45 });
+      doc.text('MERIT FREE', pWidth / 2, pHeight / 2, { align: 'center', angle: 45 });
       doc.restoreGraphicsState();
     };
 
@@ -1006,7 +1006,7 @@ export default function App() {
                 <ScrollText className="text-white w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">PrimeCV</h1>
+                <h1 className="text-xl font-bold tracking-tight">Merit</h1>
                 <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">ATS-Optimised</p>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cookie, X, Settings, Check } from 'lucide-react';
 
-const CONSENT_KEY = 'primecv-consent';
+const CONSENT_KEY = 'merit-consent';
 
 interface ConsentPreferences {
   essential: boolean;
@@ -138,7 +138,7 @@ export function CookieConsent() {
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-white mb-1">We use cookies</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    PrimeCV uses essential cookies for authentication and security. 
+                    Merit uses essential cookies for authentication and security. 
                     We also use functional cookies for your preferences. 
                     See our{' '}
                     <a href="#" onClick={(e) => { e.preventDefault(); setShowBanner(false); window.dispatchEvent(new CustomEvent('open-privacy')); }} className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">

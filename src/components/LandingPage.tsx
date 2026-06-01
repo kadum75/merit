@@ -116,7 +116,7 @@ export default function LandingPage({
             <div className="bg-[#3B82F6] p-1 rounded-md" aria-hidden="true">
               <ScrollText className="text-white w-4 h-5 sm:w-5 sm:h-5" />
             </div>
-            <span className="text-white font-bold text-lg sm:text-xl tracking-tight">PrimeCV</span>
+            <span className="text-white font-bold text-lg sm:text-xl tracking-tight">Merit</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 flex-wrap justify-end">
             {user ? (
@@ -231,7 +231,7 @@ export default function LandingPage({
                 <span className="block text-[#3B82F6] mt-2">Built for the UK Job Market.</span>
               </h1>
               <p className="text-xl text-white/70 max-w-xl leading-relaxed">
-                PrimeCV helps you write, structure and optimise your CV for every role you apply for — in minutes.
+                Merit helps you write, structure and optimise your CV for every role you apply for — in minutes.
               </p>
             </div>
 
@@ -324,7 +324,7 @@ export default function LandingPage({
                 step: 2,
                 icon: Sparkles,
                 title: 'Paste the job description',
-                body: 'Add the role you are applying for and PrimeCV helps format your CV to match the specific requirements.'
+                body: 'Add the role you are applying for and Merit helps format your CV to match the specific requirements.'
               },
               {
                 step: 3,
@@ -379,7 +379,7 @@ export default function LandingPage({
                 icon: Sparkles,
                 iconColor: 'text-yellow-400',
                 title: 'Structured Writing',
-                body: 'PrimeCV helps structure your professional summary, experience bullets and skills section — tailored to your target role.'
+                body: 'Merit helps structure your professional summary, experience bullets and skills section — tailored to your target role.'
               },
               {
                 icon: CheckCircle2,
@@ -411,13 +411,13 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Trusted by UK job seekers</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Join thousands of professionals who have landed their dream roles using PrimeCV.</p>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Join thousands of professionals who have landed their dream roles using Merit.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                quote: 'Got three interviews in my first week. PrimeCV tailored my CV perfectly for each role.',
+                quote: 'Got three interviews in my first week. Merit tailored my CV perfectly for each role.',
                 name: 'Sarah M.',
                 title: 'Software Engineer, London'
               },
@@ -427,7 +427,7 @@ export default function LandingPage({
                 title: 'Project Manager, Manchester'
               },
               {
-                quote: 'Uploaded my old CV, PrimeCV rewrote it completely. Landed a new role within 2 weeks.',
+                quote: 'Uploaded my old CV, Merit rewrote it completely. Landed a new role within 2 weeks.',
                 name: 'Priya K.',
                 title: 'Marketing Executive, Birmingham'
               }
@@ -537,7 +537,7 @@ export default function LandingPage({
           </div>
 
           <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-lg mx-auto">
-            The free plan is perfect for trying PrimeCV. Upgrade to Pro to unlock job tailoring and unlimited downloads.
+            The free plan is perfect for trying Merit. Upgrade to Pro to unlock job tailoring and unlimited downloads.
           </p>
         </div>
       </section>
@@ -546,8 +546,8 @@ export default function LandingPage({
       <section id="support-section" className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Support PrimeCV</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep PrimeCV free for UK job seekers. Your support helps us cover hosting and infrastructure costs.</p>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Support Merit</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep Merit free for UK job seekers. Your support helps us cover hosting and infrastructure costs.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -565,7 +565,7 @@ export default function LandingPage({
               </div>
               <div className="space-y-4 flex-1">
                 <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                  Support the development of PrimeCV with a small financial contribution. This helps us maintain our platform for everyone.
+                  Support the development of Merit with a small financial contribution. This helps us maintain our platform for everyone.
                 </p>
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
                   <p className="text-[10px] uppercase tracking-widest font-bold text-amber-700 flex items-center gap-1.5">
@@ -588,7 +588,7 @@ export default function LandingPage({
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#3B82F6] mb-4">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold dark:text-white">PrimeCV Pro</h3>
+                <h3 className="text-xl font-bold dark:text-white">Merit Pro</h3>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">£9.99</span>
                   <span className="text-zinc-500 text-sm font-normal">/month</span>
@@ -623,7 +623,7 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-extrabold">Ready to land your next role?</h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">Join thousands of UK job seekers building better CVs with PrimeCV.</p>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">Join thousands of UK job seekers building better CVs with Merit.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
@@ -654,7 +654,7 @@ export default function LandingPage({
               <div className="bg-white/10 p-1.5 rounded-md">
                 <ScrollText className="text-white w-5 h-5" />
               </div>
-              <span className="text-white font-bold text-xl tracking-tight">PrimeCV</span>
+              <span className="text-white font-bold text-xl tracking-tight">Merit</span>
             </div>
             <div className="flex gap-8 text-sm font-medium">
               <button onClick={() => openLegal('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
@@ -674,9 +674,9 @@ export default function LandingPage({
                 className="inline-flex items-center gap-2 bg-[#F59E0B] hover:bg-[#D97706] text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/10"
               >
                 <Coffee className="w-4 h-4" />
-                Support PrimeCV
+                Support Merit
               </motion.a>
-              <p className="text-xs text-white/40">Help keep PrimeCV free for UK job seekers</p>
+              <p className="text-xs text-white/40">Help keep Merit free for UK job seekers</p>
             </div>
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">

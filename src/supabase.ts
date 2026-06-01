@@ -12,7 +12,7 @@ export const missingConfigVars = {
 };
 
 // ── Stub ────────────────────────────────────────────────────────
-// When Supabase env vars are missing, use a mock so PrimeCV runs
+// When Supabase env vars are missing, use a mock so Merit runs
 // without a real backend. Remove this once you configure Supabase.
 // ────────────────────────────────────────────────────────────────
 function createStubSupabase() {
@@ -23,7 +23,7 @@ function createStubSupabase() {
 
   const fakeUser = {
     id: 'stub-user-id',
-    email: 'demo@primecv.co.uk',
+    email: 'rjcosta@gmail.com',
     user_metadata: { full_name: 'Demo User', avatar_url: null },
     app_metadata: {},
     aud: 'authenticated',

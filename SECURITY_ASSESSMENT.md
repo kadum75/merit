@@ -1,7 +1,7 @@
-# PrimeCV — Security Assessment Report
+# Merit — Security Assessment Report
 
 **Date:** 2026-05-26  
-**Project:** PrimeCV (ATS-optimised CV builder)  
+**Project:** Merit (ATS-optimised CV builder)  
 **Scope:** Full-stack application (Vite + React + Express + Supabase + Stripe + Netlify)
 
 ---
@@ -54,7 +54,7 @@
 
 ### 3.1 Supabase Stub Bypass
 - **File:** `supabase.ts:151-160`
-- When `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are missing, a stub client auto-authenticates as `demo@primecv.co.uk` with `is_pro: true`.
+- When `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are missing, a stub client auto-authenticates as `rjcosta@gmail.com` with `is_pro: true`.
 - If env vars are misconfigured in production, all users bypass authentication entirely.
 - **Recommendation:** Crash on startup if Supabase env vars are missing in production, or disable the stub in production builds.
 
