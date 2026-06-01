@@ -154,44 +154,18 @@ console.info(
 );
 
 function createRealSupabase() {
+  // NOTE: Using implicit flow for OAuth — Supabase's GoTrue server
+  // doesn't support grant_type=pkce for social providers (returns
+  // "unsupported_grant_type"). Implicit flow returns tokens directly
+  // in the URL fragment after OAuth redirect.
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      flowType: 'pkce',
+      flowType: 'implicit',
       detectSessionInUrl: true,
       persistSession: true,
       autoRefreshToken: true,
     },
   });
-
-  // Manual PKCE code exchange — handles cases where automatic detection
-  // fails (e.g. some browsers, race conditions on redirect back).
-  ;(async () => {
-    try {
-      const code = new URLSearchParams(window.location.search).get('code');
-      if (!code) return;
-
-      // Only attempt if a code-verifier exists (PKCE was initiated)
-      const hasVerifier = Object.keys(localStorage).some(k =>
-        k.includes('auth-token-code-verifier')
-      );
-      if (!hasVerifier) return;
-
-      const { data: existing } = await client.auth.getSession();
-      if (existing?.session?.access_token) {
-        window.history.replaceState({}, '', window.location.pathname);
-        return;
-      }
-
-      console.info('[Supabase] Exchanging PKCE code...');
-      const { error } = await client.auth.exchangeCodeForSession(code);
-      if (error) {
-        console.error('[Supabase] PKCE exchange failed:', error);
-      }
-      window.history.replaceState({}, '', window.location.pathname);
-    } catch (err) {
-      console.error('[Supabase] PKCE exchange error:', err);
-    }
-  })();
 
   return client;
 }
