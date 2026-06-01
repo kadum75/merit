@@ -37,6 +37,7 @@ interface LandingPageProps {
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
 const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
 const STRIPE_PRICE_DONATION = "price_1TH0BXFWr5mLxG6sPP8Ui9ZL"; // Donation price
+const STRIPE_PRICE_ORG = import.meta.env.VITE_STRIPE_ORG_PRICE_ID || "price_1TdVLYFWr5mLxG6sxRNuJTB8";
 
 export default function LandingPage({ 
   onStart, 
@@ -454,7 +455,7 @@ export default function LandingPage({
             <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Start for free and upgrade only when you need more power.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* STARTER Card */}
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 relative overflow-hidden flex flex-col">
               <div className="space-y-2">
@@ -533,11 +534,45 @@ export default function LandingPage({
                 <p className="text-center text-xs text-zinc-400">Cancel anytime · Billed monthly</p>
               </div>
             </div>
-          </div>
 
-          <p className="text-center text-zinc-500 dark:text-zinc-400 text-sm max-w-lg mx-auto">
-            The free plan is perfect for trying Merit. Upgrade to Pro to unlock job tailoring and unlimited downloads.
-          </p>
+            {/* ORGANISATIONS Card */}
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 relative overflow-hidden flex flex-col">
+              <div className="absolute top-5 right-5 bg-[#3B82F6] text-white text-xs font-bold px-3 py-1 rounded-full">
+                Best for teams
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold dark:text-white">Organisations</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold">£29.99</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">/month</span>
+                </div>
+              </div>
+              <ul className="space-y-4 flex-1">
+                {[
+                  { text: 'Everything in Pro', star: false },
+                  { text: 'Up to 10 team seats', star: false },
+                  { text: 'Shared CV templates & branding', star: false },
+                  { text: 'Bulk CV download & analytics', star: false },
+                  { text: 'Candidate notes per CV', star: false },
+                  { text: 'Dedicated account manager', star: false },
+                ].map((feature, i) => (
+                  <li key={`row-org-features-${i}`} className="flex items-start gap-3 text-zinc-600 dark:text-zinc-400 text-sm">
+                    <CheckCircle2 className="w-5 h-5 text-[#3B82F6] flex-shrink-0" />
+                    {feature.text}
+                  </li>
+                ))}
+              </ul>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => handleCheckout(STRIPE_PRICE_ORG, "org")}
+                  className="w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                >
+                  Get Organisations – £29.99/mo
+                </button>
+                <p className="text-center text-xs text-zinc-400">Cancel anytime · Billed monthly</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
