@@ -891,14 +891,20 @@ export default function App() {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      setShowUserMenu(false);
-      setCurrentView('home');
-      setData(INITIAL_DATA);
-      setGeneratedContent(null);
-      setStep(0);
     } catch (err) {
       console.error('Sign out error:', err);
     }
+    // Clear Supabase session from local storage regardless
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('sb-') || key.includes('supabase')) {
+        localStorage.removeItem(key);
+      }
+    }
+    setShowUserMenu(false);
+    setCurrentView('home');
+    setData(INITIAL_DATA);
+    setGeneratedContent(null);
+    setStep(0);
   };
 
   const handleCheckout = async (priceId: string, planType: string) => {
