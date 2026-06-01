@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Shield, FileText, Mail } from 'lucide-react';
+import { X, Shield, FileText, Mail, Globe } from 'lucide-react';
 
 export type LegalType = 'privacy' | 'terms' | 'contact';
 
@@ -27,7 +27,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <h4 className="text-white font-bold pt-2">1. Who We Are & Contact</h4>
           <p>
             PrimeCV is operated by ZenStack. Our Data Protection Officer can be reached at:{' '}
-            <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a>.
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
             For UK GDPR purposes, we are a data controller registered with the Information Commissioner's Office (ICO).
           </p>
 
@@ -96,7 +96,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           </ul>
           <p className="mt-2">
             To exercise any right, email{' '}
-            <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a>.
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
             We will respond within 30 days. You also have the right to lodge a complaint with the ICO (UK) 
             or your local supervisory authority (EU).
           </p>
@@ -118,7 +118,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             We collect the following categories of personal information: identifiers (name, email), 
             professional/employment information (CV data), and internet activity (usage data). 
             We do not sell personal information, nor have we done so in the preceding 12 months.
-            For CCPA requests: email <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a>.
+            For CCPA requests: email <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
           </p>
           <p className="mt-2">
             Similar rights apply in other US states with comprehensive privacy laws (Colorado, Connecticut, 
@@ -200,7 +200,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <h4 className="text-white font-bold pt-2">13. Contact & Complaints</h4>
           <p>
             Data Protection Officer:{' '}
-            <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a>
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
           </p>
           <p className="mt-1">
             UK ICO: <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">ico.org.uk</a> · 0303 123 1113
@@ -324,7 +324,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <p>
             If you believe content on PrimeCV infringes your copyright, please send a DMCA takedown 
             notice to{' '}
-            <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a> 
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a> 
             with: (a) identification of the copyrighted work, (b) proof of ownership, 
             (c) your contact information, and (d) a statement of good faith belief.
           </p>
@@ -339,7 +339,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <p className="pt-4 text-xs text-zinc-500 border-t border-zinc-800">
             These Terms were drafted with reference to UK consumer law, the EU Consumer Rights Directive, 
             and the California Consumer Privacy Act (CCPA). For questions, contact{' '}
-            <a href="mailto:contact@primecv.co.uk" className="text-blue-400 underline">contact@primecv.co.uk</a>.
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
           </p>
         </div>
       )
@@ -355,13 +355,24 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           </p>
           <div className="bg-zinc-800/50 p-6 rounded-2xl border border-zinc-700/50 space-y-4">
             <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center text-green-400">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider">Website</p>
+                <a href="https://webpagemain-pink.vercel.app/#" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-blue-400 transition-colors">
+                  webpagemain-pink.vercel.app
+                </a>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400">
                 <Mail className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider">Email</p>
-                <a href="mailto:contact@primecv.co.uk" className="text-white font-medium hover:text-blue-400 transition-colors">
-                  contact@primecv.co.uk
+                <a href="mailto:rjcosta@gmail.com" className="text-white font-medium hover:text-blue-400 transition-colors">
+                  rjcosta@gmail.com
                 </a>
               </div>
             </div>
@@ -371,7 +382,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
               </div>
               <div>
                 <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider">Data Protection</p>
-                <p className="text-white font-medium">DPO: contact@primecv.co.uk</p>
+                <p className="text-white font-medium">DPO: rjcosta@gmail.com</p>
               </div>
             </div>
           </div>
