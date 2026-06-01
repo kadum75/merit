@@ -160,6 +160,24 @@ export default function App() {
   const data: CVData = activeCV?.data ?? INITIAL_DATA;
   const generatedContent: string | null = activeCV?.generatedContent ?? null;
 
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const months: Record<string, string> = {
+      'january': 'Jan', 'february': 'Feb', 'march': 'Mar', 'april': 'Apr',
+      'may': 'May', 'june': 'Jun', 'july': 'Jul', 'august': 'Aug',
+      'september': 'Sep', 'october': 'Oct', 'november': 'Nov', 'december': 'Dec'
+    };
+    const lower = dateStr.toLowerCase().trim();
+    for (const [full, abbr] of Object.entries(months)) {
+      if (lower.includes(full)) return dateStr.replace(new RegExp(full, 'gi'), abbr);
+    }
+    if (/^\d{4}-\d{2}$/.test(dateStr)) {
+      const [y, m] = dateStr.split('-');
+      return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
+    }
+    return dateStr;
+  };
+
   const buildLivePreview = (d: CVData): string => {
     const sections: string[] = [];
     const pd = d.personalDetails;
@@ -194,24 +212,6 @@ export default function App() {
   };
 
   const livePreview = React.useMemo(() => buildLivePreview(data), [data]);
-
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return '';
-    const months: Record<string, string> = {
-      'january': 'Jan', 'february': 'Feb', 'march': 'Mar', 'april': 'Apr',
-      'may': 'May', 'june': 'Jun', 'july': 'Jul', 'august': 'Aug',
-      'september': 'Sep', 'october': 'Oct', 'november': 'Nov', 'december': 'Dec'
-    };
-    const lower = dateStr.toLowerCase().trim();
-    for (const [full, abbr] of Object.entries(months)) {
-      if (lower.includes(full)) return dateStr.replace(new RegExp(full, 'gi'), abbr);
-    }
-    if (/^\d{4}-\d{2}$/.test(dateStr)) {
-      const [y, m] = dateStr.split('-');
-      return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
-    }
-    return dateStr;
-  };
 
   const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.experience.length > 0 || data.education.length > 0 || data.skills;
 
