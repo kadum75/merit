@@ -74,21 +74,14 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
-          skipBrowserRedirect: true,
+          redirectTo: window.location.origin
         }
       });
 
       if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No OAuth URL returned from Supabase');
-      }
     } catch (err: any) {
       console.error('Google Sign-in Error:', err);
       setError(`Sign-in failed: ${err.message}`);
