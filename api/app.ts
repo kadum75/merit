@@ -91,6 +91,30 @@ export function createApp() {
         }
         break;
       }
+      case "checkout.session.async_payment_succeeded": {
+        const asyncSession = event.data.object as Stripe.Checkout.Session;
+        const { uid: asyncUid, planType: asyncPlanType } = asyncSession.metadata || {};
+        if (asyncUid && supabase) {
+          await supabase.from("users").update({
+            stripe_customer_id: asyncSession.customer as string,
+            is_pro: true,
+            subscription_id: asyncSession.subscription as string,
+            subscription_status: "active",
+            plan_type: asyncPlanType || "monthly",
+          }).eq("uid", asyncUid);
+        }
+        break;
+      }
+      case "checkout.session.async_payment_failed": {
+        const failedSession = event.data.object as Stripe.Checkout.Session;
+        const { uid: failedUid } = failedSession.metadata || {};
+        if (failedUid && supabase) {
+          await supabase.from("users").update({
+            subscription_status: "payment_failed",
+          }).eq("uid", failedUid);
+        }
+        break;
+      }
     }
     res.json({ received: true });
   });
