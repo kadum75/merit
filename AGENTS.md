@@ -23,10 +23,11 @@ Senior full-stack developer for PrimeCV, an ATS-optimised CV builder for the UK 
 - British English
 
 ## Deployment (GitHub → Vercel)
-- After every change: build, commit, and push to GitHub `master` branch
+- After every change: build, commit, push to GitHub `master` branch, AND deploy to Vercel
   - `npm run build` to verify no errors
   - `git add . && git commit -m "..." && git push`
-- Vercel auto-deploys from GitHub `master` branch
+  - `npx vercel deploy --prod --yes` to deploy immediately
+- Vercel auto-deploys from GitHub `master` branch as fallback
 - Production URL: `https://primecv.vercel.app`
 - Vercel project config in `vercel.json` — API routes in `api/`, SPA fallback
 - Stripe webhook endpoint: `https://primecv.vercel.app/api/webhook`

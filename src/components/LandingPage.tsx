@@ -110,10 +110,10 @@ export default function LandingPage({
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-[#0F172A] dark:text-zinc-100">
       {/* 1. NAVIGATION BAR */}
-      <nav className="sticky top-0 z-50 bg-[#0F172A] border-b border-white/10 px-4 lg:px-16 py-3 lg:py-4">
+      <nav className="sticky top-0 z-50 bg-[#0F172A] border-b border-white/10 px-4 lg:px-16 py-3 lg:py-4" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
-            <div className="bg-[#3B82F6] p-1 rounded-md">
+            <div className="bg-[#3B82F6] p-1 rounded-md" aria-hidden="true">
               <ScrollText className="text-white w-4 h-5 sm:w-5 sm:h-5" />
             </div>
             <span className="text-white font-bold text-lg sm:text-xl tracking-tight">PrimeCV</span>
@@ -217,7 +217,7 @@ export default function LandingPage({
       )}
 
       {/* 2. HERO SECTION */}
-      <section className="bg-[#0F172A] pt-20 pb-32 px-6 lg:px-16 overflow-hidden">
+      <section className="bg-[#0F172A] pt-20 pb-32 px-6 lg:px-16 overflow-hidden" aria-label="Hero">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -305,7 +305,7 @@ export default function LandingPage({
       </section>
 
       {/* 3. HOW IT WORKS SECTION */}
-      <section className="py-24 px-6 lg:px-16 bg-white dark:bg-zinc-950">
+      <section className="py-24 px-6 lg:px-16 bg-white dark:bg-zinc-950" aria-label="How it works">
         <div className="max-w-7xl mx-auto text-center space-y-16">
           <div className="space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Three steps to your perfect CV</h2>
@@ -366,7 +366,7 @@ export default function LandingPage({
       </section>
 
       {/* 4. FEATURES SECTION */}
-      <section className="py-24 px-6 lg:px-16 bg-[#0F172A] text-white">
+      <section className="py-24 px-6 lg:px-16 bg-[#0F172A] text-white" aria-label="Features">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight">Everything you need to stand out</h2>
@@ -407,7 +407,7 @@ export default function LandingPage({
       </section>
 
       {/* 5. SOCIAL PROOF SECTION */}
-      <section className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900">
+      <section className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900" aria-label="Testimonials">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Trusted by UK job seekers</h2>
@@ -448,7 +448,7 @@ export default function LandingPage({
       </section>
 
       {/* 6. PRICING SECTION */}
-      <section className="py-24 px-6 lg:px-16 bg-white dark:bg-zinc-950">
+      <section className="py-24 px-6 lg:px-16 bg-white dark:bg-zinc-950" aria-label="Pricing">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Simple, honest pricing</h2>
@@ -618,7 +618,7 @@ export default function LandingPage({
       </section>
 
       {/* 7. FINAL CTA BANNER */}
-      <section className="py-20 px-6 lg:px-16 bg-[#3B82F6] text-white overflow-hidden relative">
+      <section className="py-20 px-6 lg:px-16 bg-[#3B82F6] text-white overflow-hidden relative" aria-label="Call to action">
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="space-y-4">
@@ -680,7 +680,7 @@ export default function LandingPage({
             </div>
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
-              <p className="text-sm">© 2026 <a href="https://zenstack.netlify.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">ZenStack</a>. All rights reserved.</p>
+              <p className="text-sm">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">ZenStack</a>. All rights reserved.</p>
               <div className="flex flex-wrap justify-center gap-6">
               {[
                 { icon: ShieldCheck, label: 'ATS Compatible' },
