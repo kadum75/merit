@@ -31,6 +31,7 @@ interface LandingPageProps {
   isStripeConfigured: boolean;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  getAuthToken: () => Promise<string | null>;
 }
 
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
@@ -46,7 +47,8 @@ export default function LandingPage({
   onManageSubscription,
   isStripeConfigured,
   theme,
-  onToggleTheme
+  onToggleTheme,
+  getAuthToken
 }: LandingPageProps) {
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [legalModal, setLegalModal] = React.useState<{ isOpen: boolean; type: LegalType }>({
@@ -75,11 +77,15 @@ export default function LandingPage({
       return;
     }
 
+    const token = await getAuthToken();
+    if (!token) { alert('Session expired. Please sign in again.'); return; }
+
     try {
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ 
           uid: user.id,

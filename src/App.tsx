@@ -978,6 +978,7 @@ export default function App() {
             isStripeConfigured={isStripeConfigured}
             theme={theme}
             onToggleTheme={toggleTheme}
+            getAuthToken={getAuthToken}
           />
         </motion.div>
       ) : (
