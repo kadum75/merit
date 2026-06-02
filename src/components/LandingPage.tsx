@@ -12,10 +12,10 @@ import {
   Coffee,
   Heart,
   Lock,
-  ScrollText
+  ScrollText,
+  Home,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-
 import { LegalModal, LegalType } from './LegalModal';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_PRICE_ORG } from '../lib/pricing';
 
@@ -31,11 +31,6 @@ interface LandingPageProps {
   onToggleTheme: () => void;
   handleCheckout: (priceId: string, planType: string) => Promise<void>;
 }
-
-const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
-const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
-const STRIPE_PRICE_DONATION = "price_1TH0klFWr5mLxG6s4ys0XZ0i"; // Custom amount donation (min £1)
-const STRIPE_PRICE_ORG = import.meta.env.VITE_STRIPE_ORG_PRICE_ID || "price_1TdVLYFWr5mLxG6sxRNuJTB8";
 
 export default function LandingPage({ 
   onStart, 
@@ -98,13 +93,6 @@ export default function LandingPage({
                 >
                   {user ? 'Build My CV' : 'Build My CV — Free'}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white text-lg font-bold px-8 py-4 rounded-xl transition-all border border-white/10 w-full sm:w-auto"
-                >
-                  <Home className="w-5 h-5" />
-                  Home
                 </button>
               </div>
 
@@ -520,13 +508,6 @@ export default function LandingPage({
               className="bg-white text-[#3B82F6] hover:bg-blue-50 text-lg font-bold px-10 py-5 rounded-xl transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
             >
               {user ? 'Build Your CV' : 'Build My CV Now'}
-            </button>
-            <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="bg-white/10 hover:bg-white/20 text-white text-lg font-bold px-10 py-5 rounded-xl transition-all border border-white/20 flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              <Home className="w-5 h-5" />
-              Home
             </button>
           </div>
           <p className="text-white/60 text-xs italic">
