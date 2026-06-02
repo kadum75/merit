@@ -318,11 +318,17 @@ export default function App() {
       setIsExchangingCode(true);
       supabase.auth.exchangeCodeForSession(authCode).catch((err) => {
         console.error('Auth code exchange failed (code may be expired):', err);
+        if (urlParams.get('signin') === 'confirmed') {
+          window.history.replaceState({}, '', window.location.pathname);
+          setIsAuthModalOpen(true);
+        }
       }).finally(() => {
         window.history.replaceState({}, '', window.location.pathname);
         setIsExchangingCode(false);
         supabase.auth.getUser().then(({ data: { user } }) => {
           if (user) setUser(user);
+        }).catch((err) => {
+          console.error('Failed to get user after code exchange:', err);
         });
       });
     } else if (authError) {
@@ -331,12 +337,19 @@ export default function App() {
     } else {
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (user) setUser(user);
+      }).catch((err) => {
+        console.error('Failed to get user on page load:', err);
       });
     }
 
     if (urlParams.get('signin') === 'confirmed') {
-      window.history.replaceState({}, '', window.location.pathname);
-      setIsAuthModalOpen(true);
+      // If there's an auth code, the exchange will handle auto-sign-in,
+      // and the modal will open in the async chain if it fails.
+      // If there's no auth code, open the modal immediately.
+      if (!authCode) {
+        window.history.replaceState({}, '', window.location.pathname);
+        setIsAuthModalOpen(true);
+      }
     }
 
     if (urlParams.get('checkout_success') === 'true') {
