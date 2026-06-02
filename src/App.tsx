@@ -316,7 +316,9 @@ export default function App() {
 
     if (authCode) {
       setIsExchangingCode(true);
-      supabase.auth.exchangeCodeForSession(authCode).finally(() => {
+      supabase.auth.exchangeCodeForSession(authCode).catch((err) => {
+        console.error('Auth code exchange failed (code may be expired):', err);
+      }).finally(() => {
         window.history.replaceState({}, '', window.location.pathname);
         setIsExchangingCode(false);
         supabase.auth.getUser().then(({ data: { user } }) => {
