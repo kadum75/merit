@@ -406,6 +406,10 @@ export default function App() {
       // The webhook will update Supabase, which our poller will pick up
       window.history.replaceState({}, '', window.location.pathname);
     }
+    if (params.get('signin') === 'confirmed') {
+      window.history.replaceState({}, '', window.location.pathname);
+      setIsAuthModalOpen(true);
+    }
   }, []);
 
   const steps = [

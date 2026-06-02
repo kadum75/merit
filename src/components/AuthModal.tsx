@@ -56,6 +56,9 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: 'https://merit-cv.vercel.app?signin=confirmed',
+          },
         });
         if (error) throw error;
         if (data.session) {
