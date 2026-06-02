@@ -921,8 +921,13 @@ export default function App() {
   };
 
   const getAuthToken = async (): Promise<string | null> => {
-    const { data } = await supabase.auth.getSession();
-    return data?.session?.access_token ?? null;
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token ?? null;
+    } catch (err) {
+      console.error('Failed to get auth session:', err);
+      return null;
+    }
   };
 
   const handleManageSubscription = async () => {
