@@ -125,6 +125,7 @@ export default function App() {
   const [editRoleValue, setEditRoleValue] = useState('');
   const [newCVRole, setNewCVRole] = useState('');
   const [showNewCVInput, setShowNewCVInput] = useState(false);
+  const [isExchangingCode, setIsExchangingCode] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('merit-theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'dark';
@@ -330,6 +331,7 @@ export default function App() {
     const authCode = urlParams.get('code');
     const authError = urlParams.get('error') || urlParams.get('error_description');
     if (authCode) {
+      setIsExchangingCode(true);
       supabase.auth.exchangeCodeForSession(authCode).then(({ data: { session } }) => {
         window.history.replaceState({}, '', window.location.pathname);
         if (session?.user) {
@@ -337,6 +339,9 @@ export default function App() {
         }
       }).catch(err => {
         console.error('PKCE exchange failed:', err);
+        window.history.replaceState({}, '', window.location.pathname);
+      }).finally(() => {
+        setIsExchangingCode(false);
       });
     } else if (authError) {
       console.error('OAuth error:', authError);
@@ -347,6 +352,8 @@ export default function App() {
         if (session?.user) {
           setUser(session.user);
         }
+      }).catch(err => {
+        console.error('Session recovery failed:', err);
       });
     }
 
@@ -360,11 +367,12 @@ export default function App() {
     const pending = sessionStorage.getItem('merit-pending-checkout');
     if (!pending) return;
     pendingCheckoutRef.current = true;
-    sessionStorage.removeItem('merit-pending-checkout');
     try {
       const { priceId, planType } = JSON.parse(pending);
       handleCheckout(priceId, planType);
-    } catch { /* ignore */ }
+    } catch {
+      pendingCheckoutRef.current = false;
+    }
   }, [user]);
 
   // Supabase User Data Listener (for isPro status)
@@ -915,6 +923,8 @@ export default function App() {
       });
       const data = await response.json();
       if (data.url) {
+        pendingCheckoutRef.current = true;
+        sessionStorage.removeItem('merit-pending-checkout');
         window.location.href = data.url;
       } else {
         alert(data.error || 'Could not open subscription management. Please try again.');
@@ -975,6 +985,8 @@ export default function App() {
 
       const data = await response.json();
       if (data.url) {
+        pendingCheckoutRef.current = true;
+        sessionStorage.removeItem('merit-pending-checkout');
         window.location.href = data.url;
       } else {
         throw new Error(data.error || "Failed to create checkout session");
@@ -988,6 +1000,16 @@ export default function App() {
   return (
     <>
       <CookieConsent />
+      
+      {isExchangingCode && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+            <div className="w-10 h-10 border-4 border-zinc-200 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Signing you in...</p>
+          </div>
+        </div>
+      )}
+      
        {!isSupabaseConfigValid && (
          <div className="bg-red-600 text-white py-2 px-4 text-center text-sm font-bold sticky top-0 z-[100] flex flex-col items-center justify-center gap-1">
            <div className="flex items-center gap-2">
@@ -1018,7 +1040,7 @@ export default function App() {
             isStripeConfigured={isStripeConfigured}
             theme={theme}
             onToggleTheme={toggleTheme}
-            getAuthToken={getAuthToken}
+            handleCheckout={handleCheckout}
           />
         </motion.div>
       ) : (
@@ -2078,19 +2100,30 @@ export default function App() {
                 <button 
                   onClick={() => {
                     setShowUpgradeModal(false);
-                    handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly');
+                    handleCheckout(STRIPE_PRICE_ANNUAL, 'annual');
                   }}
                   className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-xl font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
-                  Upgrade to Pro
+                  Upgrade to Pro — £79.99/yr
                 </button>
-                <button 
-                  onClick={() => setShowUpgradeModal(false)}
-                  className="w-full py-3 text-zinc-500 hover:text-zinc-700 font-medium transition-colors"
-                >
-                  Maybe later
-                </button>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => {
+                      setShowUpgradeModal(false);
+                      handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly');
+                    }}
+                    className="flex-1 py-3 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl font-medium transition-all text-sm"
+                  >
+                    £9.99/month
+                  </button>
+                  <button 
+                    onClick={() => setShowUpgradeModal(false)}
+                    className="flex-1 py-3 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 font-medium transition-all text-sm"
+                  >
+                    Maybe later
+                  </button>
+                </div>
               </div>
             </div>
             

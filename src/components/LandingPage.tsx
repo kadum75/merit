@@ -31,7 +31,7 @@ interface LandingPageProps {
   isStripeConfigured: boolean;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
-  getAuthToken: () => Promise<string | null>;
+  handleCheckout: (priceId: string, planType: string) => Promise<void>;
 }
 
 const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
@@ -49,7 +49,7 @@ export default function LandingPage({
   isStripeConfigured,
   theme,
   onToggleTheme,
-  getAuthToken
+  handleCheckout
 }: LandingPageProps) {
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [legalModal, setLegalModal] = React.useState<{ isOpen: boolean; type: LegalType }>({
@@ -67,47 +67,7 @@ export default function LandingPage({
     return () => window.removeEventListener('open-privacy', handler);
   }, []);
 
-  const handleCheckout = async (priceId: string, planType: string) => {
-    if (!isStripeConfigured) {
-      alert("Payments coming soon - please check back shortly!");
-      return;
-    }
 
-    if (!user) {
-      sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType }));
-      onSignInClick();
-      return;
-    }
-
-    const token = await getAuthToken();
-    if (!token) { alert('Session expired. Please sign in again.'); return; }
-
-    try {
-      const response = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          uid: user.id,
-          email: user.email,
-          priceId, 
-          planType 
-        }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Something went wrong with the checkout. Please try again later.");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-[#0F172A] dark:text-zinc-100">

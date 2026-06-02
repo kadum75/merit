@@ -100,6 +100,7 @@ function createStubSupabase() {
       },
       getSession: () => Promise.resolve({ data: { session: fakeSession }, error: null }),
       getUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
+      updateUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
     },
     from: (table: string) => {
       if (table === 'users') {
