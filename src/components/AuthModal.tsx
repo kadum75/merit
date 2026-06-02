@@ -20,6 +20,8 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
   const [error, setError] = useState<string | null>(isSupabaseConfigValid ? null : 'Supabase is not configured. Please set credentials in environment variables.');
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [confirmedEmail, setConfirmedEmail] = useState('');
   
   // Consent flags
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -65,7 +67,8 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
           await syncUserDocument(data.user, agreeToTerms);
           onClose();
         } else {
-          setError('Check your email for the confirmation link.');
+          setConfirmedEmail(email);
+          setShowEmailConfirmation(true);
         }
       }
     } catch (err: any) {
@@ -223,6 +226,49 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
                   )}
                 </button>
               </form>
+            ) : showEmailConfirmation ? (
+              <>
+                <div className="relative rounded-2xl overflow-hidden">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl opacity-75 blur-sm" />
+                  <div className="relative bg-white dark:bg-zinc-900 rounded-2xl p-8 flex flex-col items-center text-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                    >
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-6">
+                        <Mail className="w-10 h-10 text-white" />
+                      </div>
+                    </motion.div>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
+                      Verify Your Email
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4 max-w-xs">
+                      We sent a confirmation link to:
+                    </p>
+                    <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-medium text-zinc-900 dark:text-white mb-6 w-full max-w-xs truncate">
+                      {confirmedEmail}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowEmailConfirmation(false);
+                        setIsSignIn(true);
+                      }}
+                      className="w-full py-3 px-4 bg-zinc-900 dark:bg-zinc-100 hover:bg-zinc-800 dark:hover:bg-white text-white dark:text-zinc-900 font-bold rounded-xl transition-all"
+                    >
+                      I've Confirmed — Sign In
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowEmailConfirmation(false);
+                        setIsSignIn(false);
+                      }}
+                      className="mt-4 text-sm text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors"
+                    >
+                      Didn't get it? <span className="underline underline-offset-2">Resend</span>
+                    </button>
+                  </div>
+                </div>
+              </>
             ) : (
             <><div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl mb-6">
               <button
