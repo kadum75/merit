@@ -125,7 +125,6 @@ export default function App() {
   const [editRoleValue, setEditRoleValue] = useState('');
   const [newCVRole, setNewCVRole] = useState('');
   const [showNewCVInput, setShowNewCVInput] = useState(false);
-  const [isExchangingCode, setIsExchangingCode] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('merit-theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'dark';
@@ -325,37 +324,6 @@ export default function App() {
         await syncUserDocument(currentUser);
       }
     });
-
-    // Handle OAuth redirect (PKCE code exchange)
-    const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get('code');
-    const authError = urlParams.get('error') || urlParams.get('error_description');
-    if (authCode) {
-      setIsExchangingCode(true);
-      supabase.auth.exchangeCodeForSession(authCode).then(({ data: { session } }) => {
-        window.history.replaceState({}, '', window.location.pathname);
-        if (session?.user) {
-          setUser(session.user);
-        }
-      }).catch(err => {
-        console.error('PKCE exchange failed:', err);
-        window.history.replaceState({}, '', window.location.pathname);
-      }).finally(() => {
-        setIsExchangingCode(false);
-      });
-    } else if (authError) {
-      console.error('OAuth error:', authError);
-      window.history.replaceState({}, '', window.location.pathname);
-    } else {
-      // Try to recover existing session
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-        }
-      }).catch(err => {
-        console.error('Session recovery failed:', err);
-      });
-    }
 
     return () => subscription?.unsubscribe();
   }, []);
@@ -1006,16 +974,7 @@ export default function App() {
   return (
     <>
       <CookieConsent />
-      
-      {isExchangingCode && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-zinc-200 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full animate-spin" />
-            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Signing you in...</p>
-          </div>
-        </div>
-      )}
-      
+
        {!isSupabaseConfigValid && (
          <div className="bg-red-600 text-white py-2 px-4 text-center text-sm font-bold sticky top-0 z-[100] flex flex-col items-center justify-center gap-1">
            <div className="flex items-center gap-2">
