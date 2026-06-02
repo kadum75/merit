@@ -185,7 +185,7 @@ export function createApp() {
         return res.status(429).json({ error: "Too many requests. Please try again later." });
       }
 
-      const { uid, email, priceId, planType } = req.body;
+      const { uid, email, priceId, planType, returnView } = req.body;
       if (!priceId || !uid || !email) {
         return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
       }
@@ -195,14 +195,15 @@ export function createApp() {
       }
 
       const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://merit-cv.vercel.app";
+      const viewParam = returnView === 'builder' ? '&view=builder' : '';
       const mode = planType === "donation" ? "payment" as const : "subscription" as const;
       const session = await stripe.checkout.sessions.create({
         customer_email: email,
         line_items: [{ price: priceId, quantity: 1 }],
         mode,
         metadata: { uid, planType },
-        success_url: `${appUrl}?checkout_success=true`,
-        cancel_url: appUrl,
+        success_url: `${appUrl}?checkout_success=true${viewParam}`,
+        cancel_url: `${appUrl}?view=${returnView || 'home'}`,
       });
       res.json({ url: session.url });
     } catch (error: any) {

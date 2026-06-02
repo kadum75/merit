@@ -12,14 +12,12 @@ import {
   Coffee,
   Heart,
   Lock,
-  Home,
-  LogOut,
-  CreditCard
+  ScrollText
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 
 import { LegalModal, LegalType } from './LegalModal';
-import { Sun, Moon, ScrollText } from 'lucide-react';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_PRICE_ORG } from '../lib/pricing';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -51,7 +49,6 @@ export default function LandingPage({
   onToggleTheme,
   handleCheckout
 }: LandingPageProps) {
-  const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [legalModal, setLegalModal] = React.useState<{ isOpen: boolean; type: LegalType }>({
     isOpen: false,
     type: 'privacy'
@@ -67,111 +64,8 @@ export default function LandingPage({
     return () => window.removeEventListener('open-privacy', handler);
   }, []);
 
-
-
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-[#0F172A] dark:text-zinc-100">
-      {/* 1. NAVIGATION BAR */}
-      <nav className="sticky top-0 z-50 bg-[#0F172A] border-b border-white/10 px-4 lg:px-16 py-3 lg:py-4" aria-label="Main navigation">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
-            <div className="bg-[#3B82F6] p-1 rounded-md" aria-hidden="true">
-              <ScrollText className="text-white w-4 h-5 sm:w-5 sm:h-5" />
-            </div>
-            <span className="text-white font-bold text-lg sm:text-xl tracking-tight">Merit</span>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 flex-wrap justify-end">
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-1 sm:gap-2 p-1 pr-2 sm:pr-3 bg-white/10 hover:bg-white/20 rounded-full transition-all text-white"
-                >
-                  {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/20" />
-                  ) : (
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">
-                      {user.email?.[0].toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">
-                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                  </span>
-                </button>
-
-                <AnimatePresence mode="sync">
-                  {showUserMenu && (
-                    <motion.div
-                      key="landing-user-menu"
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-50"
-                    >
-                      <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">
-                        <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1">Signed in as</p>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{user.email}</p>
-                      </div>
-                      <div className="p-2">
-                        {isPro && (
-                          <button
-                            onClick={onManageSubscription}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                          >
-                            <CreditCard className="w-4 h-4" />
-                            Manage Subscription
-                          </button>
-                        )}
-                        <button
-                          onClick={onSignOut}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Sign Out
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <button 
-                onClick={onSignInClick}
-                className="text-white/80 hover:text-white text-[11px] sm:text-sm font-medium px-2 sm:px-4 py-1.5 sm:py-2 transition-colors"
-              >
-                Sign In
-              </button>
-            )}
-            <button
-              onClick={onToggleTheme}
-              className="p-1.5 sm:p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            >
-              {theme === 'light' ? <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-            </button>
-            <button 
-              onClick={() => {
-                if (!isStripeConfigured) {
-                  document.getElementById('support-section')?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  handleCheckout(STRIPE_PRICE_DONATION, "donation");
-                }
-              }}
-              className="bg-[#F59E0B] hover:bg-[#D97706] text-white text-[10px] sm:text-xs font-bold px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all flex items-center gap-1 sm:gap-2"
-            >
-              <Coffee className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              Donate
-            </button>
-            <button 
-              onClick={onStart}
-              className="bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] sm:text-sm font-bold px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-lg transition-all shadow-lg shadow-blue-500/20"
-            >
-              {user ? 'Build CV' : 'Start Free'}
-            </button>
-          </div>
-        </div>
-      </nav>
-
       {!isStripeConfigured && (
         <div className="bg-amber-500 text-white text-center py-2 text-sm font-bold">
           Payment system not yet configured - contact the site owner
@@ -660,17 +554,13 @@ export default function LandingPage({
           
           <div className="pt-12 border-t border-white/5 flex flex-col items-center gap-8">
             <div className="flex flex-col items-center gap-4">
-              <motion.a 
-                href="https://buy.stripe.com/28E3cvdlB1g7cJWbcC28808"
-                target="_blank"
-                rel="noopener noreferrer"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              <button
+                onClick={() => handleCheckout(STRIPE_PRICE_DONATION, 'donation')}
                 className="inline-flex items-center gap-2 bg-[#F59E0B] hover:bg-[#D97706] text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/10"
               >
                 <Coffee className="w-4 h-4" />
                 Support Merit
-              </motion.a>
+              </button>
               <p className="text-xs text-white/40">Help keep Merit free for all job seekers</p>
             </div>
             

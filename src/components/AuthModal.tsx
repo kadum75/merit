@@ -93,6 +93,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
       if (!data?.url) {
         throw new Error('Failed to get OAuth URL');
       }
+      window.location.href = data.url;
     } catch (err: any) {
       console.error('Google Sign-in Error:', err);
       setError(`Sign-in failed: ${err.message}`);
@@ -154,7 +155,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-zinc-950 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 dark:bg-zinc-950 backdrop-blur-sm"
         >
           <motion.div
             key="auth-modal-content"
@@ -258,9 +259,16 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
                       I've Confirmed — Sign In
                     </button>
                     <button
-                      onClick={() => {
-                        setShowEmailConfirmation(false);
-                        setIsSignIn(false);
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase.auth.resend({
+                            type: 'signup',
+                            email: confirmedEmail,
+                          });
+                          if (error) throw error;
+                        } catch (err: any) {
+                          setError(err.message);
+                        }
                       }}
                       className="mt-4 text-sm text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors"
                     >

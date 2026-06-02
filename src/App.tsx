@@ -20,12 +20,11 @@ import {
   Globe,
   Loader2,
   Upload,
-  Home,
-  LogOut,
-  Settings,
-  CreditCard,
   Lock,
-  ScrollText
+  FolderOpen, 
+  Edit3, 
+  X, 
+  Pencil
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -34,13 +33,15 @@ import html2canvas from 'html2canvas';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, parseExistingCV } from './services/geminiService';
 import { cn } from './lib/utils';
-import { Sun, Moon, FolderOpen, Edit3, X, Pencil, Monitor } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
 import { CookieConsent } from './components/CookieConsent';
+import { Header } from './components/Header';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabase, getCurrentMonthString, handleSupabaseError, OperationType, isSupabaseConfigValid, syncUserDocument, missingConfigVars } from './supabase';
 import { UK_LOCATIONS } from './data/uk-locations';
 import { SKILLS } from './data/skills';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION } from './lib/pricing';
 
 const GENERAL_SKILLS = [
   'Leadership', 'Team Management', 'Project Management', 'Communication',
@@ -71,9 +72,6 @@ const INITIAL_DATA: CVData = {
   transferableSkillsFocus: '',
 };
 
-const STRIPE_PRICE_MONTHLY = import.meta.env.VITE_STRIPE_MONTHLY_PRICE_ID || "price_1TJa0cFWr5mLxG6s4mgygOvY";
-const STRIPE_PRICE_ANNUAL = import.meta.env.VITE_STRIPE_ANNUAL_PRICE_ID || "price_1Tcn1uFWr5mLxG6sxa02uRFY";
-const STRIPE_PRICE_DONATION = "price_1TH0klFWr5mLxG6s4ys0XZ0i"; // Custom amount donation (min £1)
 const CV_STORAGE_KEY = 'merit-cvs';
 
 function generateId() {
@@ -111,7 +109,6 @@ export default function App() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [cvs, setCVs] = useState<SavedCV[]>(() => loadCVs());
   const [activeCVId, setActiveCVId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -344,6 +341,11 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
     }
 
+    if (urlParams.get('view') === 'builder') {
+      setCurrentView('builder');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setResetPasswordMode(true);
@@ -416,8 +418,8 @@ export default function App() {
 
     fetchUserData();
 
-    // Poll for changes every 5 seconds as a lightweight realtime alternative
-    const interval = setInterval(fetchUserData, 5000);
+    // Poll for changes every 60 seconds as a lightweight realtime alternative
+    const interval = setInterval(fetchUserData, 60000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -976,7 +978,8 @@ export default function App() {
           uid: user.id,
           email: user.email,
           priceId, 
-          planType 
+          planType,
+          returnView: currentView
         }),
       });
 
@@ -984,6 +987,7 @@ export default function App() {
       if (data.url) {
         pendingCheckoutRef.current = true;
         sessionStorage.removeItem('merit-pending-checkout');
+        sessionStorage.setItem('merit-previous-view', currentView);
         window.location.href = data.url;
       } else {
         throw new Error(data.error || "Failed to create checkout session");
@@ -995,6 +999,7 @@ export default function App() {
   };
 
   return (
+    <ErrorBoundary>
     <>
       <CookieConsent />
 
@@ -1018,6 +1023,21 @@ export default function App() {
            </div>
          </div>
        )}
+
+      <Header
+        user={user}
+        isPro={isPro}
+        isStripeConfigured={isStripeConfigured}
+        theme={theme}
+        currentView={currentView}
+        onNavigateHome={() => setCurrentView('home')}
+        onSignInClick={() => setIsAuthModalOpen(true)}
+        onSignOut={handleSignOut}
+        onManageSubscription={handleManageSubscription}
+        onCheckout={handleCheckout}
+        onToggleTheme={toggleTheme}
+      />
+
       <AnimatePresence mode="sync">
       {currentView === 'home' ? (
         <motion.div
@@ -1049,243 +1069,140 @@ export default function App() {
           transition={{ duration: 0.3 }}
           className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col"
         >
-          {/* Header */}
-          <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 py-3 px-4 sm:py-4 sm:px-6 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <button 
-              onClick={() => setCurrentView('home')}
-              className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
-              title="Go to Home"
-            >
-              <Home className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="bg-zinc-900 p-2 rounded-lg">
-                <ScrollText className="text-white w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">Merit</h1>
-                <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">ATS-Optimised</p>
-              </div>
-            </div>
-
-            {/* CV Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setCVMenuOpen(!cvMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span className="max-w-[120px] truncate">{activeCV?.jobRole ?? 'CV'}</span>
-                <span className="text-[10px] text-zinc-400 font-bold">{cvs.length}/4</span>
-              </button>
-
-              <AnimatePresence>
-                {cvMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    className="absolute left-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50"
-                  >
-                    <div className="p-2 space-y-1">
-                      {cvs.map(cv => (
-                        <div key={cv.id} className="group relative">
-                          {editingCVId === cv.id ? (
-                            <div className="flex items-center gap-1 p-1">
-                              <input
-                                value={editRoleValue}
-                                onChange={e => setEditRoleValue(e.target.value)}
-                                onKeyDown={e => { if (e.key === 'Enter') handleRenameCV(cv.id); if (e.key === 'Escape') setEditingCVId(null); }}
-                                className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                                autoFocus
-                              />
-                              <button onClick={() => handleRenameCV(cv.id)} className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded">
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => setEditingCVId(null)} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => switchCV(cv.id)}
-                              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                cv.id === activeCVId
-                                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
-                                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                              }`}
-                            >
-                              <FileText className="w-4 h-4 shrink-0" />
-                              <span className="flex-1 truncate text-left">{cv.jobRole}</span>
-                              <span className="text-[10px] text-zinc-400">{cv.generatedContent ? '✓' : ''}</span>
-                              <button
-                                onClick={e => { e.stopPropagation(); startRename(cv); }}
-                                className="p-1 text-zinc-300 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <Pencil className="w-3 h-3" />
-                              </button>
-                              {cvs.length > 1 && (
-                                <button
-                                  onClick={e => { e.stopPropagation(); if (confirm(`Delete "${cv.jobRole}"?`)) handleDeleteCV(cv.id); }}
-                                  className="p-1 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {showNewCVInput ? (
-                      <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
-                        <div className="flex items-center gap-1">
-                          <input
-                            value={newCVRole}
-                            onChange={e => setNewCVRole(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') handleCreateCV(newCVRole); if (e.key === 'Escape') { setShowNewCVInput(false); setNewCVRole(''); } }}
-                            placeholder="Job role (e.g. Senior Dev)"
-                            className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                            autoFocus
-                          />
-                          <button onClick={() => { setShowNewCVInput(false); setNewCVRole(''); }} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      cvs.length < 4 && (
-                        <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
-                          <button
-                            onClick={() => setShowNewCVInput(true)}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                          >
-                            <Plus className="w-4 h-4" />
-                            New CV
-                          </button>
-                        </div>
-                      )
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 w-full sm:w-auto">
-            {user ? (
+          {/* Builder secondary bar */}
+          <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 sm:px-6 py-2">
+            <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2">
+              {/* CV Selector */}
               <div className="relative">
                 <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 pr-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-all"
+                  onClick={() => setCVMenuOpen(!cvMenuOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
                 >
-                  {user.user_metadata?.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="" className="w-8 h-8 rounded-full border border-white" />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold">
-                      {user.email?.[0].toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hidden sm:inline">
-                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                  </span>
+                  <FolderOpen className="w-4 h-4" />
+                  <span className="max-w-[120px] truncate">{activeCV?.jobRole ?? 'CV'}</span>
+                  <span className="text-[10px] text-zinc-400 font-bold">{cvs.length}/4</span>
                 </button>
 
                 <AnimatePresence>
-                  {showUserMenu && (
+                  {cvMenuOpen && (
                     <motion.div
-                      key="user-menu"
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden z-50"
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      className="absolute left-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50"
                     >
-                      <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">
-                        <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Signed in as</p>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{user.email}</p>
+                      <div className="p-2 space-y-1">
+                        {cvs.map(cv => (
+                          <div key={cv.id} className="group relative">
+                            {editingCVId === cv.id ? (
+                              <div className="flex items-center gap-1 p-1">
+                                <input
+                                  value={editRoleValue}
+                                  onChange={e => setEditRoleValue(e.target.value)}
+                                  onKeyDown={e => { if (e.key === 'Enter') handleRenameCV(cv.id); if (e.key === 'Escape') setEditingCVId(null); }}
+                                  className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                                  autoFocus
+                                />
+                                <button onClick={() => handleRenameCV(cv.id)} className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded">
+                                  <CheckCircle2 className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => setEditingCVId(null)} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => switchCV(cv.id)}
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                                  cv.id === activeCVId
+                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                                }`}
+                              >
+                                <FileText className="w-4 h-4 shrink-0" />
+                                <span className="flex-1 truncate text-left">{cv.jobRole}</span>
+                                <span className="text-[10px] text-zinc-400">{cv.generatedContent ? '✓' : ''}</span>
+                                <button
+                                  onClick={e => { e.stopPropagation(); startRename(cv); }}
+                                  className="p-1 text-zinc-300 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                </button>
+                                {cvs.length > 1 && (
+                                  <button
+                                    onClick={e => { e.stopPropagation(); if (confirm(`Delete "${cv.jobRole}"?`)) handleDeleteCV(cv.id); }}
+                                    className="p-1 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                      <div className="p-2">
-                        {isPro && (
-                          <button
-                            onClick={handleManageSubscription}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                          >
-                            <CreditCard className="w-4 h-4" />
-                            Manage Subscription
-                          </button>
-                        )}
-                        <button
-                          onClick={handleSignOut}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Sign Out
-                        </button>
-                      </div>
+
+                      {showNewCVInput ? (
+                        <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
+                          <div className="flex items-center gap-1">
+                            <input
+                              value={newCVRole}
+                              onChange={e => setNewCVRole(e.target.value)}
+                              onKeyDown={e => { if (e.key === 'Enter') handleCreateCV(newCVRole); if (e.key === 'Escape') { setShowNewCVInput(false); setNewCVRole(''); } }}
+                              placeholder="Job role (e.g. Senior Dev)"
+                              className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                              autoFocus
+                            />
+                            <button onClick={() => { setShowNewCVInput(false); setNewCVRole(''); }} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        cvs.length < 4 && (
+                          <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
+                            <button
+                              onClick={() => setShowNewCVInput(true)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                            >
+                              <Plus className="w-4 h-4" />
+                              New CV
+                            </button>
+                          </div>
+                        )
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-4 py-2 text-sm font-semibold text-zinc-700 hover:text-zinc-900 transition-colors"
-              >
-                Sign In
-              </button>
-            )}
-            
-            <div className="flex flex-wrap gap-1 sm:gap-1.5">
-              <button 
-                onClick={() => handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
-              >
-                Pro Monthly
-              </button>
-              <button 
-                onClick={() => handleCheckout(STRIPE_PRICE_ANNUAL, 'annual')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-all"
-              >
-                Pro Annual
-              </button>
-              <button 
-                onClick={() => handleCheckout(STRIPE_PRICE_DONATION, 'donation')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
-              >
-                Donate
-              </button>
-            </div>
-            
-            <div className="h-6 w-px bg-zinc-200 mx-1 hidden sm:block" />
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <button 
-                onClick={clearAll}
-                className="text-[10px] sm:text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-red-200 dark:border-red-900 rounded-full"
-              >
-                Clear All
-              </button>
-              <button 
-                onClick={() => {
-                  setData({
-                    personalDetails: {
-                      fullName: 'Alex Thompson',
-                      email: 'alex.thompson@example.co.uk',
-                      phone: '+44 7700 900123',
-                      location: 'Manchester, UK',
-                      linkedin: 'linkedin.com/in/alexthompson-pm',
-                      portfolio: 'alexthompson.design',
-                      portfolios: ['alexthompson.design'],
-                      usefulLinks: [
-                        { label: 'GitHub', url: 'github.com/alexthompson' },
-                        { label: 'Stack Overflow', url: 'stackoverflow.com/users/alexthompson' },
-                      ],
-                    },
-                    professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
-                    experience: [
-                      {
+
+              <div className="h-5 w-px bg-zinc-200 dark:bg-zinc-700 hidden sm:block" />
+
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                <button 
+                  onClick={clearAll}
+                  className="text-[10px] sm:text-xs font-bold text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-red-200 dark:border-red-900 rounded-full"
+                >
+                  Clear All
+                </button>
+                <button 
+                  onClick={() => {
+                    setData({
+                      personalDetails: {
+                        fullName: 'Alex Thompson',
+                        email: 'alex.thompson@example.co.uk',
+                        phone: '+44 7700 900123',
+                        location: 'Manchester, UK',
+                        linkedin: 'linkedin.com/in/alexthompson-pm',
+                        portfolio: 'alexthompson.design',
+                        portfolios: ['alexthompson.design'],
+                        usefulLinks: [
+                          { label: 'GitHub', url: 'github.com/alexthompson' },
+                          { label: 'Stack Overflow', url: 'stackoverflow.com/users/alexthompson' },
+                        ],
+                      },
+                      professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
+                      experience: [{
                         id: '1',
                         company: 'TechFlow Solutions',
                         role: 'Senior Project Manager',
@@ -1294,70 +1211,67 @@ export default function App() {
                         endDate: 'Present',
                         isCurrent: true,
                         achievements: 'Led a cross-functional team of 15 to launch a new SaaS platform\nManaged a budget of £1.2M with 10% cost savings\nImplemented Jira workflows that improved team velocity by 25%',
-                      }
-                    ],
-                    education: [
-                      {
+                      }],
+                      education: [{
                         id: '1',
                         institution: 'University of Manchester',
                         degree: 'BSc Computer Science',
                         location: 'Manchester',
                         graduationDate: '2018',
                         grade: 'First Class Honours',
-                      }
-                    ],
-                    skills: 'Agile, Scrum, Prince2, Stakeholder Management, Risk Mitigation, Budgeting, Jira, Confluence',
-                    jobDescription: 'We are looking for a Senior Project Manager to lead our digital transformation initiatives. The ideal candidate will have experience in Agile delivery, budget management, and leading high-performing teams.',
-                    transferableSkillsFocus: 'Highlight my leadership and team management skills from my time as a sports captain and my retail management experience.',
-                  });
-                  setStep(5);
-                }}
-                className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full"
-              >
-                Load Sample
-              </button>
-              <label className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full cursor-pointer flex items-center gap-1">
-                {isParsing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                {isParsing ? 'Parsing...' : 'Upload CV'}
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  onChange={handleFileUpload}
-                  disabled={isParsing}
-                />
-              </label>
-            </div>
-            {(generatedContent || isPro) && (
-              <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center w-full sm:w-auto mt-1 sm:mt-0">
-                {isPro ? (
-                  <>
-                    <button 
-                      onClick={downloadPDF}
-                      className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-lg text-[11px] sm:text-sm font-medium transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> PDF
-                    </button>
-                    <button 
-                      onClick={downloadDOC}
-                      className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-lg text-[11px] sm:text-sm font-medium transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> DOC
-                    </button>
-                  </>
-                ) : generatedContent ? (
-                  <button 
-                    onClick={() => handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
-                    className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-lg text-[11px] sm:text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
-                  >
-                    <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> Go Pro to Download
-                  </button>
-                ) : null}
+                      }],
+                      skills: 'Agile, Scrum, Prince2, Stakeholder Management, Risk Mitigation, Budgeting, Jira, Confluence',
+                      jobDescription: 'We are looking for a Senior Project Manager to lead our digital transformation initiatives. The ideal candidate will have experience in Agile delivery, budget management, and leading high-performing teams.',
+                      transferableSkillsFocus: 'Highlight my leadership and team management skills from my time as a sports captain and my retail management experience.',
+                    });
+                    setStep(5);
+                  }}
+                  className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full"
+                >
+                  Load Sample
+                </button>
+                <label className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full cursor-pointer flex items-center gap-1">
+                  {isParsing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                  {isParsing ? 'Parsing...' : 'Upload CV'}
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={handleFileUpload}
+                    disabled={isParsing}
+                  />
+                </label>
               </div>
-            )}
+
+              {(generatedContent || isPro) && (
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center ml-auto">
+                  {isPro ? (
+                    <>
+                      <button 
+                        onClick={downloadPDF}
+                        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-lg text-[11px] sm:text-sm font-medium transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> PDF
+                      </button>
+                      <button 
+                        onClick={downloadDOC}
+                        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-lg text-[11px] sm:text-sm font-medium transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> DOC
+                      </button>
+                    </>
+                  ) : generatedContent ? (
+                    <button 
+                      onClick={() => handleCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
+                      className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white rounded-lg text-[11px] sm:text-sm font-bold transition-all shadow-lg shadow-amber-500/20"
+                    >
+                      <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" /> Go Pro to Download
+                    </button>
+                  ) : null}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
         {/* Left Column: Form */}
@@ -2157,15 +2071,7 @@ export default function App() {
         </motion.div>
       )}
     </AnimatePresence>
-
-      {/* Floating theme toggle — always visible on every page */}
-      <button
-        onClick={toggleTheme}
-        className="fixed bottom-5 right-5 z-50 p-3 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg hover:scale-110 transition-all"
-        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      >
-        {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-      </button>
   </>
+  </ErrorBoundary>
 );
 }
