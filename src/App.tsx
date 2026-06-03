@@ -1050,21 +1050,25 @@ export default function App() {
   };
 
   const handleCheckout = async (priceId: string, planType: string) => {
+    alert('DIAG: handleCheckout entered');
     if (!isStripeConfigured) {
       alert("Payments coming soon - please check back shortly!");
       return;
     }
 
     if (!user) {
+      alert('DIAG: no user, opening auth modal');
       sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType }));
       setIsAuthModalOpen(true);
       return;
     }
 
     const token = await getAuthToken();
+    alert('DIAG: token=' + (token ? 'got' : 'null'));
     if (!token) { alert('Session expired. Please sign in again.'); return; }
 
     try {
+      alert('DIAG: calling fetch');
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: {
@@ -1081,10 +1085,12 @@ export default function App() {
       });
 
       const data = await response.json();
+      alert('DIAG: API response status=' + response.status + ' hasUrl=' + !!data.url);
       if (data.url) {
         pendingCheckoutRef.current = true;
         sessionStorage.removeItem('merit-pending-checkout');
         sessionStorage.setItem('merit-previous-view', currentView);
+        alert('DIAG: redirecting to ' + data.url);
         window.location.href = data.url;
       } else {
         throw new Error(data.error || "Failed to create checkout session");
@@ -1092,7 +1098,7 @@ export default function App() {
     } catch (error) {
       console.error("Checkout error:", error);
       pendingCheckoutRef.current = false;
-      alert("Something went wrong with the checkout. Please try again later.");
+      alert("DIAG: catch block - " + String(error));
     }
   };
 
