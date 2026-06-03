@@ -102,6 +102,53 @@ function createSavedCV(jobRole: string): SavedCV {
   };
 }
 
+async function loadServerCVs(userId: string): Promise<SavedCV[]> {
+  try {
+    const { data, error } = await supabase
+      .from('cvs')
+      .select('*')
+      .eq('user_uid', userId);
+    if (error) {
+      console.error('Failed to load CVs from server:', error);
+      return [];
+    }
+    return (data || []).map(row => ({
+      id: row.cv_id,
+      jobRole: row.job_role,
+      data: row.data,
+      generatedContent: row.generated_content,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+  } catch (err) {
+    console.error('Failed to load CVs from server:', err);
+    return [];
+  }
+}
+
+async function saveServerCVs(cvs: SavedCV[], userId: string) {
+  if (cvs.length === 0) return;
+  try {
+    const rows = cvs.map(cv => ({
+      user_uid: userId,
+      cv_id: cv.id,
+      job_role: cv.jobRole,
+      data: cv.data,
+      generated_content: cv.generatedContent,
+      created_at: cv.createdAt,
+      updated_at: cv.updatedAt,
+    }));
+    const { error } = await supabase
+      .from('cvs')
+      .upsert(rows, { onConflict: 'user_uid,cv_id' });
+    if (error) {
+      console.error('Failed to save CVs to server:', error);
+    }
+  } catch (err) {
+    console.error('Failed to save CVs to server:', err);
+  }
+}
+
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'builder'>('home');
   const [user, setUser] = useState<any>(null);
@@ -307,6 +354,36 @@ export default function App() {
       setActiveCVId(first.id);
     }
   }, []);
+
+  // Sync CVs from server when user signs in
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    loadServerCVs(user.id).then(serverCVs => {
+      if (cancelled) return;
+      if (serverCVs.length > 0) {
+        setCVs(serverCVs);
+        localStorage.setItem('merit-cvs', JSON.stringify(serverCVs));
+      } else {
+        const localCVs = loadCVs();
+        if (localCVs.length > 0) {
+          saveServerCVs(localCVs, user.id);
+        }
+      }
+    });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // Debounced server sync whenever CVs change and user is logged in
+  const serverSyncTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (!user?.id) return;
+    clearTimeout(serverSyncTimer.current);
+    serverSyncTimer.current = setTimeout(() => {
+      saveServerCVs(cvs, user.id);
+    }, 1500);
+    return () => clearTimeout(serverSyncTimer.current);
+  }, [cvs, user?.id]);
 
   // Auth: handle PKCE exchange, session recovery, and auth state changes
   useEffect(() => {

@@ -1,6 +1,38 @@
 export interface Database {
   public: {
     Tables: {
+      cvs: {
+        Row: {
+          id: string
+          user_uid: string
+          cv_id: string
+          job_role: string
+          data: any
+          generated_content: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_uid: string
+          cv_id: string
+          job_role: string
+          data: any
+          generated_content?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_uid?: string
+          cv_id?: string
+          job_role?: string
+          data?: any
+          generated_content?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
       users: {
         Row: {
           id: string

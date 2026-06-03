@@ -56,7 +56,28 @@ CREATE POLICY "Admin full access"
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id);
 CREATE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
 
--- 5. Helpful view for debugging
+-- 5. CVs table (per-user CV storage)
+CREATE TABLE IF NOT EXISTS cvs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_uid TEXT NOT NULL,
+  cv_id TEXT NOT NULL,
+  job_role TEXT NOT NULL,
+  data JSONB NOT NULL,
+  generated_content TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_uid, cv_id)
+);
+
+ALTER TABLE cvs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own CVs"
+  ON cvs FOR ALL
+  USING (auth.uid()::text = user_uid);
+
+CREATE INDEX IF NOT EXISTS idx_cvs_user_uid ON cvs(user_uid);
+
+-- 6. Helpful view for debugging
 CREATE OR REPLACE VIEW user_stats AS
 SELECT
   COUNT(*) as total_users,

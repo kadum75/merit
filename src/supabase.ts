@@ -48,6 +48,7 @@ function createStubSupabase() {
     builder.insert = () => Promise.resolve({ data: null, error: null });
     builder.update = () => builder;
     builder.delete = () => Promise.resolve({ data: null, error: null });
+    builder.upsert = () => Promise.resolve({ data: null, error: null });
     builder.order = () => builder;
     builder.limit = () => builder;
     builder.range = () => builder;
