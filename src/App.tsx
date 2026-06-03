@@ -31,17 +31,18 @@ import Markdown from 'react-markdown';
 import jsPDF, { GState } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
-import { generateCareerContent, parseExistingCV } from './services/geminiService';
+import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
 import { CookieConsent } from './components/CookieConsent';
 import { Header } from './components/Header';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { useToast } from './components/ToastContext';
 import { supabase, getCurrentMonthString, handleSupabaseError, OperationType, isSupabaseConfigValid, syncUserDocument, missingConfigVars } from './supabase';
 import { UK_LOCATIONS } from './data/uk-locations';
 import { SKILLS } from './data/skills';
-import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION } from './lib/pricing';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL } from './lib/pricing';
 
 const GENERAL_SKILLS = [
   'Leadership', 'Team Management', 'Project Management', 'Communication',
@@ -174,6 +175,7 @@ export default function App() {
     const saved = localStorage.getItem('merit-theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'dark';
   });
+  const { toast } = useToast();
   const accessTokenRef = useRef<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
@@ -761,7 +763,7 @@ export default function App() {
     } catch (error: any) {
       console.error('Generation failed:', error);
       const message = error?.message || 'Failed to generate content. Please try again.';
-      alert(`Error: ${message}`);
+      toast(message, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -799,13 +801,13 @@ export default function App() {
             id: Math.random().toString(36).substring(2, 11)
           }))
         }));
-        alert('CV parsed successfully! Please review the fields.');
+        toast('CV parsed successfully! Please review the fields.', 'success');
       } else {
-        alert('Could not extract data from this file. Please try a different file or fill manually.');
+        toast('Could not extract data from this file. Please try a different file or fill manually.', 'error');
       }
     } catch (error) {
       console.error('Parsing failed:', error);
-      alert('Failed to parse CV. Please try again or fill manually.');
+      toast('Failed to parse CV. Please try again or fill manually.', 'error');
     } finally {
       setIsParsing(false);
       // Reset input so same file can be uploaded again
@@ -956,10 +958,10 @@ export default function App() {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      alert('Copied to clipboard!');
+      toast('Copied to clipboard!', 'success');
     } catch (err) {
       console.error('Failed to copy:', err);
-      alert('Failed to copy to clipboard.');
+      toast('Failed to copy to clipboard.', 'error');
     }
   };
 
@@ -1018,7 +1020,7 @@ export default function App() {
   const handleManageSubscription = async () => {
     if (!user) return;
     const token = await getAuthToken();
-    if (!token) { alert('Session expired. Please sign in again.'); return; }
+    if (!token) { toast('Session expired. Please sign in again.', 'error'); return; }
     try {
       const response = await fetch('/api/create-portal-session', {
         method: 'POST',
@@ -1031,11 +1033,11 @@ export default function App() {
         sessionStorage.removeItem('merit-pending-checkout');
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Could not open subscription management. Please try again.');
+        toast(data.error || 'Could not open subscription management. Please try again.', 'error');
       }
     } catch (err) {
       console.error('Portal error:', err);
-      alert('Something went wrong. Please try again later.');
+      toast('Something went wrong. Please try again later.', 'error');
     }
   };
 
@@ -1059,7 +1061,7 @@ export default function App() {
 
   const handleCheckout = async (priceId: string, planType: string) => {
     if (!isStripeConfigured) {
-      alert("Payments coming soon - please check back shortly!");
+      toast("Payments coming soon - please check back shortly!", 'info');
       return;
     }
 
@@ -1072,7 +1074,7 @@ export default function App() {
     const token = accessTokenRef.current;
     if (!token) {
       console.warn('[Checkout] no valid session token');
-      alert('Session expired. Please sign in again.');
+      toast('Session expired. Please sign in again.', 'error');
       return;
     }
 
@@ -1100,12 +1102,12 @@ export default function App() {
         window.location.href = data.url;
       } else {
         console.error('[Checkout] API returned no URL:', data);
-        alert('Checkout error: ' + (data.error || 'No checkout URL returned. Please try again.'));
+        toast('Checkout error: ' + (data.error || 'No checkout URL returned. Please try again.'), 'error');
       }
     } catch (error) {
       console.error('[Checkout] fetch error:', error);
       pendingCheckoutRef.current = false;
-      alert('Something went wrong with the checkout. Please try again later.');
+      toast('Something went wrong with the checkout. Please try again later.', 'error');
     }
   };
 
@@ -1891,7 +1893,7 @@ export default function App() {
 
                       <div className="space-y-2">
                       <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Transferable Skills Focus (Optional)</h3>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Pick skills from the list or type your own. These help the AI highlight relevant experience.</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Choose skills from the list or type your own to highlight relevant experience.</p>
                       <div className="relative">
                         <input
                           value={transferableSkillInput}

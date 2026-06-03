@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { LegalModal, LegalType } from './LegalModal';
-import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_PRICE_ORG } from '../lib/pricing';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_DONATION_ENABLED } from '../lib/pricing';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -254,38 +254,14 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
             <h2 className="text-4xl font-bold tracking-tight dark:text-white">Trusted by job seekers</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Join thousands of professionals who have landed their dream roles using Merit.</p>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Professionals who have built their CVs with Merit.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                quote: 'Got three interviews in my first week. Merit tailored my CV perfectly for each role.',
-                name: 'Sarah M.',
-                title: 'Software Engineer, London'
-              },
-              {
-                quote: 'Finally a CV tool that understands what employers are looking for.',
-                name: 'James T.',
-                title: 'Project Manager, Manchester'
-              },
-              {
-                quote: 'Uploaded my old CV, Merit rewrote it completely. Landed a new role within 2 weeks.',
-                name: 'Priya K.',
-                title: 'Marketing Executive, Birmingham'
-              }
-            ].map((testimonial, i) => (
-              <div key={`testimonial-item-${i}`} className="bg-white dark:bg-zinc-800 p-8 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-700 space-y-6">
-                <div className="flex gap-1 text-yellow-400">
-                  {[...Array(5)].map((_, starIdx) => <Star key={`testimonial-star-${i}-${starIdx}`} className="w-4 h-4 fill-current" />)}
-                </div>
-                <p className="text-zinc-700 dark:text-zinc-300 italic leading-relaxed">"{testimonial.quote}"</p>
-                <div className="pt-4 border-t border-zinc-50 dark:border-zinc-700">
-                  <p className="font-bold text-[#0F172A] dark:text-white">{testimonial.name}</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{testimonial.title}</p>
-                </div>
-              </div>
-            ))}
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed">
+              Merit is a new CV builder. We're focused on building the best tools for UK job seekers — 
+              no fake reviews, just honest work.
+            </p>
           </div>
         </div>
       </section>
@@ -385,43 +361,7 @@ export default function LandingPage({
               </div>
             </div>
 
-            {/* ORGANISATIONS Card */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 relative overflow-hidden flex flex-col">
-              <div className="absolute top-5 right-5 bg-[#3B82F6] text-white text-xs font-bold px-3 py-1 rounded-full">
-                Best for teams
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold dark:text-white">Organisations</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">£29.99</span>
-                  <span className="text-zinc-500 dark:text-zinc-400">/month</span>
-                </div>
-              </div>
-              <ul className="space-y-4 flex-1">
-                {[
-                  { text: 'Everything in Pro', star: false },
-                  { text: 'Up to 10 team seats', star: false },
-                  { text: 'Shared CV templates & branding', star: false },
-                  { text: 'Bulk CV download & analytics', star: false },
-                  { text: 'Candidate notes per CV', star: false },
-                  { text: 'Dedicated account manager', star: false },
-                ].map((feature, i) => (
-                  <li key={`row-org-features-${i}`} className="flex items-start gap-3 text-zinc-600 dark:text-zinc-400 text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-[#3B82F6] flex-shrink-0" />
-                    {feature.text}
-                  </li>
-                ))}
-              </ul>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => handleCheckout(STRIPE_PRICE_ORG, "org")}
-                  className="w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
-                >
-                  Get Organisations – £29.99/mo
-                </button>
-                <p className="text-center text-xs text-zinc-400">Cancel anytime · Billed monthly</p>
-              </div>
-            </div>
+
           </div>
         </div>
       </section>
@@ -430,12 +370,13 @@ export default function LandingPage({
       <section id="support-section" className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Support Merit</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep Merit free for all job seekers. Your support helps us cover hosting and infrastructure costs.</p>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Go Pro</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Unlimited CV downloads and full job description tailoring for active job seekers.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Donation Card */}
+            {STRIPE_DONATION_ENABLED && (
+            /* Donation Card */
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 flex flex-col shadow-sm">
               <div className="space-y-2">
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400 mb-4">
@@ -465,6 +406,7 @@ export default function LandingPage({
                 Donate
               </button>
             </div>
+            )}
 
             {/* Pro Plan Card */}
             <div className="bg-white dark:bg-zinc-900 border-2 border-[#3B82F6] p-10 rounded-3xl space-y-8 flex flex-col shadow-xl shadow-blue-500/10">
@@ -517,7 +459,7 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-extrabold">Ready to land your next role?</h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">Join thousands of job seekers building better CVs with Merit.</p>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">Build a better CV for your next role.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
@@ -551,6 +493,7 @@ export default function LandingPage({
           </div>
           
           <div className="pt-12 border-t border-white/5 flex flex-col items-center gap-8">
+            {STRIPE_DONATION_ENABLED && (
             <div className="flex flex-col items-center gap-4">
               <button
                 onClick={() => handleCheckout(STRIPE_PRICE_DONATION, 'donation')}
@@ -561,6 +504,7 @@ export default function LandingPage({
               </button>
               <p className="text-xs text-white/40">Help keep Merit free for all job seekers</p>
             </div>
+            )}
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
               <p className="text-sm">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">Zenstack</a>. All rights reserved.</p>

@@ -1,4 +1,5 @@
 import React, { Component, type ReactNode } from 'react';
+import { logError } from '../supabase';
 
 interface Props { children: ReactNode }
 interface State { hasError: boolean }
@@ -7,6 +8,10 @@ export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
   static getDerivedStateFromError() { return { hasError: true }; }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    logError(error, { componentStack: info.componentStack });
+  }
 
   render() {
     if (this.state.hasError) {

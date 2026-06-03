@@ -2,31 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const RATE_LIMIT_WINDOW = 60_000;
-const RATE_LIMIT_MAX = 10;
-const rateBuckets = new Map<string, { count: number; resetAt: number }>();
-
-function rateLimitKey(ip: string, uid?: string): string {
-  return uid ? `uid:${uid}` : `ip:${ip}`;
-}
-
-function checkRateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateBuckets.get(key);
-  if (!entry || now > entry.resetAt) {
-    rateBuckets.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-  if (entry.count >= RATE_LIMIT_MAX) return false;
-  entry.count++;
-  return true;
-}
-
-function getClientIp(req: express.Request): string {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-  return req.socket.remoteAddress || "unknown";
-}
+const processedEvents = new Map<string, boolean>();
 
 export function createApp() {
   const app = express();
@@ -89,6 +65,13 @@ export function createApp() {
       console.error(`Webhook Error: ${err.message}`);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    if (processedEvents.has(event.id)) {
+      return res.json({ received: true, idempotent: true });
+    }
+    processedEvents.set(event.id, true);
+    setTimeout(() => processedEvents.delete(event.id), 60_000);
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
@@ -111,6 +94,22 @@ export function createApp() {
         }
         break;
       }
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = subscription.customer as string;
+        const status = subscription.status;
+        if (supabase) {
+          const dbStatus = status === "active" || status === "trialing" ? "active" : status;
+          await supabase
+            .from("users")
+            .update({
+              subscription_status: dbStatus,
+              is_pro: dbStatus === "active",
+            })
+            .eq("stripe_customer_id", customerId);
+        }
+        break;
+      }
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
@@ -125,6 +124,17 @@ export function createApp() {
               .update({ is_pro: false, subscription_status: "cancelled" })
               .eq("stripe_customer_id", customerId);
           }
+        }
+        break;
+      }
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId = invoice.customer as string;
+        if (supabase && invoice.subscription) {
+          await supabase
+            .from("users")
+            .update({ subscription_status: "active" })
+            .eq("stripe_customer_id", customerId);
         }
         break;
       }
@@ -180,11 +190,6 @@ export function createApp() {
         return res.status(401).json({ error: "Unauthorized: valid session required" });
       }
 
-      const rlKey = rateLimitKey(getClientIp(req), user.uid);
-      if (!checkRateLimit(rlKey)) {
-        return res.status(429).json({ error: "Too many requests. Please try again later." });
-      }
-
       const { uid, email, priceId, planType, returnView } = req.body;
       if (!priceId || !uid || !email) {
         return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
@@ -221,11 +226,6 @@ export function createApp() {
       const user = await verifyAuth(req);
       if (!user) {
         return res.status(401).json({ error: "Unauthorized: valid session required" });
-      }
-
-      const rlKey = rateLimitKey(getClientIp(req), user.uid);
-      if (!checkRateLimit(rlKey)) {
-        return res.status(429).json({ error: "Too many requests. Please try again later." });
       }
 
       const { uid } = req.body;

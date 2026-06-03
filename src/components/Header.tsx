@@ -2,7 +2,7 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { UserMenu } from './UserMenu';
-import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION } from '../lib/pricing';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_DONATION_ENABLED } from '../lib/pricing';
 
 interface HeaderProps {
   user: User | null;
@@ -58,12 +58,14 @@ export function Header({
               >
                 Pro Annual
               </button>
+              {STRIPE_DONATION_ENABLED && (
               <button
                 onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation')}
                 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
               >
                 Donate
               </button>
+              )}
           </div>
 
           {user ? (

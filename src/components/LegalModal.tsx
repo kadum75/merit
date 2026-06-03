@@ -29,7 +29,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <p>
             Merit is operated by Zenstack. Our Data Protection Officer can be reached at:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
-            For UK GDPR purposes, we are a data controller registered with the Information Commissioner's Office (ICO).
+            Merit is a new service in the process of registering with the Information Commissioner's Office (ICO). Until registration is complete, we operate under the direct supervision of the ICO's transitional provisions.
           </p>
 
           <h4 className="text-white font-bold pt-2">2. Data We Collect</h4>
@@ -52,7 +52,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <ul className="list-disc pl-5 space-y-1">
             <li><span className="text-white">Consent</span> — you explicitly agree when creating an account and accepting this policy</li>
             <li><span className="text-white">Contractual necessity</span> — processing is required to provide CV generation and storage</li>
-            <li><span className="text-white">Legitimate interests</span> — service improvement, fraud prevention, analytics</li>
+            <li><span className="text-white">Legitimate interests</span> — service improvement, fraud prevention</li>
             <li><span className="text-white">Legal obligation</span> — tax records for paid subscriptions (6 years retention)</li>
           </ul>
 
@@ -65,7 +65,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             <li>Comply with legal obligations (tax, anti-fraud)</li>
           </ul>
           <p className="text-amber-400 text-xs mt-1">
-            We DO NOT sell your personal data to third parties. We DO NOT use your CV content for training AI models.
+            We DO NOT sell your personal data to third parties. We DO NOT use your CV content for training models.
           </p>
 
           <h4 className="text-white font-bold pt-2">5. Data Retention</h4>
@@ -73,7 +73,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             <li>Account data: retained until you delete your account or after 12 months of inactivity</li>
             <li>CV content: retained while your account is active; deleted within 90 days of account deletion</li>
             <li>Payment records: retained for 6 years (UK HMRC legal requirement)</li>
-            <li>Analytics: anonymised after 26 months</li>
+
             <li>Cookie data: as per the cookie durations in Section 10</li>
           </ul>
 
@@ -277,7 +277,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             <li><span className="text-white">Your content</span> — you retain full ownership of the CV content, work history, and personal information you provide</li>
             <li><span className="text-white">Our IP</span> — Merit templates, design, branding, software, and underlying technology are owned by Zenstack</li>
             <li><span className="text-white">License</span> — you grant us a limited license to process, store, and display your content solely to provide the Service</li>
-            <li><span className="text-white">AI training</span> — we do not use your CV content to train AI or machine learning models</li>
+            <li><span className="text-white">Model training</span> — we do not use your CV content to train AI or machine learning models</li>
           </ul>
 
           <h4 className="text-white font-bold pt-2">7. Data Protection & GDPR</h4>

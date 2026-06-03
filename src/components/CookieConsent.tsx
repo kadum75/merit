@@ -7,13 +7,11 @@ const CONSENT_KEY = 'merit-consent';
 interface ConsentPreferences {
   essential: boolean;
   functional: boolean;
-  analytics: boolean;
 }
 
 const DEFAULT_PREFS: ConsentPreferences = {
   essential: true,
   functional: true,
-  analytics: false,
 };
 
 export function CookieConsent() {
@@ -41,8 +39,8 @@ export function CookieConsent() {
     setShowDetails(false);
   };
 
-  const acceptAll = () => saveConsent({ essential: true, functional: true, analytics: true });
-  const acceptEssential = () => saveConsent({ essential: true, functional: false, analytics: false });
+  const acceptAll = () => saveConsent({ essential: true, functional: true });
+  const acceptEssential = () => saveConsent({ essential: true, functional: false });
   const savePreferences = () => saveConsent(prefs);
 
   if (!showBanner) return null;
@@ -91,18 +89,6 @@ export function CookieConsent() {
                     type="checkbox"
                     checked={prefs.functional}
                     onChange={e => setPrefs(p => ({ ...p, functional: e.target.checked }))}
-                    className="w-4 h-4 accent-zinc-900"
-                  />
-                </label>
-                <label className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl">
-                  <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-white">Analytics</p>
-                    <p className="text-xs text-zinc-500">Usage tracking to improve the service</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={prefs.analytics}
-                    onChange={e => setPrefs(p => ({ ...p, analytics: e.target.checked }))}
                     className="w-4 h-4 accent-zinc-900"
                   />
                 </label>

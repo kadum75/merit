@@ -256,4 +256,21 @@ export const getCurrentMonthString = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
+export async function logError(error: unknown, context?: Record<string, unknown>) {
+  try {
+    const userId = (await supabase.auth.getUser())?.data?.user?.id || null;
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    await supabase.from('error_logs').insert({
+      user_id: userId,
+      error_message: message.substring(0, 1000),
+      error_stack: stack?.substring(0, 5000) || null,
+      context: context || {},
+      severity: 'error',
+    });
+  } catch {
+    // silent — don't let logging itself crash the app
+  }
+}
+
 export default supabase;
