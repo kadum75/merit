@@ -259,7 +259,7 @@ export default function LandingPage({
 
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed">
-              Merit is a new CV builder. We're focused on building the best tools for UK job seekers — 
+              Merit is a new CV builder. We're focused on building the best tools for professionals — 
               no fake reviews, just honest work.
             </p>
           </div>
