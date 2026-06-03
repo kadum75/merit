@@ -130,7 +130,7 @@ export function createApp() {
       case "invoice.paid": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
-        if (supabase && invoice.subscription) {
+        if (supabase && (invoice as any).subscription) {
           await supabase
             .from("users")
             .update({ subscription_status: "active" })
