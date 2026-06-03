@@ -362,7 +362,6 @@ export default function LandingPage({
               </div>
             </div>
 
-
           </div>
         </div>
       </section>
@@ -371,8 +370,8 @@ export default function LandingPage({
       <section id="support-section" className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Simple, honest pricing</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Start for free and upgrade only when you need more power.</p>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Support Merit</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Help us keep Merit free and growing for everyone.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -415,7 +414,7 @@ export default function LandingPage({
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-[#3B82F6] mb-4">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold dark:text-white">Merit Pro</h3>
+                <h3 className="text-xl font-bold dark:text-white">Pro</h3>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">£9.99</span>
                   <span className="text-zinc-500 text-sm font-normal">/month</span>

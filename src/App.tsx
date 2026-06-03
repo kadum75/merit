@@ -2075,7 +2075,7 @@ export default function App() {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-[#111827] dark:text-zinc-100">No content yet</h3>
-                    <p className="text-sm text-[#6b7280] dark:text-zinc-400 max-w-xs mx-auto">Fill in your details and target job description to generate your professional UK CV.</p>
+                    <p className="text-sm text-[#6b7280] dark:text-zinc-400 max-w-xs mx-auto">Fill in your details and target job description to generate your professional CV.</p>
                   </div>
                 </div>
               )}
