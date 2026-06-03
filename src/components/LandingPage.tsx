@@ -374,7 +374,14 @@ export default function LandingPage({
                 >
                   {isPro ? 'Manage Subscription' : 'Go Pro – £9.99/mo'}
                 </button>
-                <p className="text-center text-xs text-zinc-400">Cancel anytime · Billed monthly</p>
+                {!isPro && (
+                  <button 
+                    onClick={() => handleCheckout(STRIPE_PRICE_ANNUAL, "annual")}
+                    className="w-full py-3 border border-[#3B82F6] text-[#3B82F6] hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold rounded-xl transition-all text-sm"
+                  >
+                    Go Pro Annual – £79.99/yr
+                  </button>
+                )}
               </div>
             </div>
 
@@ -482,12 +489,22 @@ export default function LandingPage({
                   <p className="text-[10px] text-blue-600 mt-1">No watermark, no limits — built for active job seekers.</p>
                 </div>
               </div>
-              <button 
-                onClick={() => isPro ? onManageSubscription() : handleCheckout(STRIPE_PRICE_MONTHLY, "monthly")}
-                className="w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
-              >
-                {isPro ? 'Manage Subscription' : 'Upgrade to Pro'}
-              </button>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => isPro ? onManageSubscription() : handleCheckout(STRIPE_PRICE_MONTHLY, "monthly")}
+                  className="w-full py-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                >
+                  {isPro ? 'Manage Subscription' : 'Upgrade to Pro – £9.99/mo'}
+                </button>
+                {!isPro && (
+                  <button 
+                    onClick={() => handleCheckout(STRIPE_PRICE_ANNUAL, "annual")}
+                    className="w-full py-3 border border-[#3B82F6] text-[#3B82F6] hover:bg-blue-50 dark:hover:bg-blue-900/20 font-bold rounded-xl transition-all text-sm"
+                  >
+                    Go Annual – £79.99/yr
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (Zenstack account)</p>
