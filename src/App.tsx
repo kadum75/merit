@@ -174,6 +174,7 @@ export default function App() {
     const saved = localStorage.getItem('merit-theme');
     return (saved === 'dark' || saved === 'light') ? saved : 'dark';
   });
+  const accessTokenRef = useRef<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
 
@@ -407,6 +408,9 @@ export default function App() {
         }).catch((err) => {
           console.error('Failed to get user after code exchange:', err);
         });
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          accessTokenRef.current = session?.access_token ?? null;
+        });
       });
     } else if (authError) {
       console.error('OAuth error:', authError);
@@ -416,6 +420,9 @@ export default function App() {
         if (user) setUser(user);
       }).catch((err) => {
         console.error('Failed to get user on page load:', err);
+      });
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        accessTokenRef.current = session?.access_token ?? null;
       });
     }
 
@@ -444,6 +451,7 @@ export default function App() {
         setIsAuthModalOpen(true);
         return;
       }
+      accessTokenRef.current = session?.access_token ?? null;
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
@@ -1061,8 +1069,7 @@ export default function App() {
       return;
     }
 
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    const token = accessTokenRef.current;
     if (!token) {
       console.warn('[Checkout] no valid session token');
       alert('Session expired. Please sign in again.');
