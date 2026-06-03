@@ -49,19 +49,19 @@ export function Header({
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex gap-1 sm:gap-1.5">
               <button
-                onClick={() => { alert('DIAG: monthly clicked'); onCheckout(STRIPE_PRICE_MONTHLY, 'monthly'); }}
+                onClick={() => onCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
                 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
               >
                 Pro Monthly
               </button>
               <button
-                onClick={() => { alert('DIAG: annual clicked'); onCheckout(STRIPE_PRICE_ANNUAL, 'annual'); }}
+                onClick={() => onCheckout(STRIPE_PRICE_ANNUAL, 'annual')}
                 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-all"
               >
                 Pro Annual
               </button>
               <button
-                onClick={() => { alert('DIAG: donate clicked'); onCheckout(STRIPE_PRICE_DONATION, 'donation'); }}
+                onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation')}
                 className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
               >
                 Donate
