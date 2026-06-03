@@ -353,8 +353,8 @@ export default function LandingPage({
               </div>
               <ul className="space-y-4 flex-1">
                 {[
-                  { text: 'Unlimited CV downloads (no watermark)', star: false },
-                  { text: 'Full target job tailoring', star: true },
+                  { text: 'Unlimited CV downloads', star: false },
+                  { text: 'Full job description tailoring', star: true },
                   { text: 'Save and manage multiple CVs', star: false },
                   { text: 'Priority support', star: false },
                 ].map((feature, i) => (
@@ -473,13 +473,13 @@ export default function LandingPage({
               </div>
               <div className="space-y-4 flex-1">
                 <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                  Unlock everything: unlimited PDF downloads and full job description tailoring.
+                  Unlimited CV downloads, full job description tailoring, for active job seekers.
                 </p>
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
                   <p className="text-[10px] uppercase tracking-widest font-bold text-blue-700 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3 h-3" /> All Features Unlocked
                   </p>
-                  <p className="text-[10px] text-blue-600 mt-1">Includes ATS-optimisation and no-watermark downloads.</p>
+                  <p className="text-[10px] text-blue-600 mt-1">No watermark, no limits — built for active job seekers.</p>
                 </div>
               </div>
               <button 

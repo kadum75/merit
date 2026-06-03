@@ -2045,7 +2045,7 @@ export default function App() {
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Pro Feature</h3>
                 <p className="text-zinc-600 dark:text-zinc-400">
-                  Tailoring your CV to job descriptions and downloading as a PDF are Pro features.
+                  Unlimited CV downloads, full job description tailoring, for active job seekers.
                 </p>
               </div>
 
