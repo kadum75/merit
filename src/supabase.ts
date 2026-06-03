@@ -101,6 +101,10 @@ function createStubSupabase() {
       getSession: () => Promise.resolve({ data: { session: fakeSession }, error: null }),
       getUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
       updateUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
+      resend: ({ type, email }: { type: string; email: string }) => {
+        console.info(`[Supabase Stub] resend(${type}) for ${email}`);
+        return Promise.resolve({ data: {}, error: null });
+      },
     },
     from: (table: string) => {
       if (table === 'users') {

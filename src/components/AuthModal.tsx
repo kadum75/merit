@@ -66,6 +66,13 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
         if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
           onClose();
+        } else if (!data.user) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError || !signInData.user) {
+            throw new Error('An account with this email already exists. Please sign in instead.');
+          }
+          await syncUserDocument(signInData.user);
+          onClose();
         } else {
           setConfirmedEmail(email);
           setShowEmailConfirmation(true);
