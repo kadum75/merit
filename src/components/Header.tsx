@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun, ScrollText } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import type { User } from '@supabase/supabase-js';
 import { UserMenu } from './UserMenu';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION } from '../lib/pricing';
@@ -39,9 +39,7 @@ export function Header({
             </button>
           )}
           <button onClick={onNavigateHome} className="flex items-center gap-1.5 lg:gap-2 group">
-            <div className="bg-[#3B82F6] p-1 rounded-md" aria-hidden="true">
-              <ScrollText className="text-white w-4 h-5" />
-            </div>
+            <img src="/favicon.svg" alt="Merit" className="w-6 h-6" />
             <span className="text-zinc-900 dark:text-white font-bold text-lg tracking-tight">Merit</span>
           </button>
         </div>
