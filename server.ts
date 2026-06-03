@@ -2,8 +2,10 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import { createApp } from "./api/app.js";
 
+// Load .env.local (overrides .env) — keeps secrets off disk in shared envs
+dotenv.config({ path: path.join(process.cwd(), '.env.local') });
+// Fallback to .env for backward compatibility
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);

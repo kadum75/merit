@@ -2,8 +2,6 @@ import express from "express";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const processedEvents = new Map<string, boolean>();
-
 export function createApp() {
   const app = express();
 
@@ -66,11 +64,20 @@ export function createApp() {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    if (processedEvents.has(event.id)) {
-      return res.json({ received: true, idempotent: true });
+    if (supabase) {
+      const { data: existing } = await supabase
+        .from('webhook_events')
+        .select('id')
+        .eq('event_id', event.id)
+        .maybeSingle();
+      if (existing) {
+        return res.json({ received: true, idempotent: true });
+      }
+      await supabase
+        .from('webhook_events')
+        .insert({ event_id: event.id, event_type: event.type })
+        .catch(() => {});
     }
-    processedEvents.set(event.id, true);
-    setTimeout(() => processedEvents.delete(event.id), 60_000);
 
     switch (event.type) {
       case "checkout.session.completed": {

@@ -4,6 +4,7 @@ dist/
 coverage/
 .DS_Store
 *.log
+# Keep secrets in .env.local (not .env) for better security hygiene
 .env*
 !.env.production
 !.env.example
