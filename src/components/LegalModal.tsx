@@ -18,7 +18,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
       icon: Shield,
       body: (
         <div className="space-y-4 text-zinc-300 text-sm leading-relaxed">
-          <p className="font-semibold text-white">Last Updated: 1 June 2026</p>
+          <p className="font-semibold text-white">Last Updated: 3 June 2026</p>
           <p>
             Merit ("we", "our", "us") respects your privacy and is committed to protecting your
             personal data. This policy explains how we collect, use, and safeguard your information
@@ -68,23 +68,36 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             We DO NOT sell your personal data to third parties. We DO NOT use your CV content for training models.
           </p>
 
-          <h4 className="text-white font-bold pt-2">5. Data Retention</h4>
+          <h4 className="text-white font-bold pt-2">5. Automated Decision-Making (Article 22 UK GDPR)</h4>
+          <p>
+            Merit's CV tailoring feature uses language models to re-structure and re-phrase your content 
+            to match a target job description. This is a purely assistive tool — you review, edit, and 
+            decide whether to use the generated output. It does not constitute solely automated 
+            decision-making with legal or similarly significant effects under Article 22 UK GDPR.
+          </p>
+          <p className="mt-2">
+            If you would like an explanation of how the generation logic works or wish to discuss 
+            human intervention, contact our DPO at{' '}
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
+          </p>
+
+          <h4 className="text-white font-bold pt-2">6. Data Retention</h4>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Account data: retained until you delete your account or after 12 months of inactivity</li>
+            <li>Account data: retained until you delete your account or after 12 months of inactivity (no login or CV edit for 12 consecutive months)</li>
             <li>CV content: retained while your account is active; deleted within 90 days of account deletion</li>
             <li>Payment records: retained for 6 years (UK HMRC legal requirement)</li>
 
-            <li>Cookie data: as per the cookie durations in Section 10</li>
+            <li>Cookie data: as per the cookie durations in Section 11</li>
           </ul>
 
-          <h4 className="text-white font-bold pt-2">6. International Data Transfers</h4>
+          <h4 className="text-white font-bold pt-2">7. International Data Transfers</h4>
           <p>
             Your data is stored on Supabase servers (Google Cloud, europe-west2 — London, UK). 
             If we use sub-processors outside the UK/EEA, we ensure adequate safeguards via 
             UK International Data Transfer Agreements (IDTA) or EU Standard Contractual Clauses (SCCs).
           </p>
 
-          <h4 className="text-white font-bold pt-2">7. Your Rights (UK & EU GDPR)</h4>
+          <h4 className="text-white font-bold pt-2">8. Your Rights (UK & EU GDPR)</h4>
           <p>You have the right to:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><span className="text-white">Access</span> — request a copy of your personal data</li>
@@ -97,12 +110,14 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           </ul>
           <p className="mt-2">
             To exercise any right, email{' '}
-            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
+            or delete your account from the User Menu (Settings). To withdraw consent for cookies,
+            adjust your preferences via the Cookie Consent banner (accessible at any time).
             We will respond within 30 days. You also have the right to lodge a complaint with the ICO (UK) 
             or your local supervisory authority (EU).
           </p>
 
-          <h4 className="text-white font-bold pt-2">8. California & US Privacy Rights (CCPA/CPRA)</h4>
+          <h4 className="text-white font-bold pt-2">9. California & US Privacy Rights (CCPA/CPRA)</h4>
           <p>
             If you are a California resident, the California Consumer Privacy Act (CCPA) as amended by the 
             California Privacy Rights Act (CPRA) grants you additional rights:
@@ -126,7 +141,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             Virginia, Utah, Texas, and others). Contact us to exercise your rights under applicable state law.
           </p>
 
-          <h4 className="text-white font-bold pt-2">9. Data Security</h4>
+          <h4 className="text-white font-bold pt-2">10. Data Security</h4>
           <p>
             We implement appropriate technical and organisational measures:
           </p>
@@ -135,13 +150,13 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             <li>Row-Level Security (RLS) in Supabase — users can only access their own data</li>
             <li>Supabase Auth with PKCE flow for secure authentication</li>
             <li>Stripe for payment processing (PCI DSS Level 1 compliant)</li>
-            <li>Rate limiting on all API endpoints</li>
+            <li>API request validation and monitoring</li>
             <li>Content Security Policy (CSP) headers</li>
             <li>Regular security audits and dependency updates</li>
             <li>Access controls — only the service owner can access production data</li>
           </ul>
 
-          <h4 className="text-white font-bold pt-2">10. Cookies</h4>
+          <h4 className="text-white font-bold pt-2">11. Cookies</h4>
           <p>We use the following types of cookies:</p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
@@ -180,7 +195,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             will prevent the service from functioning correctly.
           </p>
 
-          <h4 className="text-white font-bold pt-2">11. Third-Party Processors</h4>
+          <h4 className="text-white font-bold pt-2">12. Third-Party Processors</h4>
           <ul className="list-disc pl-5 space-y-1">
             <li><span className="text-white">Supabase</span> — authentication, database, storage (Google Cloud, London, UK)</li>
             <li><span className="text-white">Stripe</span> — payment processing (PCI DSS Level 1, worldwide)</li>
@@ -192,13 +207,13 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             (DPAs) in place where required.
           </p>
 
-          <h4 className="text-white font-bold pt-2">12. Changes to This Policy</h4>
+          <h4 className="text-white font-bold pt-2">13. Changes to This Policy</h4>
           <p>
             We will notify you of material changes via email and/or a notice on the website. 
             Continued use after changes constitutes acceptance of the updated policy.
           </p>
 
-          <h4 className="text-white font-bold pt-2">13. Contact & Complaints</h4>
+          <h4 className="text-white font-bold pt-2">14. Contact & Complaints</h4>
           <p>
             Data Protection Officer:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
@@ -218,7 +233,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
       icon: FileText,
       body: (
         <div className="space-y-4 text-zinc-300 text-sm leading-relaxed">
-          <p className="font-semibold text-white">Last Updated: 1 June 2026</p>
+          <p className="font-semibold text-white">Last Updated: 3 June 2026</p>
           <p>
             These Terms of Service ("Terms") govern your use of Merit (the "Service"), operated by 
             Zenstack ("we", "our", "us"). By creating an account or using the Service, you agree to 
@@ -316,15 +331,21 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
             <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">ec.europa.eu/consumers/odr</a>.
           </p>
           <p className="mt-2">
-            <span className="text-white">For US users:</span> Any dispute arising from these Terms shall 
-            be resolved exclusively in the state or federal courts located in San Francisco, California. 
-            You agree to submit to the personal jurisdiction of such courts.
+            <span className="text-white">For US users:</span> Disputes may be brought in your local 
+            jurisdiction. We will cooperate in good faith to resolve any claim informally before 
+            formal proceedings.
           </p>
 
-          <h4 className="text-white font-bold pt-2">11. DMCA / Copyright (US Users)</h4>
+          <h4 className="text-white font-bold pt-2">11. Copyright</h4>
           <p>
-            If you believe content on Merit infringes your copyright, please send a DMCA takedown 
-            notice to{' '}
+            <span className="text-white">UK (Copyright, Designs and Patents Act 1988):</span> If you 
+            believe content on Merit infringes your copyright, contact{' '}
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a> 
+            with details of the work and proof of ownership. We will respond promptly.
+          </p>
+          <p className="mt-2">
+            <span className="text-white">US (DMCA):</span> If you are a US resident and believe your 
+            copyright has been infringed, send a DMCA notice to{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a> 
             with: (a) identification of the copyrighted work, (b) proof of ownership, 
             (c) your contact information, and (d) a statement of good faith belief.

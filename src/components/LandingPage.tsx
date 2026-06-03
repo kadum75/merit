@@ -511,7 +511,7 @@ export default function LandingPage({
               <div className="flex flex-wrap justify-center gap-6">
               {[
                 { icon: ShieldCheck, label: 'ATS Compatible' },
-                { icon: Zap, label: 'GDPR Compliant' }
+                { icon: Zap, label: 'Privacy-First' }
               ].map((item, i) => (
                 <div key={`row-footer-badges-${i}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40">
                   <item.icon className="w-3 h-3" />
