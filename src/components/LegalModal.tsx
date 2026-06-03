@@ -8,6 +8,7 @@ interface LegalModalProps {
   isOpen: boolean;
   onClose: () => void;
   type: LegalType;
+  onSwitchType?: (type: LegalType) => void;
 }
 
 export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
@@ -282,7 +283,7 @@ export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
           <h4 className="text-white font-bold pt-2">7. Data Protection & GDPR</h4>
           <p>
             Our data processing practices are detailed in our{' '}
-            <button type="button" onClick={() => {}} className="text-blue-400 underline">Privacy Policy</button>.
+            <button type="button" onClick={() => onSwitchType?.('privacy')} className="text-blue-400 underline">Privacy Policy</button>.
             By using the Service, you acknowledge our processing of your personal data as described therein.
           </p>
 

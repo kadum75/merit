@@ -421,6 +421,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
       isOpen={legalModal.isOpen} 
       onClose={() => setLegalModal({ ...legalModal, isOpen: false })} 
       type={legalModal.type} 
+      onSwitchType={(type) => setLegalModal({ isOpen: true, type })}
     />
   </>
 );

@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
-import jsPDF from 'jspdf';
+import jsPDF, { GState } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, parseExistingCV } from './services/geminiService';
@@ -736,7 +736,7 @@ export default function App() {
     
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    (pdf as any).setProperties({
+    pdf.setProperties({
       title: 'Merit Generated CV',
       subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
       author: 'Zenstack',
@@ -779,7 +779,7 @@ export default function App() {
       doc.setFont('helvetica', 'italic');
       doc.text('⚡ Created with Merit Free — Upgrade to Pro to remove this watermark', pWidth / 2, pHeight - 7, { align: 'center' });
       
-      doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
+      doc.setGState(new GState({ opacity: 0.06 }));
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(60);
       doc.setFont('helvetica', 'bold');
@@ -1014,6 +1014,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Checkout error:", error);
+      pendingCheckoutRef.current = false;
       alert("Something went wrong with the checkout. Please try again later.");
     }
   };
