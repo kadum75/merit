@@ -371,8 +371,8 @@ export default function LandingPage({
       <section id="support-section" className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto space-y-16">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Go Pro</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Unlimited CV downloads and full job description tailoring for active job seekers.</p>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Simple, honest pricing</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg">Start for free and upgrade only when you need more power.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
