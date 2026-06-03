@@ -1,20 +1,47 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Merit Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Merit — CV Builder for the UK Job Market
 
-This contains everything you need to run your app locally.
+ATS-optimised CV builder. Build, customise, and download professional CVs tailored for the UK job market.
 
-View your app in AI Studio: https://ai.studio/apps/f02a8725-6345-41dc-91bf-60bbc5e52125
+Built and maintained with [Opencode](https://opencode.ai), an AI-powered CLI for software engineering.
+
+## Features
+
+- ATS-friendly formatting — passes automated screening systems
+- Live preview as you type
+- Multiple templates
+- Pro features: unlimited downloads, full job description tailoring
+- Cloud-synced CVs (sign in to save)
+- Export to PDF
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js 18+
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Copy `.env.example` to `.env` and fill in your Supabase and Stripe keys:
+   `cp .env.example .env`
+3. Start the dev server:
    `npm run dev`
+4. (Optional) Start the API server for Stripe checkout:
+   `npm run dev:api`
+
+## Tech Stack
+
+- React + TypeScript + Vite
+- Tailwind CSS
+- Supabase (Auth + Database)
+- Stripe (Payments)
+- Vercel (Hosting)
+
+## Deployment
+
+The app is deployed on Vercel. Push to the `master` branch to auto-deploy:
+
+`git push origin master`
+
+Production URL: `https://merit-cv.vercel.app`
