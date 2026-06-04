@@ -18,3 +18,5 @@ create-*.js
 .vercel
 tsconfig.tsbuildinfo
 primecv-opencode
+*.cjs
+SECURITY_ASSESSMENT.md
