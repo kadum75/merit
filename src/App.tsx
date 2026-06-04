@@ -22,14 +22,12 @@ import {
   Upload,
   Lock,
   FolderOpen, 
-  Edit3, 
   X, 
   Pencil
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import jsPDF, { GState } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
 import { cn } from './lib/utils';
@@ -305,8 +303,8 @@ export default function App() {
     setActiveCVId(newCV.id);
     setShowNewCVInput(false);
     setNewCVRole('');
+    setEditingCVId(null);
     setStep(0);
-    setGeneratedContent(null);
   }
 
   function handleDeleteCV(id: string) {
@@ -471,12 +469,15 @@ export default function App() {
     const pending = sessionStorage.getItem('merit-pending-checkout');
     if (!pending) return;
     pendingCheckoutRef.current = true;
-    try {
-      const { priceId, planType } = JSON.parse(pending);
-      handleCheckout(priceId, planType);
-    } catch {
-      pendingCheckoutRef.current = false;
-    }
+    (async () => {
+      try {
+        const { priceId, planType } = JSON.parse(pending);
+        await handleCheckout(priceId, planType);
+      } catch {
+        pendingCheckoutRef.current = false;
+        sessionStorage.removeItem('merit-pending-checkout');
+      }
+    })();
   }, [user]);
 
   // Supabase User Data Listener (for isPro status)
@@ -512,7 +513,7 @@ export default function App() {
       }
     };
 
-    fetchUserData();
+    fetchUserData().catch(console.error);
 
     // Poll for changes every 60 seconds as a lightweight realtime alternative
     const interval = setInterval(fetchUserData, 60000);
@@ -700,6 +701,8 @@ export default function App() {
       return;
     }
 
+    setIsGenerating(true);
+
     if (!isPro) {
       // Check for monthly reset using string format YYYY-MM
       const currentMonth = getCurrentMonthString();
@@ -712,6 +715,7 @@ export default function App() {
       }
 
       if (currentCount >= 3) {
+        setIsGenerating(false);
         setShowUpgradeModal(true);
         return;
       }
@@ -737,8 +741,6 @@ export default function App() {
         console.error('Failed to update preview count:', err);
       }
     }
-
-    setIsGenerating(true);
     
     // Create a timeout promise
     const timeoutPromise = new Promise((_, reject) => {
@@ -810,6 +812,7 @@ export default function App() {
   };
 
   const downloadPDF = async () => {
+    try {
     if (!previewRef.current) return;
     if (!isPro) { setShowUpgradeModal(true); return; }
     const content = generatedContent || livePreview;
@@ -936,7 +939,12 @@ export default function App() {
       }
     });
 
-    pdf.save(`${data.personalDetails.fullName.replace(/\s+/g, '_')}_CV.pdf`);
+    const name = data.personalDetails.fullName.replace(/\s+/g, '_') || 'My_CV';
+    pdf.save(`${name}_CV.pdf`);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      toast('Failed to generate PDF. Please try again.', 'error');
+    }
   };
 
   const clearAll = () => {

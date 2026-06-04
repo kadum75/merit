@@ -210,6 +210,7 @@ export function createApp() {
         process.env.VITE_STRIPE_MONTHLY_PRICE_ID,
         process.env.VITE_STRIPE_ANNUAL_PRICE_ID,
         process.env.VITE_STRIPE_ORG_PRICE_ID,
+        process.env.VITE_STRIPE_DONATION_PRICE_ID,
       ].filter(Boolean);
       if (!ALLOWED_PRICE_IDS.includes(priceId)) {
         return res.status(400).json({ error: "Invalid price ID" });

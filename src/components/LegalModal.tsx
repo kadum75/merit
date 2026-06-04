@@ -11,7 +11,7 @@ interface LegalModalProps {
   onSwitchType?: (type: LegalType) => void;
 }
 
-export function LegalModal({ isOpen, onClose, type }: LegalModalProps) {
+export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalProps) {
   const content = {
     privacy: {
       title: 'Privacy Policy',
