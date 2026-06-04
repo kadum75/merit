@@ -915,76 +915,135 @@ export default function App() {
       doc.restoreGraphicsState();
     };
 
-    // Simple Markdown Parser for jsPDF
+    // Simple Markdown Parser for jsPDF — template-aware
     const lines = content.split('\n');
 
     if (!isPro) addWatermark(pdf);
 
+    const isProTemplate = activeTemplateId === 'professional';
+    const isModernTemplate = activeTemplateId === 'modern';
+    const isMinimalTemplate = activeTemplateId === 'minimal';
+    const isClassicTemplate = activeTemplateId === 'classic';
+
     lines.forEach(line => {
       const trimmed = line.trim();
       if (!trimmed) {
-        yPos += 2;
+        yPos += isMinimalTemplate ? 4 : 2;
         return;
       }
 
       if (trimmed.startsWith('# ')) {
         yPos += 3;
         const name = trimmed.replace('# ', '');
-        if (activeTemplateId === 'professional') {
+
+        if (isProTemplate) {
+          // Professional: dark header band + gold underline
           pdf.setFillColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
-          pdf.rect(margin, yPos - 2, contentWidth, 12, 'F');
+          pdf.rect(margin, yPos - 2, contentWidth, 14, 'F');
           pdf.setTextColor(255, 255, 255);
           pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(tpl.nameSize);
-          pdf.text(name, margin + 4, yPos + 8);
+          pdf.text(name, margin + 4, yPos + 9);
+          pdf.setDrawColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+          pdf.setLineWidth(1.5);
+          pdf.line(margin, yPos + 12, pageWidth - margin, yPos + 12);
           pdf.setTextColor(0, 0, 0);
-          yPos += 18;
-        } else {
+          pdf.setDrawColor(0, 0, 0);
+          yPos += 20;
+        } else if (isModernTemplate) {
+          // Modern: left accent bar
+          pdf.setFillColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+          pdf.rect(margin, yPos, 4, 12, 'F');
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(tpl.nameSize);
-          const isMinimal = activeTemplateId === 'minimal';
-          if (!isMinimal) {
-            pdf.text(name, pageWidth / 2, yPos, { align: 'center' });
-          } else {
-            pdf.text(name, margin, yPos);
-          }
-          yPos += 10;
-          pdf.setLineWidth(0.5);
-          if (activeTemplateId === 'modern') {
-            pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
-          }
+          pdf.text(name, margin + 10, yPos + 9);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 14;
+        } else if (isMinimalTemplate) {
+          // Minimal: left-aligned, no border, light weight
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(tpl.nameSize);
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.text(name, margin, yPos);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 12;
+        } else {
+          // Classic: thick top border + thin bottom
+          pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.setLineWidth(1.5);
+          pdf.line(margin, yPos - 2, pageWidth - margin, yPos - 2);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(tpl.nameSize);
+          pdf.text(name, pageWidth / 2, yPos + 6, { align: 'center' });
+          yPos += 8;
+          pdf.setLineWidth(0.3);
           pdf.line(margin, yPos, pageWidth - margin, yPos);
+          pdf.setDrawColor(0, 0, 0);
           yPos += 6;
         }
-        pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('## ')) {
-        yPos += 6;
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(12);
+        yPos += isMinimalTemplate ? 4 : 6;
         const heading = trimmed.replace('## ', '');
-        if (activeTemplateId !== 'classic') {
+
+        if (isClassicTemplate) {
+          // Classic: thin top border line
+          pdf.setDrawColor(200, 200, 200);
+          pdf.setLineWidth(0.3);
+          pdf.line(margin, yPos - 2, pageWidth - margin, yPos - 2);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(11);
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.text(heading.toUpperCase(), margin, yPos + 4);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 8;
+        } else if (isModernTemplate) {
+          // Modern: inline underline
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(9);
+          pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+          pdf.text(heading.toUpperCase(), margin, yPos);
+          const tw = pdf.getTextWidth(heading.toUpperCase());
+          pdf.setDrawColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, yPos + 1, margin + tw, yPos + 1);
+          pdf.setTextColor(0, 0, 0);
+          pdf.setDrawColor(0, 0, 0);
+          yPos += 8;
+        } else if (isMinimalTemplate) {
+          // Minimal: no border, just bold
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(10);
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.text(heading, margin, yPos);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 6;
+        } else {
+          // Professional: gold left border
+          pdf.setFillColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+          pdf.rect(margin, yPos - 3, 3, 10, 'F');
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(10);
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.text(heading.toUpperCase(), margin + 8, yPos + 3);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 8;
         }
-        pdf.text(heading, margin, yPos);
-        yPos += 1;
-        pdf.setLineWidth(0.3);
-        if (activeTemplateId !== 'classic') {
-          pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
-        }
-        pdf.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 5;
-        pdf.setTextColor(0, 0, 0);
-        pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('### ')) {
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(10);
         const subHeading = trimmed.replace('### ', '');
-        if (activeTemplateId === 'modern' || activeTemplateId === 'professional') {
+        if (isModernTemplate) {
           pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+        } else if (isClassicTemplate) {
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+        } else if (isProTemplate) {
+          pdf.setTextColor(tpl.accentRgb![0], tpl.accentRgb![1], tpl.accentRgb![2]);
         }
         pdf.text(subHeading, margin, yPos);
         pdf.setTextColor(0, 0, 0);
         yPos += 5;
+        pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(9);
@@ -997,20 +1056,47 @@ export default function App() {
           if (!isPro) addWatermark(pdf);
         }
 
-        pdf.text('•', margin, yPos);
+        const bulletChar = isClassicTemplate ? '▪' : isProTemplate ? '▸' : isMinimalTemplate ? '—' : '•';
+        if (isClassicTemplate) {
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+        } else if (isProTemplate) {
+          pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+        } else if (isModernTemplate) {
+          pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+        } else {
+          pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+        }
+        pdf.text(bulletChar, margin, yPos);
+        pdf.setTextColor(0, 0, 0);
         pdf.text(bulletLines, margin + 5, yPos);
         yPos += (bulletLines.length * 3.5) + 1.5;
       } else {
         const isContactInfo = yPos < 50 && trimmed.includes('|');
         if (isContactInfo) {
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(9);
-          pdf.setTextColor(100, 100, 100);
-          pdf.text(trimmed, pageWidth / 2, yPos, { align: 'center' });
+          if (isMinimalTemplate || isModernTemplate) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(8);
+            pdf.setTextColor(160, 174, 192);
+            pdf.text(trimmed, margin, yPos);
+          } else if (isProTemplate) {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text(trimmed, margin + 18, yPos);
+          } else {
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text(trimmed, pageWidth / 2, yPos, { align: 'center' });
+          }
           pdf.setTextColor(0, 0, 0);
           yPos += 8;
         } else {
-          addWrappedText(trimmed, 9, 'normal', 3);
+          if (isMinimalTemplate) {
+            addWrappedText(trimmed, 9, 'normal', 4);
+          } else {
+            addWrappedText(trimmed, 9, 'normal', 3);
+          }
         }
       }
     });

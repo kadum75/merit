@@ -7,6 +7,7 @@ export interface CVTemplate {
   pdf: {
     primaryColor: [number, number, number];
     secondaryColor: [number, number, number];
+    accentRgb?: [number, number, number];
     headerBgColor?: [number, number, number];
     fontName: string;
     nameSize: number;
@@ -17,12 +18,13 @@ export const TEMPLATES: CVTemplate[] = [
   {
     id: 'classic',
     name: 'Classic',
-    description: 'Traditional full-width layout with blue accents',
+    description: 'Navy-toned traditional layout with refined borders',
     previewClass: 'template-classic',
-    accentColor: '#3B82F6',
+    accentColor: '#1B2A4A',
     pdf: {
-      primaryColor: [59, 130, 246],
-      secondaryColor: [30, 64, 175],
+      primaryColor: [27, 42, 74],
+      secondaryColor: [71, 85, 105],
+      accentRgb: [27, 42, 74],
       fontName: 'helvetica',
       nameSize: 22,
     },
@@ -30,12 +32,13 @@ export const TEMPLATES: CVTemplate[] = [
   {
     id: 'modern',
     name: 'Modern',
-    description: 'Clean design with green accents and compact headers',
+    description: 'Contemporary slate design with teal accents and clean headers',
     previewClass: 'template-modern',
-    accentColor: '#10B981',
+    accentColor: '#319795',
     pdf: {
-      primaryColor: [16, 185, 129],
-      secondaryColor: [4, 120, 87],
+      primaryColor: [45, 55, 72],
+      secondaryColor: [49, 151, 149],
+      accentRgb: [49, 151, 149],
       fontName: 'helvetica',
       nameSize: 20,
     },
@@ -43,26 +46,28 @@ export const TEMPLATES: CVTemplate[] = [
   {
     id: 'minimal',
     name: 'Minimal',
-    description: 'Monochrome, light spacing, minimal borders',
+    description: 'Clean, left-aligned editorial design with generous whitespace',
     previewClass: 'template-minimal',
-    accentColor: '#6B7280',
+    accentColor: '#1A202C',
     pdf: {
-      primaryColor: [107, 114, 128],
-      secondaryColor: [55, 65, 81],
+      primaryColor: [26, 32, 44],
+      secondaryColor: [160, 174, 192],
+      accentRgb: [160, 174, 192],
       fontName: 'helvetica',
-      nameSize: 20,
+      nameSize: 22,
     },
   },
   {
     id: 'professional',
     name: 'Professional',
-    description: 'Dark header band, navy accents, two-column feel',
+    description: 'Executive dark header with gold accents and structured layout',
     previewClass: 'template-professional',
-    accentColor: '#1E293B',
+    accentColor: '#D69E2E',
     pdf: {
-      primaryColor: [30, 41, 59],
-      secondaryColor: [100, 116, 139],
-      headerBgColor: [30, 41, 59],
+      primaryColor: [17, 24, 39],
+      secondaryColor: [214, 158, 46],
+      accentRgb: [214, 158, 46],
+      headerBgColor: [17, 24, 39],
       fontName: 'helvetica',
       nameSize: 24,
     },

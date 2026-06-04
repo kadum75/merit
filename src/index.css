@@ -226,129 +226,329 @@
   }
 }
 
-/* === Template: Modern === */
+/* === Template: Classic — Navy, refined traditional === */
+.markdown-body.classic h1 {
+  color: #1B2A4A;
+  border: none;
+  border-top: 4px solid #1B2A4A;
+  border-bottom: 1px solid #1B2A4A;
+  padding: 14pt 0 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 24pt;
+}
+
+.markdown-body.classic h2 {
+  color: #1B2A4A;
+  border: none;
+  border-top: 1px solid #d4d4d8;
+  padding-top: 6pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12pt;
+}
+
+.markdown-body.classic h3 {
+  color: #1B2A4A;
+  font-weight: 700;
+  font-size: 11pt;
+}
+
+.markdown-body.classic p:first-of-type {
+  color: #64748b;
+  font-size: 9.5pt;
+}
+
+.markdown-body.classic li::before {
+  content: "▪";
+  color: #1B2A4A;
+}
+
+.markdown-body.classic strong {
+  color: #1B2A4A;
+}
+
+.markdown-body.classic hr {
+  border-top-color: #e2e8f0;
+}
+
+.dark .markdown-body.classic h1 {
+  color: #e2e8f0;
+  border-top-color: #e2e8f0;
+  border-bottom-color: #475569;
+}
+
+.dark .markdown-body.classic h2 {
+  color: #cbd5e1;
+  border-top-color: #334155;
+}
+
+.dark .markdown-body.classic h3 {
+  color: #94a3b8;
+}
+
+.dark .markdown-body.classic li::before {
+  color: #94a3b8;
+}
+
+.dark .markdown-body.classic p:first-of-type {
+  color: #64748b;
+}
+
+/* === Template: Modern — Slate + Teal, contemporary === */
 .markdown-body.modern h1 {
-  color: #059669;
-  border-bottom-color: #059669;
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: 'Inter', sans-serif;
-}
-
-.markdown-body.modern h2 {
-  color: #059669;
-  border-bottom-color: #10B981;
-  text-transform: none;
-  letter-spacing: 0.04em;
-  font-size: 13pt;
-}
-
-.markdown-body.modern h3 {
-  color: #047857;
-}
-
-.markdown-body.modern li::before {
-  color: #10B981;
-}
-
-.markdown-body.modern p:first-of-type {
-  font-style: italic;
-  color: #059669;
-}
-
-/* === Template: Minimal === */
-.markdown-body.minimal h1 {
   text-align: left;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 22pt;
-  border-bottom: 1px solid #d4d4d8;
-  font-weight: 600;
-  color: #18181b;
+  font-size: 24pt;
+  font-weight: 700;
+  color: #2D3748;
+  border: none;
+  padding-left: 16pt;
+  position: relative;
+}
+
+.markdown-body.modern h1::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2pt;
+  bottom: 2pt;
+  width: 4pt;
+  background: #319795;
+  border-radius: 2pt;
+}
+
+.markdown-body.modern h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10pt;
+  font-weight: 700;
+  color: #319795;
+  border: none;
+  padding-bottom: 0;
+  margin-bottom: 10pt;
+  display: inline-block;
+  border-bottom: 2px solid #319795;
+}
+
+.markdown-body.modern h3 {
+  color: #2D3748;
+  font-weight: 700;
+  font-size: 11pt;
+}
+
+.markdown-body.modern p:first-of-type {
+  text-align: left;
+  font-size: 9pt;
+  color: #718096;
+  font-style: italic;
+  padding-left: 16pt;
+}
+
+.markdown-body.modern li::before {
+  content: "•";
+  color: #319795;
+}
+
+.markdown-body.modern strong {
+  color: #2D3748;
+}
+
+.markdown-body.modern hr {
+  border-top-color: #e2e8f0;
+}
+
+.dark .markdown-body.modern h1 {
+  color: #e2e8f0;
+}
+
+.dark .markdown-body.modern h2 {
+  color: #4fd1c5;
+  border-bottom-color: #4fd1c5;
+}
+
+.dark .markdown-body.modern h3 {
+  color: #cbd5e1;
+}
+
+.dark .markdown-body.modern p:first-of-type {
+  color: #a0aec0;
+}
+
+.dark .markdown-body.modern li::before {
+  color: #4fd1c5;
+}
+
+/* === Template: Minimal — Left-aligned, no borders, typographic hierarchy === */
+.markdown-body.minimal h1 {
+  text-align: left;
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-size: 26pt;
+  font-weight: 300;
+  border: none;
+  padding: 0;
+  color: #1A202C;
+  margin-bottom: 4pt;
 }
 
 .markdown-body.minimal h2 {
   text-transform: none;
-  letter-spacing: 0;
-  border-bottom: 1px solid #e4e4e7;
-  font-weight: 600;
-  color: #27272a;
-}
-
-.markdown-body.minimal p:first-of-type {
-  text-align: left;
-  font-size: 9pt;
-  color: #71717a;
-}
-
-.markdown-body.minimal li::before {
-  content: "—";
-  color: #a1a1aa;
+  letter-spacing: 0.03em;
+  font-size: 11pt;
+  font-weight: 700;
+  border: none;
+  padding: 0;
+  margin-top: 24pt;
+  margin-bottom: 8pt;
+  color: #1A202C;
 }
 
 .markdown-body.minimal h3 {
   font-weight: 600;
-  color: #3f3f46;
+  color: #2D3748;
+  font-size: 11pt;
+  margin-top: 12pt;
 }
 
-.markdown-body.minimal {
-  font-family: 'Inter', sans-serif;
-  color: #27272a;
+.markdown-body.minimal p:first-of-type {
+  text-align: left;
+  font-size: 8.5pt;
+  color: #A0AEC0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 16pt;
+}
+
+.markdown-body.minimal p {
+  line-height: 1.8;
+  text-align: left;
+}
+
+.markdown-body.minimal li {
+  line-height: 1.8;
+  font-size: 10pt;
+  padding-left: 16pt;
+}
+
+.markdown-body.minimal li::before {
+  content: "—";
+  color: #CBD5E0;
+  font-weight: 300;
+}
+
+.markdown-body.minimal ul {
+  margin-bottom: 8pt;
+}
+
+.markdown-body.minimal hr {
+  border: none;
+  margin: 4pt 0;
+}
+
+.markdown-body.minimal strong {
+  font-weight: 600;
+  color: #1A202C;
 }
 
 .dark .markdown-body.minimal h1 {
-  color: #f4f4f5;
-  border-bottom-color: #3f3f46;
+  color: #f7fafc;
 }
 
 .dark .markdown-body.minimal h2 {
-  color: #e4e4e7;
-  border-bottom-color: #3f3f46;
+  color: #e2e8f0;
 }
 
-/* === Template: Professional === */
+.dark .markdown-body.minimal h3 {
+  color: #cbd5e1;
+}
+
+.dark .markdown-body.minimal p:first-of-type {
+  color: #718096;
+}
+
+.dark .markdown-body.minimal li::before {
+  color: #4a5568;
+}
+
+.dark .markdown-body.minimal strong {
+  color: #f7fafc;
+}
+
+/* === Template: Professional — Dark header, gold accents, executive === */
 .markdown-body.professional h1 {
-  background-color: #1e293b;
+  background-color: #111827;
   color: white;
-  padding: 12pt 16pt;
-  border-bottom: none;
+  padding: 14pt 18pt;
+  border: none;
+  border-bottom: 3px solid #D69E2E;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   font-size: 20pt;
-  border-radius: 2pt;
   text-align: left;
+  margin-bottom: 6pt;
 }
 
 .markdown-body.professional h2 {
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 11pt;
-  border-bottom: 2px solid #1e293b;
-  color: #1e293b;
+  font-size: 10pt;
+  font-weight: 700;
+  color: #111827;
+  border: none;
+  border-left: 3px solid #D69E2E;
+  padding-left: 10pt;
+  margin-top: 20pt;
+  margin-bottom: 10pt;
 }
 
 .markdown-body.professional h3 {
-  color: #475569;
-  font-weight: 600;
+  color: #374151;
+  font-weight: 700;
+  font-size: 11pt;
 }
 
 .markdown-body.professional p:first-of-type {
   text-align: left;
   font-size: 9pt;
-  color: #64748b;
-  padding: 0 16pt;
+  color: #6B7280;
+  padding: 0 18pt;
+  margin-bottom: 16pt;
 }
 
 .markdown-body.professional li::before {
-  color: #64748b;
+  content: "▸";
+  color: #D69E2E;
+  font-size: 8pt;
+}
+
+.markdown-body.professional strong {
+  color: #111827;
+}
+
+.markdown-body.professional hr {
+  border-top-color: #f3f4f6;
 }
 
 .dark .markdown-body.professional h1 {
-  background-color: #334155;
+  background-color: #1f2937;
 }
 
 .dark .markdown-body.professional h2 {
-  border-bottom-color: #475569;
   color: #e2e8f0;
+  border-left-color: #f6e05e;
+}
+
+.dark .markdown-body.professional h3 {
+  color: #9ca3af;
+}
+
+.dark .markdown-body.professional p:first-of-type {
+  color: #6B7280;
+}
+
+.dark .markdown-body.professional li::before {
+  color: #f6e05e;
 }
 
