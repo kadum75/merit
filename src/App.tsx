@@ -2003,7 +2003,33 @@ export default function App() {
                       />
                     </div>
 
-                      <div className="space-y-2">
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Choose Template</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {TEMPLATES.map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => setTemplateId(t.id)}
+                            className={`p-3 rounded-xl border-2 text-left transition-all ${
+                              activeTemplateId === t.id
+                                ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
+                                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
+                            }`}
+                          >
+                            <div
+                              className="w-full h-8 rounded-md mb-2 flex items-center justify-center text-[8px] font-bold text-white"
+                              style={{ backgroundColor: t.accentColor }}
+                            >
+                              CV
+                            </div>
+                            <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{t.name}</p>
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">{t.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
                       <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Transferable Skills Focus (Optional)</h3>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">Choose skills from the list or type your own to highlight relevant experience.</p>
                       <div className="relative">
@@ -2070,7 +2096,7 @@ export default function App() {
                       />
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Choose Template</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {TEMPLATES.map(t => (
