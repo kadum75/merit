@@ -429,7 +429,7 @@ export default function LandingPage({
                   <p className="text-[10px] uppercase tracking-widest font-bold text-amber-700 flex items-center gap-1.5">
                     <Star className="w-3 h-3" /> Note: No features unlocked
                   </p>
-                  <p className="text-[10px] text-amber-600 mt-1">Donations are purely for support and do not grant Pro access.</p>
+                  <p className="text-[10px] text-amber-600 mt-1">Donations are purely for support.</p>
                 </div>
               </div>
               <button 
