@@ -486,12 +486,6 @@ export default function App() {
       return;
     }
 
-    // Admin account gets full Pro access
-    if (user.email === 'rjcosta@gmail.com') {
-      setIsPro(true);
-      return;
-    }
-
     const fetchUserData = async () => {
       const { data, error } = await supabase
         .from('users')
