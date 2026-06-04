@@ -144,48 +144,61 @@ export default function LandingPage({
 
           <div className="relative hidden lg:flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#3B82F6]/20 to-transparent rounded-full blur-3xl" />
-            <div className="relative w-[400px] bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden transform rotate-[1.5deg] hover:rotate-0 transition-transform duration-500">
+            <div className="relative w-[420px] bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden transform rotate-[1.5deg] hover:rotate-0 transition-transform duration-500">
               <div className="h-2 bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6]" />
-              <div className="p-7 space-y-5">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="h-7 w-40 bg-zinc-800 rounded-md" />
-                    <div className="h-4 w-28 bg-zinc-400/60 rounded-md" />
-                  </div>
-                  <div className="text-right space-y-0.5">
-                    <div className="h-2.5 w-20 bg-zinc-200 rounded ml-auto" />
-                    <div className="h-2.5 w-16 bg-zinc-200 rounded ml-auto" />
-                    <div className="h-2.5 w-24 bg-zinc-200 rounded ml-auto" />
-                  </div>
-                </div>
-                <div className="h-px bg-zinc-100" />
-                <div className="space-y-2">
-                  <div className="h-3 w-24 bg-zinc-800 rounded-md" />
-                  <div className="space-y-1.5">
-                    <div className="h-2 w-full bg-zinc-200 rounded" />
-                    <div className="h-2 w-full bg-zinc-200 rounded" />
-                    <div className="h-2 w-3/4 bg-zinc-200 rounded" />
+              <div className="px-8 py-7 space-y-5">
+                <div className="text-center space-y-0.5">
+                  <div className="text-xl font-bold text-zinc-900 tracking-tight">Sarah Mitchell</div>
+                  <div className="text-[11px] text-zinc-500 font-medium">Senior Product Manager</div>
+                  <div className="flex items-center justify-center gap-3 mt-1.5">
+                    <span className="text-[9px] text-zinc-400">sarah.m@email.com</span>
+                    <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                    <span className="text-[9px] text-zinc-400">London, UK</span>
+                    <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                    <span className="text-[9px] text-zinc-400">linkedin.com/in/sarah</span>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-3 w-28 bg-zinc-800 rounded-md" />
-                  <div className="space-y-1.5 pl-3 border-l-2 border-[#3B82F6]/30">
-                    <div className="h-2.5 w-36 bg-zinc-800/70 rounded" />
-                    <div className="h-2 w-full bg-zinc-200 rounded" />
-                    <div className="h-2 w-full bg-zinc-200 rounded" />
-                    <div className="h-2 w-5/6 bg-zinc-200 rounded" />
-                    <div className="mt-2 h-2.5 w-32 bg-zinc-800/70 rounded" />
-                    <div className="h-2 w-full bg-zinc-200 rounded" />
-                    <div className="h-2 w-4/5 bg-zinc-200 rounded" />
-                  </div>
+                <div className="h-px bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-100" />
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Professional Summary</div>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">
+                    Results-driven Product Manager with 7+ years of experience leading cross-functional teams to deliver SaaS products that drive revenue growth and user engagement.
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-3 w-20 bg-zinc-800 rounded-md" />
-                  <div className="flex flex-wrap gap-1.5">
-                    {['JavaScript', 'React', 'Python', 'Node.js', 'SQL', 'AWS'].map((s, i) => (
-                      <div key={s} className={`h-5 px-2.5 ${i < 3 ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-zinc-100 text-zinc-500'} rounded text-[9px] font-medium flex items-center`}>
-                        {s}
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Experience</div>
+                  <div className="space-y-2">
+                    <div className="pl-3 border-l-2 border-[#3B82F6]/40">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-zinc-800">Senior PM</span>
+                        <span className="text-[8px] text-zinc-400">2022 — Present</span>
                       </div>
+                      <span className="text-[9px] text-zinc-500">TechCorp · London</span>
+                      <ul className="mt-1 space-y-0.5">
+                        {['Led product strategy for B2B platform — 40% revenue growth', 'Managed 3 cross-functional squads across 4 time zones'].map((t, i) => (
+                          <li key={i} className="flex items-start gap-1.5 text-[9px] text-zinc-500">
+                            <span className="text-[#3B82F6] mt-0.5">●</span>
+                            {t}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="pl-3 border-l-2 border-zinc-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-zinc-800">Product Manager</span>
+                        <span className="text-[8px] text-zinc-400">2019 — 2022</span>
+                      </div>
+                      <span className="text-[9px] text-zinc-500">Startup.io · Remote</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Skills</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['Product Strategy', 'Agile', 'Data Analytics', 'Leadership', 'Roadmapping'].map(s => (
+                      <span key={s} className="px-2 py-0.5 bg-blue-50 text-[#3B82F6] rounded text-[8px] font-medium">
+                        {s}
+                      </span>
                     ))}
                   </div>
                 </div>
