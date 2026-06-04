@@ -65,7 +65,7 @@ export async function generateCareerContent(
   isPro: boolean = false,
   templateId: string = 'classic'
 ) {
-  const { personalDetails, professionalSummary, experience, education, skills } = data;
+  const { personalDetails, professionalSummary, coverLetter, experience, education, skills } = data;
   const contactLine = buildContactParts(personalDetails).join(" | ");
 
   switch (templateId) {
@@ -78,6 +78,19 @@ export async function generateCareerContent(
     default:
       return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
   }
+}
+
+export function generateCoverLetter(data: CVData): string {
+  const { personalDetails, coverLetter } = data;
+  const contactLine = buildContactParts(personalDetails).join(" | ");
+  const location = personalDetails.location ? `\n${personalDetails.location}` : '';
+
+  return [
+    `# ${personalDetails.fullName}${location}`,
+    contactLine,
+    '---',
+    coverLetter || 'Your cover letter content goes here.',
+  ].join('\n\n');
 }
 
 function generateClassic(

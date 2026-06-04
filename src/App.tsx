@@ -29,7 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import jsPDF, { GState } from 'jspdf';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
-import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
+import { generateCareerContent, generateCoverLetter, parseExistingCV } from './services/cvGenerator';
 import { TEMPLATES } from './data/templates';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
@@ -65,6 +65,7 @@ const INITIAL_DATA: CVData = {
     usefulLinks: [],
   },
   professionalSummary: '',
+  coverLetter: '',
   experience: [],
   education: [],
   skills: '',
@@ -186,6 +187,7 @@ export default function App() {
   const accessTokenRef = useRef<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
+  const [isCoverLetterMode, setIsCoverLetterMode] = useState(false);
 
   useEffect(() => {
     const onVisibilityChange = () => setBlurred(document.hidden);
@@ -213,7 +215,7 @@ export default function App() {
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light');
 
   const activeCV = cvs.find(c => c.id === activeCVId) ?? null;
-  const data: CVData = activeCV?.data ?? INITIAL_DATA;
+  const data: CVData = activeCV?.data ? { ...INITIAL_DATA, ...activeCV.data, personalDetails: { ...INITIAL_DATA.personalDetails, ...activeCV.data.personalDetails } } : INITIAL_DATA;
   const generatedContent: string | null = activeCV?.generatedContent ?? null;
   const activeTemplateId: string = activeCV?.templateId ?? 'classic';
   const activeTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
@@ -237,6 +239,17 @@ export default function App() {
   };
 
   const buildLivePreview = (d: CVData): string => {
+    if (isCoverLetterMode) {
+      if (!d.coverLetter) return '';
+      const pd = d.personalDetails;
+      const contact = [pd.email, pd.phone, pd.location].filter(Boolean).join(' | ');
+      return [
+        pd.fullName && `# ${pd.fullName}`,
+        contact,
+        '---',
+        d.coverLetter,
+      ].filter(Boolean).join('\n\n');
+    }
     const sections: string[] = [];
     const pd = d.personalDetails;
     if (pd.fullName) sections.push(`# ${pd.fullName}`);
@@ -269,9 +282,9 @@ export default function App() {
     return sections.join('\n\n');
   };
 
-  const livePreview = React.useMemo(() => buildLivePreview(data), [data]);
+  const livePreview = React.useMemo(() => buildLivePreview(data), [data, isCoverLetterMode]);
 
-  const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.experience.length > 0 || data.education.length > 0 || data.skills;
+  const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.coverLetter || data.experience.length > 0 || data.education.length > 0 || data.skills;
 
   function setData(update: CVData | ((prev: CVData) => CVData)) {
     setCVs(prev => {
@@ -778,7 +791,9 @@ export default function App() {
     try {
       // Race the generation against the timeout
       const content = await Promise.race([
-        generateCareerContent(data, 'cv', isPro, activeTemplateId),
+        isCoverLetterMode
+          ? Promise.resolve(generateCoverLetter(data))
+          : generateCareerContent(data, 'cv', isPro, activeTemplateId),
         timeoutPromise
       ]) as string;
 
@@ -849,8 +864,8 @@ export default function App() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     pdf.setProperties({
-      title: 'Merit Generated CV',
-      subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
+      title: `Merit Generated ${isCoverLetterMode ? 'Cover Letter' : 'CV'}`,
+      subject: `${isCoverLetterMode ? 'Cover Letter' : 'ATS-Optimised CV'} - Generated on ${new Date().toLocaleDateString('en-GB')}`,
       author: 'Zenstack',
       keywords: 'Zenstack, ATS-Optimised',
       creator: 'Merit',
@@ -1001,7 +1016,7 @@ export default function App() {
     });
 
     const name = data.personalDetails.fullName.replace(/\s+/g, '_') || 'My_CV';
-    pdf.save(`${name}_CV.pdf`);
+    pdf.save(`${name}_${isCoverLetterMode ? 'Cover_Letter' : 'CV'}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
       toast('Failed to generate PDF. Please try again.', 'error');
@@ -1072,7 +1087,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_CV.doc`;
+    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_${isCoverLetterMode ? 'Cover_Letter' : 'CV'}.doc`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1694,14 +1709,54 @@ export default function App() {
 
                 {step === 1 && (
                   <div className="space-y-6">
-                    <h2 className="text-2xl font-bold dark:text-zinc-100">Professional Summary</h2>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Briefly describe your career goals and key strengths (2-3 sentences).</p>
-                    <textarea 
-                      value={data.professionalSummary}
-                      onChange={(e) => setData(prev => ({ ...prev, professionalSummary: e.target.value }))}
-                      placeholder="e.g. Highly motivated Project Manager with 5+ years of experience in the tech sector..."
-                      className="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
-                    />
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold dark:text-zinc-100">Professional Summary / Cover Letter</h2>
+                    </div>
+                    <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl w-fit">
+                      <button
+                        onClick={() => setIsCoverLetterMode(false)}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                          !isCoverLetterMode
+                            ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        }`}
+                      >
+                        Professional Summary
+                      </button>
+                      <button
+                        onClick={() => setIsCoverLetterMode(true)}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                          isCoverLetterMode
+                            ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        }`}
+                      >
+                        Cover Letter
+                      </button>
+                    </div>
+                    {!isCoverLetterMode ? (
+                      <>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">Briefly describe your career goals and key strengths (2-3 sentences).</p>
+                        <textarea 
+                          value={data.professionalSummary}
+                          onChange={(e) => setData(prev => ({ ...prev, professionalSummary: e.target.value }))}
+                          placeholder="e.g. Highly motivated Project Manager with 5+ years of experience in the tech sector..."
+                          className="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">Write a personalised cover letter to accompany your CV application.</p>
+                        <textarea 
+                          value={data.coverLetter}
+                          onChange={(e) => setData(prev => ({ ...prev, coverLetter: e.target.value }))}
+                          placeholder="Dear Hiring Manager,
+
+I am writing to express my interest in the [Role] position at [Company]..."
+                          className="w-full h-64 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
+                        />
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -2129,7 +2184,7 @@ export default function App() {
                         className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                        Generate CV
+                        {isCoverLetterMode ? 'Generate Cover Letter' : 'Generate CV'}
                       </button>
                     </div>
                   </div>
@@ -2195,7 +2250,7 @@ export default function App() {
             <div className="shadow-xl mx-auto w-full max-w-full sm:max-w-[210mm]">
               {!isPro && (
                 <div className="bg-[#FEF3C7] dark:bg-[#451a03] text-[#92400E] dark:text-[#fbbf24] py-2 px-4 text-[10px] font-bold text-center border-b border-[#FDE68A] dark:border-[#78350f] uppercase tracking-wider">
-                  ⚡ Free version — Upgrade to Pro to download your CV as a PDF.
+                  ⚡ Free version — Upgrade to Pro to download your {isCoverLetterMode ? 'cover letter' : 'CV'} as a PDF.
                 </div>
               )}
               <div 
