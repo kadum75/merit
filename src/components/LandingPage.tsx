@@ -333,7 +333,6 @@ export default function LandingPage({
                   { text: 'Unlimited CV downloads', star: false },
                   { text: 'Full job description tailoring', star: true },
                   { text: 'Save and manage multiple CVs', star: false },
-                  { text: 'Priority support', star: false },
                 ].map((feature, i) => (
                   <li key={`row-pro-features-${i}`} className="flex items-start gap-3 text-zinc-600 dark:text-zinc-400 text-sm">
                     <CheckCircle2 className="w-5 h-5 text-[#3B82F6] flex-shrink-0" />
@@ -472,7 +471,7 @@ export default function LandingPage({
                   <p className="text-[10px] uppercase tracking-widest font-bold text-violet-700 flex items-center gap-1.5">
                     <Star className="w-3 h-3" /> Coming Soon
                   </p>
-                  <p className="text-[10px] text-violet-600 mt-1">Team dashboards, bulk CV management, and priority support.</p>
+                  <p className="text-[10px] text-violet-600 mt-1">Team dashboards and bulk CV management.</p>
                 </div>
               </div>
               <button 

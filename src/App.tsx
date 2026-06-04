@@ -295,7 +295,7 @@ export default function App() {
   function handleCreateCV(role: string) {
     const trimmed = role.trim();
     if (!trimmed) return;
-    if (cvs.length >= 4) return;
+    if (!isPro && cvs.length >= 4) return;
     const newCV = createSavedCV(trimmed);
     const next = [...cvs, newCV];
     setCVs(next);
@@ -1960,7 +1960,7 @@ export default function App() {
                         className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                        {data.jobDescription ? 'Generate Tailored CV' : 'Generate General CV'}
+                        Generate CV
                       </button>
                     </div>
                   </div>
