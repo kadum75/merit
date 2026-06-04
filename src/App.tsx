@@ -1494,6 +1494,37 @@ export default function App() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+            {/* Step Navigation Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+              <button 
+                onClick={() => setStep(s => Math.max(0, s - 1))}
+                disabled={step === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 disabled:opacity-30 disabled:cursor-default transition-colors"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> Prev
+              </button>
+              <div className="flex gap-1.5">
+                {steps.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setStep(i)}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all",
+                      step === i
+                        ? "bg-zinc-900 dark:bg-zinc-100 w-5"
+                        : "bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600"
+                    )}
+                  />
+                ))}
+              </div>
+              <button 
+                onClick={() => setStep(s => Math.min(steps.length - 1, s + 1))}
+                disabled={step === steps.length - 1}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 disabled:opacity-30 disabled:cursor-default transition-colors"
+              >
+                Next <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
