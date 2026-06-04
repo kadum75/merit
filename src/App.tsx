@@ -332,7 +332,7 @@ export default function App() {
   function handleCreateCV(role: string) {
     const trimmed = role.trim();
     if (!trimmed) return;
-    const maxCVs = isPro ? 5 : 4;
+    const maxCVs = isPro ? 99 : 4;
     if (cvs.length >= maxCVs) return;
     const newCV = createSavedCV(trimmed);
     const next = [...cvs, newCV];
@@ -1366,7 +1366,7 @@ export default function App() {
                 >
                   <FolderOpen className="w-4 h-4" />
                   <span className="max-w-[120px] truncate">{activeCV?.jobRole ?? 'CV'}</span>
-                  <span className="text-[10px] text-zinc-400 font-bold">{cvs.length}/{isPro ? 5 : 4}</span>
+                  <span className="text-[10px] text-zinc-400 font-bold">{cvs.length}{isPro ? '' : '/4'}</span>
                 </button>
 
                 <AnimatePresence>
@@ -1444,7 +1444,7 @@ export default function App() {
                             </button>
                           </div>
                         </div>
-                      ) : cvs.length < (isPro ? 5 : 4) ? (
+                      ) : isPro || cvs.length < 4 ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowNewCVInput(true)}
