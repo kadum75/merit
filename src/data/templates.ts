@@ -62,7 +62,7 @@ export const TEMPLATES: CVTemplate[] = [
     name: 'Professional',
     description: 'Executive dark header with gold accents and structured layout',
     previewClass: 'template-professional',
-    accentColor: '#D69E2E',
+    accentColor: '#111827',
     pdf: {
       primaryColor: [17, 24, 39],
       secondaryColor: [214, 158, 46],
