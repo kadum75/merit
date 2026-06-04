@@ -470,7 +470,10 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
     } else {
       supabase.auth.getUser().then(({ data: { user } }) => {
-        if (user) setUser(user);
+        if (user) {
+          setUser(user);
+          setCurrentView('builder');
+        }
       }).catch((err) => {
         console.error('Failed to get user on page load:', err);
       });
@@ -509,6 +512,7 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         await syncUserDocument(currentUser);
+        if (currentView === 'home') setCurrentView('builder');
       }
     });
 
