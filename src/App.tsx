@@ -72,6 +72,7 @@ const INITIAL_DATA: CVData = {
 };
 
 const CV_STORAGE_KEY = 'merit-cvs';
+const ACTIVE_CV_KEY = 'merit-active-cv-id';
 
 function generateId() {
   return Math.random().toString(36).substring(2, 11);
@@ -156,7 +157,13 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
   const [cvs, setCVs] = useState<SavedCV[]>(() => loadCVs());
-  const [activeCVId, setActiveCVId] = useState<string | null>(null);
+  const [activeCVId, setActiveCVId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(ACTIVE_CV_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [step, setStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
@@ -340,12 +347,27 @@ export default function App() {
     setEditRoleValue(cv.jobRole);
   }
 
-  // Auto-select first CV if none active
+  // Auto-select first CV if none active; validate persisted ID still exists
   useEffect(() => {
-    if (!activeCVId && cvs.length > 0) {
+    if (cvs.length === 0) {
+      setActiveCVId(null);
+    } else if (activeCVId) {
+      if (!cvs.some(c => c.id === activeCVId)) {
+        setActiveCVId(cvs[0].id);
+      }
+    } else {
       setActiveCVId(cvs[0].id);
     }
-  }, [cvs, activeCVId]);
+  }, [cvs]);
+
+  // Persist active CV across page refreshes
+  useEffect(() => {
+    if (activeCVId) {
+      localStorage.setItem(ACTIVE_CV_KEY, activeCVId);
+    } else {
+      localStorage.removeItem(ACTIVE_CV_KEY);
+    }
+  }, [activeCVId]);
 
   // Auto-create first CV
   useEffect(() => {
@@ -1267,8 +1289,7 @@ export default function App() {
                             </button>
                           </div>
                         </div>
-                      ) : (
-                        cvs.length < (isPro ? 5 : 4) && (
+                      ) : cvs.length < (isPro ? 5 : 4) ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowNewCVInput(true)}
@@ -1278,8 +1299,20 @@ export default function App() {
                               New CV
                             </button>
                           </div>
-                        )
-                      )}
+                        ) : !isPro ? (
+                          <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
+                            <button
+                              onClick={() => setShowUpgradeModal(true)}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                            >
+                              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                              </svg>
+                              Upgrade to Pro
+                            </button>
+                          </div>
+                        ) : null
+                      }
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -2107,6 +2140,7 @@ export default function App() {
         onClose={() => { setIsAuthModalOpen(false); setResetPasswordMode(false); }}
         resetPasswordMode={resetPasswordMode}
         onPasswordReset={() => setResetPasswordMode(false)}
+        onSignUp={() => setCurrentView('builder')}
     />
 
     <AnimatePresence mode="popLayout">

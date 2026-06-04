@@ -9,9 +9,10 @@ interface AuthModalProps {
   onClose: () => void;
   resetPasswordMode?: boolean;
   onPasswordReset?: () => void;
+  onSignUp?: () => void;
 }
 
-export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset }: AuthModalProps) {
+export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset, onSignUp }: AuthModalProps) {
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,6 +66,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
         if (error) throw error;
         if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
+          onSignUp?.();
           onClose();
         } else if (!data.user) {
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -72,6 +74,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset 
             throw new Error('An account with this email already exists. Please sign in instead.');
           }
           await syncUserDocument(signInData.user);
+          onSignUp?.();
           onClose();
         } else {
           setConfirmedEmail(email);
