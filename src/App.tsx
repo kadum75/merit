@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Mail,
   Phone,
   MapPin,
@@ -188,6 +189,7 @@ export default function App() {
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
   const [isCoverLetterMode, setIsCoverLetterMode] = useState(false);
+  const [showSummaryGuide, setShowSummaryGuide] = useState(false);
 
   useEffect(() => {
     const onVisibilityChange = () => setBlurred(document.hidden);
@@ -1822,13 +1824,71 @@ export default function App() {
                     </div>
                     {!isCoverLetterMode ? (
                       <>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">Briefly describe your career goals and key strengths (2-3 sentences).</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          A strong summary is the first thing recruiters read. Write 3–5 sentences covering who you are, what you've achieved, and what you're looking for.
+                        </p>
                         <textarea 
                           value={data.professionalSummary}
                           onChange={(e) => setData(prev => ({ ...prev, professionalSummary: e.target.value }))}
-                          placeholder="e.g. Highly motivated Project Manager with 5+ years of experience in the tech sector..."
-                          className="w-full h-40 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
+                          placeholder={`[Role] with [X+] years of experience in [industry/domain].\nExpert in [skill 1], [skill 2], and [skill 3], having [key achievement / metric].\nSeeking to [career goal / value proposition].`}
+                          className="w-full h-52 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
                         />
+                        <div className="flex items-center justify-between text-xs">
+                          <span className={
+                            data.professionalSummary.trim() ? (
+                              data.professionalSummary.trim().split(/\s+/).length < 20
+                                ? 'text-amber-500 font-medium'
+                                : data.professionalSummary.trim().split(/\s+/).length > 80
+                                ? 'text-amber-500 font-medium'
+                                : 'text-green-600 dark:text-green-400 font-medium'
+                            ) : 'text-zinc-400 dark:text-zinc-500'
+                          }>
+                            {data.professionalSummary.trim() ? `${data.professionalSummary.trim().split(/\s+/).length} words (aim for 30–60)` : '0 words'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setShowSummaryGuide(!showSummaryGuide)}
+                            className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+                          >
+                            {showSummaryGuide ? 'Hide' : 'Show'} writing guide
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSummaryGuide ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                        {showSummaryGuide && (
+                          <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-5 space-y-5 text-sm">
+                            <div>
+                              <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Suggested structure</h4>
+                              <ol className="space-y-2 text-zinc-600 dark:text-zinc-400 list-decimal list-inside">
+                                <li><strong className="text-zinc-800 dark:text-zinc-200">Who you are</strong> — Role title, years of experience, industry</li>
+                                <li><strong className="text-zinc-800 dark:text-zinc-200">What you bring</strong> — 2–3 key skills or specialities with a notable achievement</li>
+                                <li><strong className="text-zinc-800 dark:text-zinc-200">What you want</strong> — Career goal or value proposition for the next role</li>
+                              </ol>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Examples by role</h4>
+                              <div className="space-y-3">
+                                <details className="group">
+                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Project Manager</summary>
+                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                    "Results-driven Project Manager with 8+ years of experience delivering enterprise software solutions across finance and healthcare sectors. Expert in Agile and Waterfall methodologies, having led cross-functional teams of 15+ to deliver £2M+ programmes on time and under budget. Seeking to leverage deep project leadership and stakeholder management skills at a forward-thinking organisation."
+                                  </p>
+                                </details>
+                                <details className="group">
+                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Software Engineer</summary>
+                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                    "Full-stack Software Engineer with 6 years of experience building scalable web applications using React, Node.js, and AWS. Proven track record of designing systems serving 500k+ daily active users while reducing infrastructure costs by 40%. Passionate about clean architecture, developer experience, and mentoring junior engineers."
+                                  </p>
+                                </details>
+                                <details className="group">
+                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Marketing Manager</summary>
+                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                    "Creative Marketing Manager with 7+ years of experience driving brand growth and demand generation for B2B SaaS companies. Specialist in content marketing, SEO strategy, and paid acquisition — delivering 3x pipeline growth and 150% YoY organic traffic increase. Adept at building and leading high-performing marketing teams in fast-paced scale-up environments."
+                                  </p>
+                                </details>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <>
