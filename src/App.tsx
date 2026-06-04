@@ -704,41 +704,31 @@ export default function App() {
     setIsGenerating(true);
 
     if (!isPro) {
-      // Check for monthly reset using string format YYYY-MM
-      const currentMonth = getCurrentMonthString();
-      let currentCount = previewCount;
-      let shouldReset = false;
-
-      if (lastPreviewReset !== currentMonth) {
-        shouldReset = true;
-        currentCount = 0;
-      }
-
-      if (currentCount >= 3) {
-        setIsGenerating(false);
-        setShowUpgradeModal(true);
-        return;
-      }
-
-      // Update Supabase usage
       try {
-        const { error } = await supabase
-          .from('users')
-          .update({
-            preview_count: currentCount + 1,
-            last_preview_reset: currentMonth
-          })
-          .eq('uid', user.id);
-
-        if (error) {
-          console.error('Failed to update preview count:', error);
-          handleSupabaseError(error, OperationType.WRITE, `users/${user.id}`);
-        } else {
-          setPreviewCount(currentCount + 1);
-          setLastPreviewReset(currentMonth);
+        const token = accessTokenRef.current;
+        if (!token) {
+          setIsGenerating(false);
+          setIsAuthModalOpen(true);
+          return;
         }
-      } catch (err: any) {
-        console.error('Failed to update preview count:', err);
+        const response = await fetch('/api/increment-preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const result = await response.json();
+        if (!result.allowed) {
+          setIsGenerating(false);
+          setShowUpgradeModal(true);
+          return;
+        }
+        if (result.remaining >= 0) {
+          setPreviewCount(3 - result.remaining);
+        }
+      } catch (err) {
+        console.error('Preview check failed:', err);
       }
     }
     

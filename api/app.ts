@@ -47,6 +47,41 @@ export function createApp() {
     }
   }
 
+  async function checkRateLimit(userId: string, endpoint: string, maxRequests: number = 30, windowMinutes: number = 1): Promise<boolean> {
+    if (!supabase) return true; // Allow if DB is down
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000).toISOString();
+    try {
+      const { data, error } = await supabase
+        .from('rate_limits')
+        .select('request_count')
+        .eq('user_id', userId)
+        .eq('endpoint', endpoint)
+        .gte('window_start', windowStart)
+        .order('window_start', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) return true;
+      const count = data?.request_count || 0;
+      if (count >= maxRequests) return false;
+      if (data) {
+        await supabase
+          .from('rate_limits')
+          .update({ request_count: count + 1 })
+          .eq('user_id', userId)
+          .eq('endpoint', endpoint)
+          .eq('window_start', data.window_start);
+      } else {
+        await supabase
+          .from('rate_limits')
+          .insert({ user_id: userId, endpoint, request_count: 1, window_start: now.toISOString() });
+      }
+      return true;
+    } catch {
+      return true; // Allow on error (fail open)
+    }
+  }
+
   app.get("/api/config", (_req, res) => {
     res.json({ isStripeConfigured, isSupabaseConfigured });
   });
@@ -197,6 +232,10 @@ export function createApp() {
         return res.status(401).json({ error: "Unauthorized: valid session required" });
       }
 
+      if (!(await checkRateLimit(user.uid, 'create-checkout-session', 10, 1))) {
+        return res.status(429).json({ error: "Too many requests. Please wait before trying again." });
+      }
+
       const { uid, email, priceId, planType, returnView } = req.body;
       if (!priceId || !uid || !email) {
         return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
@@ -245,6 +284,10 @@ export function createApp() {
         return res.status(401).json({ error: "Unauthorized: valid session required" });
       }
 
+      if (!(await checkRateLimit(user.uid, 'create-portal-session', 10, 1))) {
+        return res.status(429).json({ error: "Too many requests. Please wait before trying again." });
+      }
+
       const { uid } = req.body;
       if (!uid) return res.status(400).json({ error: "UID is required" });
 
@@ -274,6 +317,52 @@ export function createApp() {
     } catch (error: any) {
       console.error("Portal error:", error);
       res.status(500).json({ error: "An unexpected error occurred. Please try again." });
+    }
+  });
+
+  app.post("/api/increment-preview", async (req, res) => {
+    try {
+      const user = await verifyAuth(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      if (!supabase) {
+        return res.status(500).json({ error: "Database not initialized" });
+      }
+
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const { data: userData } = await supabase
+        .from("users")
+        .select("preview_count, last_preview_reset, is_pro")
+        .eq("uid", user.uid)
+        .single();
+
+      if (userData?.is_pro) {
+        return res.json({ allowed: true, remaining: -1 });
+      }
+
+      let count = userData?.preview_count || 0;
+      let reset = userData?.last_preview_reset || "";
+
+      if (reset !== currentMonth) {
+        count = 0;
+        reset = currentMonth;
+      }
+
+      if (count >= 3) {
+        return res.json({ allowed: false, remaining: 0 });
+      }
+
+      await supabase
+        .from("users")
+        .update({ preview_count: count + 1, last_preview_reset: currentMonth })
+        .eq("uid", user.uid);
+
+      res.json({ allowed: true, remaining: 2 - count });
+    } catch (err) {
+      console.error("Preview count error:", err);
+      res.status(500).json({ error: "Failed to validate preview count" });
     }
   });
 
