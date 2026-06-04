@@ -44,6 +44,7 @@ export interface SavedCV {
   jobRole: string;
   data: CVData;
   generatedContent: string | null;
+  templateId: string;
   createdAt: string;
   updatedAt: string;
 }

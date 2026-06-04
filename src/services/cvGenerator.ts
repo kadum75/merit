@@ -18,60 +18,143 @@ function formatUKDate(dateStr: string): string {
   return dateStr;
 }
 
-export async function generateCareerContent(data: CVData, type: 'cv', isPro: boolean = false) {
-  const generationData = { ...data };
-  const { personalDetails, professionalSummary, experience, education, skills } = generationData;
-
-  let markdown = `# ${personalDetails.fullName}\n\n`;
-
-  const contactParts = [
+function buildContactParts(personalDetails: CVData['personalDetails']): string[] {
+  return [
     personalDetails.email,
     personalDetails.phone,
     personalDetails.location,
-    personalDetails.linkedin
+    personalDetails.linkedin,
+    personalDetails.portfolio,
   ].filter(Boolean);
+}
 
-  markdown += `${contactParts.join(" | ")}\n\n`;
+function renderExperienceMarkdown(experience: CVData['experience']): string {
+  let md = '';
+  experience.forEach((exp) => {
+    const start = formatUKDate(exp.startDate);
+    const end = exp.isCurrent ? "Present" : formatUKDate(exp.endDate);
+    md += `### ${exp.role}, ${exp.company} (${start} - ${end})\n`;
+    if (exp.location) md += `*${exp.location}*\n\n`;
+    if (exp.achievements) {
+      const bullets = exp.achievements.split('\n').filter(line => line.trim());
+      bullets.forEach(bullet => {
+        const cleanBullet = bullet.trim().replace(/^[•\-\*]\s*/, '');
+        md += `- ${cleanBullet}\n`;
+      });
+    }
+    md += `\n`;
+  });
+  return md;
+}
 
+function renderEducationMarkdown(education: CVData['education']): string {
+  let md = '';
+  education.forEach((edu) => {
+    md += `### ${edu.degree}, ${edu.institution} (${formatUKDate(edu.graduationDate)})\n`;
+    if (edu.location || edu.grade) {
+      md += `*${[edu.location, edu.grade].filter(Boolean).join(", ")}*\n`;
+    }
+    md += `\n`;
+  });
+  return md;
+}
+
+export async function generateCareerContent(
+  data: CVData,
+  type: 'cv',
+  isPro: boolean = false,
+  templateId: string = 'classic'
+) {
+  const { personalDetails, professionalSummary, experience, education, skills } = data;
+  const contactLine = buildContactParts(personalDetails).join(" | ");
+
+  switch (templateId) {
+    case 'modern':
+      return generateModern(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+    case 'minimal':
+      return generateMinimal(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+    case 'professional':
+      return generateProfessional(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+    default:
+      return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+  }
+}
+
+function generateClassic(
+  fullName: string,
+  contactLine: string,
+  professionalSummary: string,
+  experience: CVData['experience'],
+  education: CVData['education'],
+  skills: string,
+): string {
+  let md = `# ${fullName}\n\n`;
+  md += `${contactLine}\n\n`;
+  if (professionalSummary) md += `## Professional Summary\n\n${professionalSummary}\n\n`;
+  if (experience.length > 0) md += `## Work Experience\n\n${renderExperienceMarkdown(experience)}`;
+  if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
+  if (skills) md += `## Skills\n\n${skills}\n`;
+  return md;
+}
+
+function generateModern(
+  fullName: string,
+  contactLine: string,
+  professionalSummary: string,
+  experience: CVData['experience'],
+  education: CVData['education'],
+  skills: string,
+): string {
+  let md = `# ${fullName}\n\n`;
+  md += `*${contactLine}*\n\n`;
+  if (professionalSummary) md += `## Professional Summary\n\n${professionalSummary}\n\n`;
+  if (skills) md += `## Core Skills\n\n${skills}\n\n`;
+  if (experience.length > 0) md += `## Experience\n\n${renderExperienceMarkdown(experience)}`;
+  if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
+  return md;
+}
+
+function generateMinimal(
+  fullName: string,
+  contactLine: string,
+  professionalSummary: string,
+  experience: CVData['experience'],
+  education: CVData['education'],
+  skills: string,
+): string {
+  let md = `# ${fullName}\n\n`;
+  md += `${contactLine}\n\n`;
   if (professionalSummary) {
-    markdown += `## Professional Summary\n\n${professionalSummary}\n\n`;
+    md += `${professionalSummary}\n\n`;
   }
-
-  if (experience && experience.length > 0) {
-    markdown += `## Work Experience\n\n`;
-    experience.forEach((exp) => {
-      const start = formatUKDate(exp.startDate);
-      const end = exp.isCurrent ? "Present" : formatUKDate(exp.endDate);
-      markdown += `### ${exp.role}, ${exp.company} (${start} - ${end})\n`;
-      if (exp.location) markdown += `*${exp.location}*\n\n`;
-
-      if (exp.achievements) {
-        const bullets = exp.achievements.split('\n').filter(line => line.trim());
-        bullets.forEach(bullet => {
-          const cleanBullet = bullet.trim().replace(/^[•\-\*]\s*/, '');
-          markdown += `- ${cleanBullet}\n`;
-        });
-      }
-      markdown += `\n`;
-    });
+  if (experience.length > 0) {
+    md += `## Work Experience\n\n${renderExperienceMarkdown(experience)}`;
   }
-
-  if (education && education.length > 0) {
-    markdown += `## Education\n\n`;
-    education.forEach((edu) => {
-      markdown += `### ${edu.degree}, ${edu.institution} (${formatUKDate(edu.graduationDate)})\n`;
-      if (edu.location || edu.grade) {
-        markdown += `*${[edu.location, edu.grade].filter(Boolean).join(", ")}*\n`;
-      }
-      markdown += `\n`;
-    });
+  if (education.length > 0) {
+    md += `## Education\n\n${renderEducationMarkdown(education)}`;
   }
-
   if (skills) {
-    markdown += `## Skills\n\n${skills}\n`;
+    const skillList = skills.split(',').map(s => s.trim()).filter(Boolean);
+    md += `## Skills\n\n${skillList.map(s => `- ${s}`).join('\n')}\n`;
   }
+  return md;
+}
 
-  return markdown;
+function generateProfessional(
+  fullName: string,
+  contactLine: string,
+  professionalSummary: string,
+  experience: CVData['experience'],
+  education: CVData['education'],
+  skills: string,
+): string {
+  let md = `# ${fullName}\n\n`;
+  md += `${contactLine}\n\n`;
+  if (professionalSummary) md += `${professionalSummary}\n\n`;
+  if (experience.length > 0) md += `## Experience\n\n${renderExperienceMarkdown(experience)}`;
+  if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
+  if (skills) md += `## Skills\n\n${skills}\n`;
+  return md;
 }
 
 export async function parseExistingCV(fileBase64: string, mimeType: string): Promise<Partial<CVData>> {

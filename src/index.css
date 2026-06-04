@@ -226,3 +226,129 @@
   }
 }
 
+/* === Template: Modern === */
+.markdown-body.modern h1 {
+  color: #059669;
+  border-bottom-color: #059669;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.markdown-body.modern h2 {
+  color: #059669;
+  border-bottom-color: #10B981;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-size: 13pt;
+}
+
+.markdown-body.modern h3 {
+  color: #047857;
+}
+
+.markdown-body.modern li::before {
+  color: #10B981;
+}
+
+.markdown-body.modern p:first-of-type {
+  font-style: italic;
+  color: #059669;
+}
+
+/* === Template: Minimal === */
+.markdown-body.minimal h1 {
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 22pt;
+  border-bottom: 1px solid #d4d4d8;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.markdown-body.minimal h2 {
+  text-transform: none;
+  letter-spacing: 0;
+  border-bottom: 1px solid #e4e4e7;
+  font-weight: 600;
+  color: #27272a;
+}
+
+.markdown-body.minimal p:first-of-type {
+  text-align: left;
+  font-size: 9pt;
+  color: #71717a;
+}
+
+.markdown-body.minimal li::before {
+  content: "—";
+  color: #a1a1aa;
+}
+
+.markdown-body.minimal h3 {
+  font-weight: 600;
+  color: #3f3f46;
+}
+
+.markdown-body.minimal {
+  font-family: 'Inter', sans-serif;
+  color: #27272a;
+}
+
+.dark .markdown-body.minimal h1 {
+  color: #f4f4f5;
+  border-bottom-color: #3f3f46;
+}
+
+.dark .markdown-body.minimal h2 {
+  color: #e4e4e7;
+  border-bottom-color: #3f3f46;
+}
+
+/* === Template: Professional === */
+.markdown-body.professional h1 {
+  background-color: #1e293b;
+  color: white;
+  padding: 12pt 16pt;
+  border-bottom: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 20pt;
+  border-radius: 2pt;
+  text-align: left;
+}
+
+.markdown-body.professional h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11pt;
+  border-bottom: 2px solid #1e293b;
+  color: #1e293b;
+}
+
+.markdown-body.professional h3 {
+  color: #475569;
+  font-weight: 600;
+}
+
+.markdown-body.professional p:first-of-type {
+  text-align: left;
+  font-size: 9pt;
+  color: #64748b;
+  padding: 0 16pt;
+}
+
+.markdown-body.professional li::before {
+  color: #64748b;
+}
+
+.dark .markdown-body.professional h1 {
+  background-color: #334155;
+}
+
+.dark .markdown-body.professional h2 {
+  border-bottom-color: #475569;
+  color: #e2e8f0;
+}
+

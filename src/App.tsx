@@ -30,6 +30,7 @@ import Markdown from 'react-markdown';
 import jsPDF, { GState } from 'jspdf';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
+import { TEMPLATES } from './data/templates';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
@@ -97,6 +98,7 @@ function createSavedCV(jobRole: string): SavedCV {
     jobRole,
     data: { ...INITIAL_DATA, personalDetails: { ...INITIAL_DATA.personalDetails } },
     generatedContent: null,
+    templateId: 'classic',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -213,6 +215,8 @@ export default function App() {
   const activeCV = cvs.find(c => c.id === activeCVId) ?? null;
   const data: CVData = activeCV?.data ?? INITIAL_DATA;
   const generatedContent: string | null = activeCV?.generatedContent ?? null;
+  const activeTemplateId: string = activeCV?.templateId ?? 'classic';
+  const activeTemplate = TEMPLATES.find(t => t.id === activeTemplateId) ?? TEMPLATES[0];
 
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return '';
@@ -288,6 +292,17 @@ export default function App() {
       if (idx === -1) return prev;
       const newContent = typeof content === 'function' ? content(next[idx].generatedContent) : content;
       next[idx] = { ...next[idx], generatedContent: newContent, updatedAt: new Date().toISOString() };
+      saveCVs(next);
+      return next;
+    });
+  }
+
+  function setTemplateId(templateId: string) {
+    setCVs(prev => {
+      const next = [...prev];
+      const idx = next.findIndex(c => c.id === activeCVId);
+      if (idx === -1) return prev;
+      next[idx] = { ...next[idx], templateId, updatedAt: new Date().toISOString() };
       saveCVs(next);
       return next;
     });
@@ -763,7 +778,7 @@ export default function App() {
     try {
       // Race the generation against the timeout
       const content = await Promise.race([
-        generateCareerContent(data, 'cv', isPro),
+        generateCareerContent(data, 'cv', isPro, activeTemplateId),
         timeoutPromise
       ]) as string;
 
@@ -846,6 +861,7 @@ export default function App() {
     const margin = 20;
     const contentWidth = pageWidth - (margin * 2);
     let yPos = margin;
+    const tpl = activeTemplate.pdf;
 
     // Helper to add text with wrapping
     const addWrappedText = (text: string, fontSize: number, fontStyle: string = 'normal', marginBottom: number = 5) => {
@@ -898,29 +914,61 @@ export default function App() {
 
       if (trimmed.startsWith('# ')) {
         yPos += 3;
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(22);
         const name = trimmed.replace('# ', '');
-        pdf.text(name, pageWidth / 2, yPos, { align: 'center' });
-        yPos += 10;
-        pdf.setLineWidth(0.5);
-        pdf.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 6;
+        if (activeTemplateId === 'professional') {
+          pdf.setFillColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          pdf.rect(margin, yPos - 2, contentWidth, 12, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(tpl.nameSize);
+          pdf.text(name, margin + 4, yPos + 8);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 18;
+        } else {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(tpl.nameSize);
+          const isMinimal = activeTemplateId === 'minimal';
+          if (!isMinimal) {
+            pdf.text(name, pageWidth / 2, yPos, { align: 'center' });
+          } else {
+            pdf.text(name, margin, yPos);
+          }
+          yPos += 10;
+          pdf.setLineWidth(0.5);
+          if (activeTemplateId === 'modern') {
+            pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+          }
+          pdf.line(margin, yPos, pageWidth - margin, yPos);
+          yPos += 6;
+        }
+        pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('## ')) {
         yPos += 6;
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(12);
         const heading = trimmed.replace('## ', '');
+        if (activeTemplateId !== 'classic') {
+          pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+        }
         pdf.text(heading, margin, yPos);
         yPos += 1;
         pdf.setLineWidth(0.3);
+        if (activeTemplateId !== 'classic') {
+          pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
+        }
         pdf.line(margin, yPos, pageWidth - margin, yPos);
         yPos += 5;
+        pdf.setTextColor(0, 0, 0);
+        pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('### ')) {
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(10);
         const subHeading = trimmed.replace('### ', '');
+        if (activeTemplateId === 'modern' || activeTemplateId === 'professional') {
+          pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
+        }
         pdf.text(subHeading, margin, yPos);
+        pdf.setTextColor(0, 0, 0);
         yPos += 5;
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         pdf.setFont('helvetica', 'normal');
@@ -1000,15 +1048,19 @@ export default function App() {
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br/>');
 
+    const tpl = activeTemplate.pdf;
+    const primaryHex = `rgb(${tpl.primaryColor.join(',')})`;
+    const secondaryHex = `rgb(${tpl.secondaryColor.join(',')})`;
+
     const fullHtml = `
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head><meta charset='utf-8'></head>
       <body>
         <style>
           body { font-family: Calibri, Arial, sans-serif; line-height: 1.5; }
-          h1 { color: #111827; font-size: 24pt; border-bottom: 1pt solid #e5e7eb; }
-          h2 { color: #111827; font-size: 18pt; margin-top: 20pt; }
-          h3 { color: #111827; font-size: 14pt; margin-top: 15pt; }
+          h1 { color: ${primaryHex}; font-size: 24pt; border-bottom: 1pt solid ${primaryHex}; ${activeTemplateId === 'professional' ? `background: ${primaryHex}; color: white; padding: 8pt;` : ''} }
+          h2 { color: ${activeTemplateId === 'classic' ? '#111827' : primaryHex}; font-size: 18pt; margin-top: 20pt; border-bottom: 1pt solid ${activeTemplateId === 'classic' ? '#e5e7eb' : primaryHex}; }
+          h3 { color: ${activeTemplateId === 'modern' || activeTemplateId === 'professional' ? secondaryHex : '#111827'}; font-size: 14pt; margin-top: 15pt; }
           li { margin-bottom: 5pt; }
         </style>
         ${htmlContent}
@@ -1986,7 +2038,33 @@ export default function App() {
                         className="w-full h-24 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none disabled:bg-zinc-50/50 dark:disabled:bg-zinc-800/50"
                       />
                     </div>
-                    
+
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-zinc-700 dark:text-zinc-300">Choose Template</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {TEMPLATES.map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => setTemplateId(t.id)}
+                            className={`p-3 rounded-xl border-2 text-left transition-all ${
+                              activeTemplateId === t.id
+                                ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
+                                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
+                            }`}
+                          >
+                            <div
+                              className="w-full h-8 rounded-md mb-2 flex items-center justify-center text-[8px] font-bold text-white"
+                              style={{ backgroundColor: t.accentColor }}
+                            >
+                              CV
+                            </div>
+                            <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{t.name}</p>
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 leading-tight mt-0.5">{t.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="flex gap-4 pt-4">
                       <button 
                         onClick={handleGenerate}
@@ -2082,7 +2160,7 @@ export default function App() {
                     <p className="text-sm font-medium text-zinc-400 dark:text-zinc-500">Preview hidden — switch back to view</p>
                   </div>
                 ) : (
-                <div className="markdown-body">
+                <div className={`markdown-body ${activeTemplateId}`}>
                   <Markdown>{generatedContent}</Markdown>
                 </div>
                 )
@@ -2093,7 +2171,7 @@ export default function App() {
                     <p className="text-sm font-medium text-zinc-400 dark:text-zinc-500">Preview hidden — switch back to view</p>
                   </div>
                 ) : (
-                <div className="markdown-body">
+                <div className={`markdown-body ${activeTemplateId}`}>
                   <Markdown>{livePreview}</Markdown>
                 </div>
                 )
