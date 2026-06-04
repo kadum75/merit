@@ -361,6 +361,40 @@ export default function LandingPage({
               </div>
             </div>
 
+            {/* Organisations Card — Coming Soon */}
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 flex flex-col shadow-sm relative opacity-70">
+              <div className="absolute -top-3 right-6">
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-300 px-4 py-1.5 rounded-full">Coming Soon</span>
+              </div>
+              <div className="space-y-2">
+                <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center text-violet-600 dark:text-violet-400 mb-4">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold dark:text-white">Organisations</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold">Custom</span>
+                  <span className="text-zinc-400 text-sm font-normal"> / per team</span>
+                </div>
+              </div>
+              <div className="space-y-4 flex-1">
+                <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+                  For teams and employers who want to manage multiple candidates' CVs in one place.
+                </p>
+                <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-100 dark:border-violet-800">
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-violet-700 flex items-center gap-1.5">
+                    <Star className="w-3 h-3" /> Coming Soon
+                  </p>
+                  <p className="text-[10px] text-violet-600 mt-1">Team dashboards and bulk CV management.</p>
+                </div>
+              </div>
+              <button 
+                disabled
+                className="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 font-bold rounded-xl cursor-not-allowed"
+              >
+                Coming Soon
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
@@ -448,39 +482,6 @@ export default function LandingPage({
               </div>
             </div>
 
-            {/* Organisations Card — Coming Soon */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 flex flex-col shadow-sm relative opacity-70">
-              <div className="absolute -top-3 right-6">
-                <span className="text-[10px] uppercase tracking-[0.2em] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-300 px-4 py-1.5 rounded-full">Coming Soon</span>
-              </div>
-              <div className="space-y-2">
-                <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center text-violet-600 dark:text-violet-400 mb-4">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold dark:text-white">Organisations</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">Custom</span>
-                  <span className="text-zinc-400 text-sm font-normal"> / per team</span>
-                </div>
-              </div>
-              <div className="space-y-4 flex-1">
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                  For teams and employers who want to manage multiple candidates' CVs in one place.
-                </p>
-                <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-100 dark:border-violet-800">
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-violet-700 flex items-center gap-1.5">
-                    <Star className="w-3 h-3" /> Coming Soon
-                  </p>
-                  <p className="text-[10px] text-violet-600 mt-1">Team dashboards and bulk CV management.</p>
-                </div>
-              </div>
-              <button 
-                disabled
-                className="w-full py-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 font-bold rounded-xl cursor-not-allowed"
-              >
-                Coming Soon
-              </button>
-            </div>
           </div>
           <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (Zenstack account)</p>
         </div>
