@@ -1499,6 +1499,16 @@ export default function App() {
                         ],
                       },
                       professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
+                      coverLetter: `Dear Hiring Manager,
+
+I am writing to express my interest in the Senior Project Manager role at your organisation. With over 8 years of experience delivering complex software solutions at TechFlow Solutions, I am confident that my project leadership and Agile expertise would make a strong contribution to your team.
+
+In my current role as Senior Project Manager, I lead cross-functional teams of up to 15 people, manage budgets exceeding £1.2M, and have consistently delivered high-impact SaaS platforms on time and under budget. I am particularly proud of implementing Jira workflows that improved team velocity by 25%.
+
+I would welcome the opportunity to discuss how my skills and experience align with the needs of your organisation. Thank you for your consideration.
+
+Yours sincerely,
+Alex Thompson`,
                       experience: [{
                         id: '1',
                         company: 'TechFlow Solutions',
