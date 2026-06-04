@@ -267,7 +267,7 @@ export default function App() {
       d.experience.forEach(exp => {
         const dates = `${formatDate(exp.startDate)} — ${exp.isCurrent ? 'Present' : formatDate(exp.endDate)}`;
         sections.push(`### ${exp.role} at ${exp.company}\n*${exp.location} | ${dates}*`);
-        if (exp.achievements) sections.push(exp.achievements.split('\n').map(a => `- ${a}`).join('\n'));
+        if (exp.achievements) sections.push(exp.achievements.split('\n').map(a => `- ${a.trim().replace(/^[•\-\*%ª]\s*/, '')}`).join('\n'));
       });
     }
     if (d.education?.length) {

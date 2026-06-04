@@ -38,7 +38,7 @@ function renderExperienceMarkdown(experience: CVData['experience']): string {
     if (exp.achievements) {
       const bullets = exp.achievements.split('\n').filter(line => line.trim());
       bullets.forEach(bullet => {
-        const cleanBullet = bullet.trim().replace(/^[•\-\*]\s*/, '');
+        const cleanBullet = bullet.trim().replace(/^[•\-\*%ª]\s*/, '');
         md += `- ${cleanBullet}\n`;
       });
     }
