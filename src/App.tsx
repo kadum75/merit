@@ -965,14 +965,17 @@ export default function App() {
     if (!content) return;
     
     // Very basic markdown to simple HTML conversion for better Word compatibility
+    const escapeHtml = (str: string) =>
+      str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
     const htmlContent = content
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/^\* (.*$)/gm, '<li>$1</li>')
-      .replace(/^- (.*$)/gm, '<li>$1</li>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^# (.*$)/gm, (_, c) => '<h1>' + escapeHtml(c) + '</h1>')
+      .replace(/^## (.*$)/gm, (_, c) => '<h2>' + escapeHtml(c) + '</h2>')
+      .replace(/^### (.*$)/gm, (_, c) => '<h3>' + escapeHtml(c) + '</h3>')
+      .replace(/^\* (.*$)/gm, (_, c) => '<li>' + escapeHtml(c) + '</li>')
+      .replace(/^- (.*$)/gm, (_, c) => '<li>' + escapeHtml(c) + '</li>')
+      .replace(/\*\*(.*?)\*\*/g, (_, c) => '<strong>' + escapeHtml(c) + '</strong>')
+      .replace(/\*(.*?)\*/g, (_, c) => '<em>' + escapeHtml(c) + '</em>')
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br/>');
 

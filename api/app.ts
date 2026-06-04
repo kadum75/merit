@@ -206,6 +206,15 @@ export function createApp() {
         return res.status(403).json({ error: "Forbidden: uid/email does not match authenticated user" });
       }
 
+      const ALLOWED_PRICE_IDS = [
+        process.env.VITE_STRIPE_MONTHLY_PRICE_ID,
+        process.env.VITE_STRIPE_ANNUAL_PRICE_ID,
+        process.env.VITE_STRIPE_ORG_PRICE_ID,
+      ].filter(Boolean);
+      if (!ALLOWED_PRICE_IDS.includes(priceId)) {
+        return res.status(400).json({ error: "Invalid price ID" });
+      }
+
       const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://merit-cv.vercel.app";
       const viewParam = returnView === 'builder' ? '&view=builder' : '';
       const mode = planType === "donation" ? "payment" as const : "subscription" as const;
@@ -220,7 +229,7 @@ export function createApp() {
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Stripe error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "An unexpected error occurred. Please try again." });
     }
   });
 
@@ -263,7 +272,7 @@ export function createApp() {
       res.json({ url: session.url });
     } catch (error: any) {
       console.error("Portal error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "An unexpected error occurred. Please try again." });
     }
   });
 
