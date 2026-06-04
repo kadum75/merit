@@ -142,8 +142,55 @@ export default function LandingPage({
             </div>
           </motion.div>
 
-          <div className="relative hidden lg:block">
+          <div className="relative hidden lg:flex items-center justify-center">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#3B82F6]/20 to-transparent rounded-full blur-3xl" />
+            <div className="relative w-[400px] bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden transform rotate-[1.5deg] hover:rotate-0 transition-transform duration-500">
+              <div className="h-2 bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6]" />
+              <div className="p-7 space-y-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <div className="h-7 w-40 bg-zinc-800 rounded-md" />
+                    <div className="h-4 w-28 bg-zinc-400/60 rounded-md" />
+                  </div>
+                  <div className="text-right space-y-0.5">
+                    <div className="h-2.5 w-20 bg-zinc-200 rounded ml-auto" />
+                    <div className="h-2.5 w-16 bg-zinc-200 rounded ml-auto" />
+                    <div className="h-2.5 w-24 bg-zinc-200 rounded ml-auto" />
+                  </div>
+                </div>
+                <div className="h-px bg-zinc-100" />
+                <div className="space-y-2">
+                  <div className="h-3 w-24 bg-zinc-800 rounded-md" />
+                  <div className="space-y-1.5">
+                    <div className="h-2 w-full bg-zinc-200 rounded" />
+                    <div className="h-2 w-full bg-zinc-200 rounded" />
+                    <div className="h-2 w-3/4 bg-zinc-200 rounded" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-28 bg-zinc-800 rounded-md" />
+                  <div className="space-y-1.5 pl-3 border-l-2 border-[#3B82F6]/30">
+                    <div className="h-2.5 w-36 bg-zinc-800/70 rounded" />
+                    <div className="h-2 w-full bg-zinc-200 rounded" />
+                    <div className="h-2 w-full bg-zinc-200 rounded" />
+                    <div className="h-2 w-5/6 bg-zinc-200 rounded" />
+                    <div className="mt-2 h-2.5 w-32 bg-zinc-800/70 rounded" />
+                    <div className="h-2 w-full bg-zinc-200 rounded" />
+                    <div className="h-2 w-4/5 bg-zinc-200 rounded" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-20 bg-zinc-800 rounded-md" />
+                  <div className="flex flex-wrap gap-1.5">
+                    {['JavaScript', 'React', 'Python', 'Node.js', 'SQL', 'AWS'].map((s, i) => (
+                      <div key={s} className={`h-5 px-2.5 ${i < 3 ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-zinc-100 text-zinc-500'} rounded text-[9px] font-medium flex items-center`}>
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
