@@ -153,6 +153,8 @@ async function saveServerCVs(cvs: SavedCV[], userId: string) {
   }
 }
 
+const ADMIN_EMAIL = 'rjcosta@gmail.com';
+
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'builder'>('home');
   const [user, setUser] = useState<any>(null);
@@ -429,7 +431,7 @@ export default function App() {
   }, [user?.id]);
 
   // Debounced server sync whenever CVs change and user is logged in
-  const serverSyncTimer = useRef<ReturnType<typeof setTimeout>>();
+  const serverSyncTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     if (!user?.id) return;
     clearTimeout(serverSyncTimer.current);
@@ -456,8 +458,15 @@ export default function App() {
       }).finally(() => {
         window.history.replaceState({}, '', window.location.pathname);
         setIsExchangingCode(false);
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          if (user) setUser(user);
+        supabase.auth.getUser().then(async ({ data: { user } }) => {
+          if (user) {
+            if (user.email !== ADMIN_EMAIL) {
+              await supabase.auth.signOut();
+              toast('Only the administrator can access this system during maintenance.', 'error');
+              return;
+            }
+            setUser(user);
+          }
         }).catch((err) => {
           console.error('Failed to get user after code exchange:', err);
         });
@@ -469,8 +478,13 @@ export default function App() {
       console.error('OAuth error:', authError);
       window.history.replaceState({}, '', window.location.pathname);
     } else {
-      supabase.auth.getUser().then(({ data: { user } }) => {
+      supabase.auth.getUser().then(async ({ data: { user } }) => {
         if (user) {
+          if (user.email !== ADMIN_EMAIL) {
+            await supabase.auth.signOut();
+            toast('Only the administrator can access this system during maintenance.', 'error');
+            return;
+          }
           setUser(user);
           setCurrentView('builder');
         }
@@ -509,6 +523,11 @@ export default function App() {
       }
       accessTokenRef.current = session?.access_token ?? null;
       const currentUser = session?.user ?? null;
+      if (currentUser && currentUser.email !== ADMIN_EMAIL) {
+        await supabase.auth.signOut();
+        toast('Only the administrator can access this system during maintenance.', 'error');
+        return;
+      }
       setUser(currentUser);
       if (currentUser) {
         await syncUserDocument(currentUser);
@@ -869,8 +888,7 @@ export default function App() {
       subject: `${isCoverLetterMode ? 'Cover Letter' : 'ATS-Optimised CV'} - Generated on ${new Date().toLocaleDateString('en-GB')}`,
       author: 'Zenstack',
       keywords: 'Zenstack, ATS-Optimised',
-      creator: 'Merit',
-      producer: isPro ? 'Merit Pro' : 'Merit Free Tier'
+      creator: 'Merit'
     });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
