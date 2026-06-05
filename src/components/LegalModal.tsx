@@ -213,7 +213,28 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
             Continued use after changes constitutes acceptance of the updated policy.
           </p>
 
-          <h4 className="text-white font-bold pt-2">14. Contact & Complaints</h4>
+          <h4 className="text-white font-bold pt-2">14. Complaints Procedure</h4>
+          <p>
+            Under the Data (Use and Access) Act 2025, we maintain a formal procedure for handling 
+            data protection complaints. If you believe we have mishandled your personal data:
+          </p>
+          <ol className="list-decimal pl-5 space-y-1">
+            <li>Email your complaint to{' '}
+              <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>{' '}
+              with the subject "Data Protection Complaint"</li>
+            <li>Include your name, a description of the issue, and any relevant reference numbers</li>
+            <li>We will acknowledge receipt within 5 working days</li>
+            <li>We will investigate and provide a full response within 30 calendar days</li>
+            <li>If we need more time for complex cases, we will notify you with an updated timeline</li>
+          </ol>
+          <p className="mt-2">
+            If you are unsatisfied with our response, you have the right to lodge a complaint with the 
+            Information Commissioner's Office (ICO):{' '}
+            <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">ico.org.uk</a> · 0303 123 1113.
+            For EU users, you may complain to your local supervisory authority.
+          </p>
+
+          <h4 className="text-white font-bold pt-2">15. Contact</h4>
           <p>
             Data Protection Officer:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
@@ -382,8 +403,8 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
               </div>
               <div>
                 <p className="text-xs text-zinc-500 uppercase font-bold tracking-wider">Website</p>
-                <a href="https://webpagemain-pink.vercel.app/#" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-blue-400 transition-colors">
-                  webpagemain-pink.vercel.app
+                <a href="https://merit-cv.vercel.app/#" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-blue-400 transition-colors">
+                  merit-cv.vercel.app
                 </a>
               </div>
             </div>

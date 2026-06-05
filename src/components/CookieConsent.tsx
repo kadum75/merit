@@ -11,7 +11,7 @@ interface ConsentPreferences {
 
 const DEFAULT_PREFS: ConsentPreferences = {
   essential: true,
-  functional: true,
+  functional: false,
 };
 
 export function CookieConsent() {
