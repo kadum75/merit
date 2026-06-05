@@ -172,5 +172,8 @@ function generateProfessional(
 
 export async function parseExistingCV(text: string, fileName?: string): Promise<Partial<CVData>> {
   if (!text?.trim()) return {};
+  const ext = fileName?.split('.').pop()?.toLowerCase();
+  const binaryExts = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'zip'];
+  if (binaryExts.includes(ext || '') || text.startsWith('%PDF')) return {};
   return { professionalSummary: text };
 }
