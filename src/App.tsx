@@ -1547,7 +1547,7 @@ Alex Thompson`,
                   <input 
                     type="file" 
                     className="hidden" 
-                    accept=".pdf,.png,.jpg,.jpeg"
+                    accept=".pdf,.png,.jpg,.jpeg,.txt,.doc,.docx"
                     onChange={handleFileUpload}
                     disabled={isParsing}
                   />

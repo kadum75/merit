@@ -171,6 +171,17 @@ function generateProfessional(
 }
 
 export async function parseExistingCV(fileBase64: string, mimeType: string): Promise<Partial<CVData>> {
-  console.info("Automatic document extraction is disabled.");
+  if (mimeType === 'text/plain') {
+    try {
+      const binaryStr = atob(fileBase64);
+      const bytes = Uint8Array.from(binaryStr, c => c.charCodeAt(0));
+      const text = new TextDecoder().decode(bytes);
+      return { professionalSummary: text };
+    } catch (err) {
+      console.error('Failed to decode text file:', err);
+      return {};
+    }
+  }
+  console.info(`Automatic extraction from ${mimeType} is not supported.`);
   return {};
 }
