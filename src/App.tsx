@@ -843,7 +843,7 @@ export default function App() {
         setStep(1);
         toast('CV text extracted and placed in Professional Summary.', 'success');
       } else {
-        toast('Could not extract data. Only .txt files are supported for upload. Please fill manually.', 'error');
+        toast('Could not extract data. PDF/DOC parsing requires additional libraries. Save as .txt and upload, or paste content manually.', 'error');
       }
     } catch (error) {
       console.error('Parsing failed:', error);
@@ -1542,7 +1542,7 @@ Alex Thompson`,
                   <input 
                     type="file" 
                     className="hidden" 
-                    accept=".txt"
+                    accept=".pdf,.doc,.docx"
                     onChange={handleFileUpload}
                     disabled={isParsing}
                   />
