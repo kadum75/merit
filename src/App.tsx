@@ -820,14 +820,8 @@ export default function App() {
 
     setIsParsing(true);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const parsedData = await parseExistingCV(base64, file.type, file.name);
+      const text = await file.text();
+      const parsedData = await parseExistingCV(text, file.name);
       
       if (parsedData && Object.keys(parsedData).length > 0) {
         setData(prev => ({

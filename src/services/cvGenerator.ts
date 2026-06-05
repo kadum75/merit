@@ -170,22 +170,7 @@ function generateProfessional(
   return md;
 }
 
-export async function parseExistingCV(fileBase64: string, mimeType: string, fileName?: string): Promise<Partial<CVData>> {
-  const ext = fileName?.split('.').pop()?.toLowerCase();
-  const textExts = ['txt', 'text', 'md', 'csv', 'json', 'xml', 'html', 'htm'];
-  const isText = !mimeType || mimeType.startsWith('text/') || textExts.includes(ext || '');
-
-  if (isText) {
-    try {
-      const binaryStr = atob(fileBase64);
-      const bytes = Uint8Array.from(binaryStr, c => c.charCodeAt(0));
-      const text = new TextDecoder().decode(bytes);
-      return { professionalSummary: text };
-    } catch (err) {
-      console.error('Failed to decode text file:', err);
-      return {};
-    }
-  }
-  console.info(`Automatic extraction from ${mimeType} is not supported.`);
-  return {};
+export async function parseExistingCV(text: string, fileName?: string): Promise<Partial<CVData>> {
+  if (!text?.trim()) return {};
+  return { professionalSummary: text };
 }
