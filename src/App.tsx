@@ -1547,6 +1547,7 @@ Alex Thompson`,
                     disabled={isParsing}
                   />
                 </label>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Under Construction</span>
               </div>
 
               {(generatedContent || isPro) && (
