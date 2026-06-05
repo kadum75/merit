@@ -87,8 +87,8 @@ function createStubSupabase() {
         }));
         return Promise.resolve({ data: { user: { ...fakeUser, email }, session: fakeSession }, error: null });
       },
-      signUp: ({ email, password }: { email: string; password: string }) => {
-        console.info(`[Supabase Stub] signUp for ${email}`);
+      signUp: ({ email, password, options }: { email: string; password: string; options?: { captchaToken?: string; emailRedirectTo?: string } }) => {
+        console.info(`[Supabase Stub] signUp for ${email}${options?.captchaToken ? ' (with captcha)' : ''}`);
         authListeners.forEach(cb => cb('SIGNED_IN', {
           ...fakeSession,
           user: { ...fakeUser, email },

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, UserPlus, Chrome, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { supabase, isSupabaseConfigValid, syncUserDocument } from '../supabase';
 import { LegalModal, LegalType } from './LegalModal';
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,6 +26,8 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
   const [resetSent, setResetSent] = useState(false);
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [confirmedEmail, setConfirmedEmail] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [turnstileKey, setTurnstileKey] = useState(0);
   
   // Consent flags
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -61,8 +66,11 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
           password,
           options: {
             emailRedirectTo: 'https://merit-cv.vercel.app?signin=confirmed',
+            captchaToken,
           },
         });
+        setTurnstileKey(k => k + 1);
+        setCaptchaToken('');
         if (error) throw error;
         if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
@@ -386,6 +394,19 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
                       I agree to the <button type="button" onClick={() => openLegal('privacy')} className="text-zinc-700 dark:text-zinc-300 underline underline-offset-2">Privacy Policy</button> and <button type="button" onClick={() => openLegal('terms')} className="text-zinc-700 dark:text-zinc-300 underline underline-offset-2">Terms of Service</button>. *
                     </span>
                   </label>
+                </div>
+              )}
+
+              {!isSignIn && TURNSTILE_SITE_KEY && (
+                <div className="flex justify-center">
+                  <Turnstile
+                    key={turnstileKey}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onSuccess={setCaptchaToken}
+                    onError={() => setCaptchaToken('')}
+                    onExpire={() => setCaptchaToken('')}
+                    options={{ size: 'flexible' }}
+                  />
                 </div>
               )}
 

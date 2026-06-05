@@ -15,6 +15,7 @@
     "audit:dry": "npm audit"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.2",
     "@stripe/stripe-js": "^9.0.1",
     "@supabase/cli": "^1.0.0",
     "@supabase/supabase-js": "^2.106.2",
