@@ -840,7 +840,8 @@ export default function App() {
             id: Math.random().toString(36).substring(2, 11)
           }))
         }));
-        toast('CV parsed successfully! Please review the fields.', 'success');
+        setStep(1);
+        toast('CV text extracted and placed in Professional Summary.', 'success');
       } else {
         toast('Could not extract data from this file. Please try a different file or fill manually.', 'error');
       }
