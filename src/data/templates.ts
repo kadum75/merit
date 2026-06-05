@@ -2,7 +2,6 @@ export interface CVTemplate {
   id: string;
   name: string;
   description: string;
-  previewClass: string;
   accentColor: string;
   pdf: {
     primaryColor: [number, number, number];
@@ -19,7 +18,6 @@ export const TEMPLATES: CVTemplate[] = [
     id: 'classic',
     name: 'Classic',
     description: 'Navy-toned traditional layout with refined borders',
-    previewClass: 'template-classic',
     accentColor: '#1B2A4A',
     pdf: {
       primaryColor: [27, 42, 74],
@@ -33,7 +31,6 @@ export const TEMPLATES: CVTemplate[] = [
     id: 'modern',
     name: 'Modern',
     description: 'Contemporary slate design with teal accents and clean headers',
-    previewClass: 'template-modern',
     accentColor: '#319795',
     pdf: {
       primaryColor: [45, 55, 72],
@@ -47,7 +44,6 @@ export const TEMPLATES: CVTemplate[] = [
     id: 'minimal',
     name: 'Minimal',
     description: 'Clean, left-aligned editorial design with generous whitespace',
-    previewClass: 'template-minimal',
     accentColor: '#1A202C',
     pdf: {
       primaryColor: [26, 32, 44],
@@ -61,7 +57,6 @@ export const TEMPLATES: CVTemplate[] = [
     id: 'professional',
     name: 'Professional',
     description: 'Executive dark header with gold accents and structured layout',
-    previewClass: 'template-professional',
     accentColor: '#111827',
     pdf: {
       primaryColor: [17, 24, 39],

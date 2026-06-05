@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
-import jsPDF, { GState } from 'jspdf';
+import jsPDF from 'jspdf';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, generateCoverLetter, parseExistingCV } from './services/cvGenerator';
 import { TEMPLATES } from './data/templates';
@@ -817,7 +817,7 @@ export default function App() {
       // Race the generation against the timeout
       const content = await Promise.race([
         isCoverLetterMode
-          ? Promise.resolve(generateCoverLetter(data))
+          ? generateCoverLetter(data)
           : generateCareerContent(data, 'cv', isPro, activeTemplateId),
         timeoutPromise
       ]) as string;
@@ -906,38 +906,14 @@ export default function App() {
       if (yPos + (lines.length * (fontSize * 0.32)) > pdf.internal.pageSize.getHeight() - margin) {
         pdf.addPage();
         yPos = margin;
-        if (!isPro) addWatermark(pdf);
       }
 
       pdf.text(lines, margin, yPos);
       yPos += (lines.length * (fontSize * 0.32)) + marginBottom;
     };
 
-    const addWatermark = (doc: jsPDF) => {
-      const pWidth = doc.internal.pageSize.getWidth();
-      const pHeight = doc.internal.pageSize.getHeight();
-      
-      doc.saveGraphicsState();
-      doc.setFillColor(243, 244, 246);
-      doc.rect(0, pHeight - 15, pWidth, 15, 'F');
-      
-      doc.setTextColor(107, 114, 128);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'italic');
-      doc.text('⚡ Created with Merit Free — Upgrade to Pro to remove this watermark', pWidth / 2, pHeight - 7, { align: 'center' });
-      
-      doc.setGState(new GState({ opacity: 0.06 }));
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(60);
-      doc.setFont('helvetica', 'bold');
-      doc.text('MERIT FREE', pWidth / 2, pHeight / 2, { align: 'center', angle: 45 });
-      doc.restoreGraphicsState();
-    };
-
     // Simple Markdown Parser for jsPDF — template-aware
     const lines = content.split('\n');
-
-    if (!isPro) addWatermark(pdf);
 
     const isProTemplate = activeTemplateId === 'professional';
     const isModernTemplate = activeTemplateId === 'modern';
@@ -1072,7 +1048,6 @@ export default function App() {
         if (yPos + (bulletLines.length * 3.5) > pdf.internal.pageSize.getHeight() - margin) {
           pdf.addPage();
           yPos = margin;
-          if (!isPro) addWatermark(pdf);
         }
 
         const bulletChar = isClassicTemplate ? '▪' : isProTemplate ? '▸' : isMinimalTemplate ? '—' : '•';
@@ -1180,7 +1155,7 @@ export default function App() {
           body { font-family: Calibri, Arial, sans-serif; line-height: 1.5; }
           h1 { color: ${primaryHex}; font-size: 24pt; border-bottom: 1pt solid ${primaryHex}; ${activeTemplateId === 'professional' ? `background: ${primaryHex}; color: white; padding: 8pt;` : ''} }
           h2 { color: ${activeTemplateId === 'classic' ? '#111827' : primaryHex}; font-size: 18pt; margin-top: 20pt; border-bottom: 1pt solid ${activeTemplateId === 'classic' ? '#e5e7eb' : primaryHex}; }
-          h3 { color: ${activeTemplateId === 'modern' || activeTemplateId === 'professional' ? secondaryHex : '#111827'}; font-size: 14pt; margin-top: 15pt; }
+          h3 { color: ${activeTemplateId === 'modern' || activeTemplateId === 'professional' ? secondaryHex : primaryHex}; font-size: 14pt; margin-top: 15pt; }
           li { margin-bottom: 5pt; }
         </style>
         ${htmlContent}
@@ -2331,7 +2306,7 @@ I am writing to express my interest in the [Role] position at [Company]..."
                         className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                        {isCoverLetterMode ? 'Generate Cover Letter' : 'Generate CV'}
+                        {isCoverLetterMode ? 'Preview Cover Letter' : 'Generate CV'}
                       </button>
                     </div>
                   </div>

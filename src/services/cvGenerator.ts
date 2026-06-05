@@ -59,24 +59,69 @@ function renderEducationMarkdown(education: CVData['education']): string {
   return md;
 }
 
+function extractJdKeywords(jobDescription: string): Set<string> {
+  const stopWords = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+    'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be',
+    'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
+    'would', 'could', 'should', 'may', 'might', 'shall', 'can', 'need',
+    'must', 'about', 'between', 'through', 'during', 'before', 'after',
+    'above', 'below', 'up', 'down', 'out', 'off', 'over', 'under', 'again',
+    'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why',
+    'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
+    'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so',
+    'than', 'too', 'very', 'just', 'because', 'also', 'if', 'into',
+    'your', 'our', 'their', 'its', 'this', 'that', 'these', 'those',
+  ]);
+  const words = jobDescription.toLowerCase().split(/[^a-zA-Z0-9+#.-]+/).filter(Boolean);
+  return new Set(words.filter(w => w.length > 2 && !stopWords.has(w)));
+}
+
+function scoreSkillAgainstJd(skill: string, jdKeywords: Set<string>): number {
+  const skillWords = skill.toLowerCase().split(/[\s/]+/);
+  let score = 0;
+  for (const word of skillWords) {
+    if (jdKeywords.has(word)) score += 3;
+    for (const kw of jdKeywords) {
+      if (kw.includes(word) || word.includes(kw)) score += 1;
+    }
+  }
+  return score;
+}
+
+function prioritiseSkills(skills: string, jobDescription: string): string {
+  if (!skills || !jobDescription) return skills;
+  const jdKeywords = extractJdKeywords(jobDescription);
+  if (jdKeywords.size === 0) return skills;
+  const items = skills.split(',').map(s => s.trim()).filter(Boolean);
+  if (items.length === 0) return skills;
+  const ranked = items
+    .map(s => ({ skill: s, score: scoreSkillAgainstJd(s, jdKeywords) }))
+    .sort((a, b) => b.score - a.score);
+  const matched = ranked.filter(r => r.score > 0).map(r => r.skill);
+  const unmatched = ranked.filter(r => r.score === 0).map(r => r.skill);
+  return [...matched, ...unmatched].join(', ');
+}
+
 export async function generateCareerContent(
   data: CVData,
   type: 'cv',
   isPro: boolean = false,
   templateId: string = 'classic'
 ) {
-  const { personalDetails, professionalSummary, coverLetter, experience, education, skills } = data;
+  const { personalDetails, professionalSummary, coverLetter, experience, education, skills, jobDescription } = data;
   const contactLine = buildContactParts(personalDetails).join(" | ");
+  const prioritisedSkills = prioritiseSkills(skills, jobDescription);
 
   switch (templateId) {
     case 'modern':
-      return generateModern(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+      return generateModern(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
     case 'minimal':
-      return generateMinimal(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+      return generateMinimal(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
     case 'professional':
-      return generateProfessional(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+      return generateProfessional(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
     default:
-      return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, skills);
+      return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
   }
 }
 
