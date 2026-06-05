@@ -827,7 +827,7 @@ export default function App() {
         reader.readAsDataURL(file);
       });
 
-      const parsedData = await parseExistingCV(base64, file.type);
+      const parsedData = await parseExistingCV(base64, file.type, file.name);
       
       if (parsedData && Object.keys(parsedData).length > 0) {
         setData(prev => ({

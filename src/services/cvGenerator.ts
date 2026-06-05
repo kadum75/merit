@@ -170,8 +170,10 @@ function generateProfessional(
   return md;
 }
 
-export async function parseExistingCV(fileBase64: string, mimeType: string): Promise<Partial<CVData>> {
-  const isText = !mimeType || mimeType.startsWith('text/');
+export async function parseExistingCV(fileBase64: string, mimeType: string, fileName?: string): Promise<Partial<CVData>> {
+  const ext = fileName?.split('.').pop()?.toLowerCase();
+  const textExts = ['txt', 'text', 'md', 'csv', 'json', 'xml', 'html', 'htm'];
+  const isText = !mimeType || mimeType.startsWith('text/') || textExts.includes(ext || '');
 
   if (isText) {
     try {
