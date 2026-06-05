@@ -171,7 +171,9 @@ function generateProfessional(
 }
 
 export async function parseExistingCV(fileBase64: string, mimeType: string): Promise<Partial<CVData>> {
-  if (mimeType === 'text/plain') {
+  const isText = !mimeType || mimeType.startsWith('text/');
+
+  if (isText) {
     try {
       const binaryStr = atob(fileBase64);
       const bytes = Uint8Array.from(binaryStr, c => c.charCodeAt(0));
