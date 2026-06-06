@@ -223,12 +223,16 @@ export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): P
     if (ext === 'pdf') {
       const pdfjs = await import('pdfjs-dist');
       pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
-      const doc = await pdfjs.getDocument(buffer).promise;
+      const doc = await pdfjs.getDocument({ data: buffer }).promise;
       const pages: string[] = [];
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const content = await page.getTextContent();
-        pages.push(content.items.map((item: any) => item.str).join(' '));
+        const pageText = content.items
+        .filter(item => 'str' in item)
+        .map(item => (item as { str: string }).str)
+        .join(' ');
+      pages.push(pageText);
       }
       const text = pages.join('\n');
       if (!text.trim()) return {};
@@ -241,6 +245,11 @@ export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): P
       const text = result.value;
       if (!text.trim()) return {};
       return { professionalSummary: text };
+    }
+
+    if (ext === 'doc') {
+      console.error('Parse error: .doc files (old Word format) are not supported. Use .docx instead.');
+      return {};
     }
 
     const text = new TextDecoder().decode(buffer).trim();
