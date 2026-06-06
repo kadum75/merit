@@ -53,9 +53,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
           password,
         });
         if (error) throw error;
-        if (data.user) {
-          await syncUserDocument(data.user);
-        }
         onClose();
       } else {
         if (!agreeToTerms) {

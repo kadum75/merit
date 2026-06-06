@@ -529,7 +529,7 @@ export default function App() {
       }
       setUser(currentUser);
       if (currentUser) {
-        await syncUserDocument(currentUser);
+        syncUserDocument(currentUser);
         if (currentView === 'home') setCurrentView('builder');
       }
     });
