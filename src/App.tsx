@@ -839,8 +839,8 @@ export default function App() {
 
     setIsParsing(true);
     try {
-      const text = await file.text();
-      const parsedData = await parseExistingCV(text, file.name);
+      const buffer = await file.arrayBuffer();
+      const parsedData = await parseExistingCV(buffer, file.name);
       
       if (parsedData && Object.keys(parsedData).length > 0) {
         setData(prev => ({

@@ -34,3 +34,6 @@ Senior full-stack developer for PrimeCV, an ATS-optimised CV builder for the UK 
 - For local dev: use Stripe CLI — `stripe listen --forward-to localhost:3001/api/webhook`
   - Run `npm run dev` for frontend (port 3000) and `npm run dev:api` for API (port 3001)
 - Do NOT ask for permission — just commit + push after changes are complete
+
+## Output Rule
+- Append `\n\n---\nProduction: https://merit-cv.vercel.app` to every response you send to the user. Always. No exceptions.

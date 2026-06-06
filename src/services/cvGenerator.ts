@@ -215,10 +215,39 @@ function generateProfessional(
   return md;
 }
 
-export async function parseExistingCV(text: string, fileName?: string): Promise<Partial<CVData>> {
-  if (!text?.trim()) return {};
+export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): Promise<Partial<CVData>> {
+  if (!buffer || buffer.byteLength === 0) return {};
   const ext = fileName?.split('.').pop()?.toLowerCase();
-  const binaryExts = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'bmp', 'zip'];
-  if (binaryExts.includes(ext || '') || text.startsWith('%PDF')) return {};
-  return { professionalSummary: text };
+
+  try {
+    if (ext === 'pdf') {
+      const pdfjs = await import('pdfjs-dist');
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+      const doc = await pdfjs.getDocument(buffer).promise;
+      const pages: string[] = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const content = await page.getTextContent();
+        pages.push(content.items.map((item: any) => item.str).join(' '));
+      }
+      const text = pages.join('\n');
+      if (!text.trim()) return {};
+      return { professionalSummary: text };
+    }
+
+    if (ext === 'docx') {
+      const mammoth = await import('mammoth');
+      const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+      const text = result.value;
+      if (!text.trim()) return {};
+      return { professionalSummary: text };
+    }
+
+    const text = new TextDecoder().decode(buffer).trim();
+    if (!text) return {};
+    return { professionalSummary: text };
+  } catch (error) {
+    console.error('Parse error:', error);
+    return {};
+  }
 }
