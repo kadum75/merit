@@ -28,7 +28,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
-import jsPDF from 'jspdf';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
 import { generateCareerContent, generateCoverLetter, parseExistingCV } from './services/cvGenerator';
 import { TEMPLATES } from './data/templates';
@@ -881,6 +880,7 @@ export default function App() {
     const content = generatedContent || livePreview;
     if (!content) return;
     
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     pdf.setProperties({
