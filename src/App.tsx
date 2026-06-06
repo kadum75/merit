@@ -859,7 +859,7 @@ export default function App() {
           }))
         }));
         setStep(1);
-        toast('CV text extracted and placed in Professional Summary.', 'success');
+        toast('CV parsed — fields populated from extracted data.', 'success');
       } else {
         toast('Could not extract text from this file. Supported formats: .pdf, .docx. Check browser console for details.', 'error');
       }
