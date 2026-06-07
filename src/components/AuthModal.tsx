@@ -65,14 +65,11 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     setError(null);
 
     try {
-      if (TURNSTILE_SITE_KEY && !captchaToken) {
-        throw new Error('Please complete the security check to continue.');
-      }
       if (isSignIn) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
-          options: { captchaToken },
+          ...(captchaToken ? { options: { captchaToken } } : {}),
         });
         if (error) throw error;
         onClose();
@@ -93,7 +90,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
           password,
           options: {
             emailRedirectTo: 'https://merit-cv.vercel.app?signin=confirmed',
-            captchaToken,
+            ...(captchaToken ? { captchaToken } : {}),
           },
         });
         setTurnstileKey(k => k + 1);
@@ -106,7 +103,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
         } else if (!data.user) {
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email, password,
-            options: { captchaToken },
+            ...(captchaToken ? { options: { captchaToken } } : {}),
           });
           if (signInError || !signInData.user) {
             throw new Error('An account with this email already exists. Please sign in instead.');
@@ -157,12 +154,9 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     setLoading(true);
     setError(null);
     try {
-      if (TURNSTILE_SITE_KEY && !captchaToken) {
-        throw new Error('Please complete the security check to continue.');
-      }
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
-        captchaToken,
+        ...(captchaToken ? { captchaToken } : {}),
       });
       if (error) throw error;
       setResetSent(true);
