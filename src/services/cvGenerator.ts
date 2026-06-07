@@ -208,10 +208,10 @@ function generateProfessional(
 // ─────────────────────────────────────────────────────────────────
 
 const SECTION_HEADERS = [
-  { pattern: /^(professional\s+)?(summary|profile|about me|personal statement|career objective)/i, type: 'summary' as const },
-  { pattern: /^(work\s+)?(experience|history|employment)/i, type: 'experience' as const },
-  { pattern: /^(education|qualifications|academic|training|education\s+and\s+qualifications)/i, type: 'education' as const },
-  { pattern: /^(technical\s+)?(skills?|core\s+competencies|expertise|technologies|key\s+skills)/i, type: 'skills' as const },
+  { pattern: /^(professional\s+)?(summary|profile|about me|personal statement|career objective|personal profile)/i, type: 'summary' as const },
+  { pattern: /^((?:work|employment|career)\s+)?(experience|history|employment|professional experience|career history)/i, type: 'experience' as const },
+  { pattern: /^(education|qualifications|academic|training|education\s+and\s+qualifications|academic background)/i, type: 'education' as const },
+  { pattern: /^(technical\s+)?(skills?|core\s+competencies|expertise|technologies|key\s+skills|technical\s+skills|areas?\s+of\s+expertise|core\s+skills)/i, type: 'skills' as const },
   { pattern: /^(projects?|portfolio)/i, type: 'projects' as const },
   { pattern: /^(certifications?|licenses?|accreditations)/i, type: 'certifications' as const },
   { pattern: /^(languages)/i, type: 'languages' as const },
@@ -224,8 +224,9 @@ const PHONE_RE = /(\+44[\s\-]?\d{4}[\s\-]?\d{3}[\s\-]?\d{3}|\+44[\s\-]?\d{3}[\s\
 const LINKEDIN_RE = /linkedin\.com\/in\/[\w-]+/i;
 const DATE_RANGE_RE = /(\w+\s+\d{4})\s*[–\-–to]*\s*(\w+\s+\d{4}|present|current|now)|(\d{4})\s*[–\-–to]*\s*(\d{4}|present|current|now)|(\d{1,2}\/\d{4})\s*[–\-–to]*\s*(\d{1,2}\/\d{4}|present|current|now)/i;
 const YEAR_RE = /\b(?:19|20)\d{2}\b/;
-const DEGREE_KEYWORDS = /\b(BA|BSc|BEng|BEd|LLB|MA|MSc|MEng|MBA|MPhil|MRes|PhD|DPhil|EngD|PGCE|PGDip|BTEC|HND|HNC|NVQ|A[\s-]Level|GCSE|Bachelor|Master'?s?|Doctorate|Degree|Diploma|Foundation|Certificate)\b/i;
-const INSTITUTION_KEYWORDS = /\b(University|College|School|Institute|Academy|Polytechnic)\b/i;
+const UK_CITIES = /\b(london|manchester|birmingham|leeds|glasgow|edinburgh|bristol|liverpool|cardiff|belfast|newcastle|sheffield|oxford|cambridge|nottingham|southampton|portsmouth|leicester|brighton|aberdeen|dundee|reading|bath|york|exeter|norwich|northampton|derby|wolverhampton|swansea|coventry|hull|stoke|plymouth|milton\s*keynes|watford|slough|bournemouth|luton)\b/i;
+const DEGREE_KEYWORDS = /\b(BA|BSc|BEng|BEd|LLB|MA|MSc|MEng|MBA|MPhil|MRes|PhD|DPhil|EngD|PGCE|PGDip|PGCert|PGDE|BTEC|HND|HNC|NVQ|GNVQ|FdSc|FdA|A[\s-]Level|AS[\s-]Level|GCSE|Bachelor|Master'?s?|Doctorate|Degree|Diploma|Foundation|Certificate|Access\s+to|Higher\s+National|National\s+(Diploma|Certificate))\b/i;
+const INSTITUTION_KEYWORDS = /\b(University|College|School|Institute|Academy|Polytechnic|Conservatoire)\b/i;
 
 function parseCVText(text: string): Partial<CVData> {
   const personalDetails: Partial<CVData['personalDetails']> = {};
@@ -247,8 +248,10 @@ function parseCVText(text: string): Partial<CVData> {
 
   for (let i = 0; i < trimmedLines.length; i++) {
     const line = trimmedLines[i];
-    if (!line || line.length > 60) continue;
-    const match = SECTION_HEADERS.find(s => s.pattern.test(line));
+    if (!line) continue;
+    const cleanLine = line.replace(/^\d+[\.\)]\s*/, '').replace(/:+$/, '').replace(/[_\-]{3,}/g, '').trim();
+    if (!cleanLine) continue;
+    const match = SECTION_HEADERS.find(s => s.pattern.test(cleanLine));
     if (match) {
       const prev = sections[sections.length - 1];
       if (prev) prev.end = i;
@@ -275,24 +278,30 @@ function parseCVText(text: string): Partial<CVData> {
   const linkedinMatch = text.match(LINKEDIN_RE);
   if (linkedinMatch) personalDetails.linkedin = linkedinMatch[0];
 
-  // Name: first non-header, non-contact line before first section
+  // Name: first non-contact, non-URL line before first section that looks like a real name
   const contactLines = new Set([emailMatch?.[0], phoneMatch?.[0], linkedinMatch?.[0]].filter(Boolean));
+  let nameFallback = '';
   for (const line of before) {
-    const lower = line.toLowerCase();
     if (contactLines.has(line)) continue;
+    const lower = line.toLowerCase();
     if (lower.includes('linkedin') || lower.startsWith('http')) continue;
     if (line.length > 1 && line.length < 45) {
-      personalDetails.fullName = line;
-      break;
+      if (/^[A-Z][a-zà-ü]+(?:\s+[A-Z][a-zà-ü]+){1,3}$/.test(line)) {
+        personalDetails.fullName = line;
+        nameFallback = '';
+        break;
+      }
+      if (!nameFallback) nameFallback = line;
     }
   }
+  if (!personalDetails.fullName && nameFallback) personalDetails.fullName = nameFallback;
 
-  // Location: last contact-info line before first section (contains comma or known place)
+  // Location: last contact-info line before first section (contains comma, known city, or UK country)
   const locationCandidates = before.filter(l => {
     const lower = l.toLowerCase();
     if (contactLines.has(l)) return false;
     if (lower.startsWith('http') || lower.includes('linkedin')) return false;
-    return l.includes(',') || /\b(london|uk|united kingdom|england|scotland|wales|northern ireland|europe)\b/i.test(l);
+    return l.includes(',') || UK_CITIES.test(l) || /\b(uk|united kingdom|england|scotland|wales|northern ireland|europe)\b/i.test(l);
   });
   personalDetails.location = locationCandidates[locationCandidates.length - 1]?.trim() || '';
 
@@ -346,6 +355,10 @@ function parseCVText(text: string): Partial<CVData> {
   return result;
 }
 
+function looksLikeJobTitle(text: string): boolean {
+  return /\b(Senior|Junior|Lead|Head|Chief|Principal|Staff|Associate|Assistant|Manager|Director|Engineer|Developer|Designer|Analyst|Consultant|Specialist|Coordinator|Administrator|Officer|Executive|Supervisor|Technician|Architect|Scientist|Researcher|Lecturer|Professor|Instructor|Advisor|Representative|Agent|Operative|Worker|Intern|Trainee|Apprentice)\b/i.test(text);
+}
+
 function parseExperienceSection(lines: string[]): WorkExperience[] {
   // Join with newline, then split by blank-line boundaries
   const text = lines.join('\n');
@@ -381,26 +394,35 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     const firstLine = blockLines[0];
     const cleanFirst = firstLine.replace(DATE_RANGE_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').trim();
 
-    // Try patterns: "Role at Company", "Role, Company", "Company — Role", "Company | Role"
+    // Try patterns: "Role at Company", "Company – Role", "Company | Role", "Role, Company"
     const rolePatterns = [
-      /(.+?)\s+(?:at|@|–\s*)\s+(.+)/i,
-      /(.+?),\s*(.+?)(?:\s*[–\-–|]\s*.*)?$/,
+      { pattern: /(.+?)\s+(?:at|@)\s+(.+)/i, roleGroup: 1, companyGroup: 2 },
+      { pattern: /(.+?)\s*[–\-–]\s*(.+)/, roleGroup: 0, companyGroup: 0 },
+      { pattern: /(.+?)\s*\|\s*(.+)/, roleGroup: 0, companyGroup: 0 },
+      { pattern: /(.+?),\s*(.+?)(?:\s*[–\-–|]\s*.*)?$/, roleGroup: 0, companyGroup: 0 },
     ];
 
     let parsed = false;
-    for (const pat of rolePatterns) {
-      const m = cleanFirst.match(pat);
+    for (const rp of rolePatterns) {
+      const m = cleanFirst.match(rp.pattern);
       if (m) {
         const first = m[1].trim();
         const second = m[2].trim();
         if (first.length < 30 && second.length < 40 && first !== second) {
-          // If "at" pattern, first is role
-          if (/at|@/.test(cleanFirst)) {
+          if (rp.roleGroup === 1) {
             entry.role = first;
             entry.company = second;
-          } else {
+          } else if (rp.companyGroup === 2) {
             entry.company = first;
             entry.role = second;
+          } else {
+            if (looksLikeJobTitle(first)) {
+              entry.role = first;
+              entry.company = second;
+            } else {
+              entry.company = first;
+              entry.role = second;
+            }
           }
           parsed = true;
           break;
@@ -462,7 +484,7 @@ function parseEducationSection(lines: string[]): Education[] {
     // Find degree
     for (const line of [...blockLines]) {
       if (DEGREE_KEYWORDS.test(line)) {
-        entry.degree = line.trim();
+        entry.degree = line.trim().replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
         break;
       }
     }
@@ -480,6 +502,17 @@ function parseEducationSection(lines: string[]): Education[] {
       const nonDegree = blockLines.filter(l => l !== entry.degree);
       if (nonDegree.length > 0) entry.institution = nonDegree[nonDegree.length - 1];
     }
+
+    // Clean dates out of institution name, and extract location if on same line
+    const instParts = entry.institution.split(',').map((s: string) => s.trim());
+    if (instParts.length > 1) {
+      const last = instParts[instParts.length - 1];
+      if (UK_CITIES.test(last) && !INSTITUTION_KEYWORDS.test(last) && !DEGREE_KEYWORDS.test(last)) {
+        entry.location = last;
+        entry.institution = instParts.slice(0, -1).join(', ');
+      }
+    }
+    entry.institution = entry.institution.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
 
     entries.push(entry);
   }
