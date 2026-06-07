@@ -30,7 +30,6 @@ export interface CVData {
     usefulLinks?: { label: string; url: string }[];
   };
   professionalSummary: string;
-  coverLetter: string;
   experience: WorkExperience[];
   education: Education[];
   skills: string;

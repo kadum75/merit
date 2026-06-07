@@ -29,7 +29,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
-import { generateCareerContent, generateCoverLetter, parseExistingCV } from './services/cvGenerator';
+import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
 import { TEMPLATES } from './data/templates';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
@@ -65,7 +65,6 @@ const INITIAL_DATA: CVData = {
     usefulLinks: [],
   },
   professionalSummary: '',
-  coverLetter: '',
   experience: [],
   education: [],
   skills: '',
@@ -187,7 +186,6 @@ export default function App() {
   const accessTokenRef = useRef<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
-  const [isCoverLetterMode, setIsCoverLetterMode] = useState(false);
   const [showSummaryGuide, setShowSummaryGuide] = useState(false);
 
   useEffect(() => {
@@ -240,17 +238,6 @@ export default function App() {
   };
 
   const buildLivePreview = (d: CVData): string => {
-    if (isCoverLetterMode) {
-      if (!d.coverLetter) return '';
-      const pd = d.personalDetails;
-      const contact = [pd.email, pd.phone, pd.location].filter(Boolean).join(' | ');
-      return [
-        pd.fullName && `# ${pd.fullName}`,
-        contact,
-        '---',
-        d.coverLetter,
-      ].filter(Boolean).join('\n\n');
-    }
     const sections: string[] = [];
     const pd = d.personalDetails;
     if (pd.fullName) sections.push(`# ${pd.fullName}`);
@@ -283,9 +270,9 @@ export default function App() {
     return sections.join('\n\n');
   };
 
-  const livePreview = React.useMemo(() => buildLivePreview(data), [data, isCoverLetterMode]);
+  const livePreview = React.useMemo(() => buildLivePreview(data), [data]);
 
-  const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.coverLetter || data.experience.length > 0 || data.education.length > 0 || data.skills;
+  const hasFormData = data.personalDetails.fullName || data.professionalSummary || data.experience.length > 0 || data.education.length > 0 || data.skills;
 
   function setData(update: CVData | ((prev: CVData) => CVData)) {
     setCVs(prev => {
@@ -798,9 +785,7 @@ export default function App() {
     try {
       // Race the generation against the timeout
       const content = await Promise.race([
-        isCoverLetterMode
-          ? generateCoverLetter(data)
-          : generateCareerContent(data, 'cv', isPro, activeTemplateId),
+        generateCareerContent(data, 'cv', isPro, activeTemplateId),
         timeoutPromise
       ]) as string;
 
@@ -867,8 +852,8 @@ export default function App() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     pdf.setProperties({
-      title: `Merit Generated ${isCoverLetterMode ? 'Cover Letter' : 'CV'}`,
-      subject: `${isCoverLetterMode ? 'Cover Letter' : 'ATS-Optimised CV'} - Generated on ${new Date().toLocaleDateString('en-GB')}`,
+      title: 'Merit Generated CV',
+      subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
       author: 'Zenstack',
       keywords: 'Zenstack, ATS-Optimised',
       creator: 'Merit'
@@ -1079,7 +1064,7 @@ export default function App() {
     });
 
     const name = data.personalDetails.fullName.replace(/\s+/g, '_') || 'My_CV';
-    pdf.save(`${name}_${isCoverLetterMode ? 'Cover_Letter' : 'CV'}.pdf`);
+    pdf.save(`${name}_CV.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
       toast('Failed to generate PDF. Please try again.', 'error');
@@ -1150,7 +1135,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_${isCoverLetterMode ? 'Cover_Letter' : 'CV'}.doc`;
+    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_CV.doc`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1474,16 +1459,6 @@ export default function App() {
                         ],
                       },
                       professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
-                      coverLetter: `Dear Hiring Manager,
-
-I am writing to express my interest in the Senior Project Manager role at your organisation. With over 8 years of experience delivering complex software solutions at TechFlow Solutions, I am confident that my project leadership and Agile expertise would make a strong contribution to your team.
-
-In my current role as Senior Project Manager, I lead cross-functional teams of up to 15 people, manage budgets exceeding £1.2M, and have consistently delivered high-impact SaaS platforms on time and under budget. I am particularly proud of implementing Jira workflows that improved team velocity by 25%.
-
-I would welcome the opportunity to discuss how my skills and experience align with the needs of your organisation. Thank you for your consideration.
-
-Yours sincerely,
-Alex Thompson`,
                       experience: [{
                         id: '1',
                         company: 'TechFlow Solutions',
@@ -1783,110 +1758,72 @@ Alex Thompson`,
                 {step === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold dark:text-zinc-100">Professional Summary / Cover Letter</h2>
+                      <h2 className="text-2xl font-bold dark:text-zinc-100">Professional Summary</h2>
                     </div>
-                    <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl w-fit">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      A strong summary is the first thing recruiters read. Write 3–5 sentences covering who you are, what you've achieved, and what you're looking for.
+                    </p>
+                    <textarea 
+                      value={data.professionalSummary}
+                      onChange={(e) => setData(prev => ({ ...prev, professionalSummary: e.target.value }))}
+                      placeholder={`[Role] with [X+] years of experience in [industry/domain].\nExpert in [skill 1], [skill 2], and [skill 3], having [key achievement / metric].\nSeeking to [career goal / value proposition].`}
+                      className="w-full h-52 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
+                    />
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={
+                        data.professionalSummary.trim() ? (
+                          data.professionalSummary.trim().split(/\s+/).length < 20
+                            ? 'text-amber-500 font-medium'
+                            : data.professionalSummary.trim().split(/\s+/).length > 80
+                            ? 'text-amber-500 font-medium'
+                            : 'text-green-600 dark:text-green-400 font-medium'
+                        ) : 'text-zinc-400 dark:text-zinc-500'
+                      }>
+                        {data.professionalSummary.trim() ? `${data.professionalSummary.trim().split(/\s+/).length} words (aim for 30–60)` : '0 words'}
+                      </span>
                       <button
-                        onClick={() => setIsCoverLetterMode(false)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                          !isCoverLetterMode
-                            ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                        }`}
+                        type="button"
+                        onClick={() => setShowSummaryGuide(!showSummaryGuide)}
+                        className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
                       >
-                        Professional Summary
-                      </button>
-                      <button
-                        onClick={() => setIsCoverLetterMode(true)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                          isCoverLetterMode
-                            ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-                        }`}
-                      >
-                        Cover Letter
+                        {showSummaryGuide ? 'Hide' : 'Show'} writing guide
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSummaryGuide ? 'rotate-180' : ''}`} />
                       </button>
                     </div>
-                    {!isCoverLetterMode ? (
-                      <>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                          A strong summary is the first thing recruiters read. Write 3–5 sentences covering who you are, what you've achieved, and what you're looking for.
-                        </p>
-                        <textarea 
-                          value={data.professionalSummary}
-                          onChange={(e) => setData(prev => ({ ...prev, professionalSummary: e.target.value }))}
-                          placeholder={`[Role] with [X+] years of experience in [industry/domain].\nExpert in [skill 1], [skill 2], and [skill 3], having [key achievement / metric].\nSeeking to [career goal / value proposition].`}
-                          className="w-full h-52 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
-                        />
-                        <div className="flex items-center justify-between text-xs">
-                          <span className={
-                            data.professionalSummary.trim() ? (
-                              data.professionalSummary.trim().split(/\s+/).length < 20
-                                ? 'text-amber-500 font-medium'
-                                : data.professionalSummary.trim().split(/\s+/).length > 80
-                                ? 'text-amber-500 font-medium'
-                                : 'text-green-600 dark:text-green-400 font-medium'
-                            ) : 'text-zinc-400 dark:text-zinc-500'
-                          }>
-                            {data.professionalSummary.trim() ? `${data.professionalSummary.trim().split(/\s+/).length} words (aim for 30–60)` : '0 words'}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setShowSummaryGuide(!showSummaryGuide)}
-                            className="flex items-center gap-1 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
-                          >
-                            {showSummaryGuide ? 'Hide' : 'Show'} writing guide
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSummaryGuide ? 'rotate-180' : ''}`} />
-                          </button>
+                    {showSummaryGuide && (
+                      <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-5 space-y-5 text-sm">
+                        <div>
+                          <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Suggested structure</h4>
+                          <ol className="space-y-2 text-zinc-600 dark:text-zinc-400 list-decimal list-inside">
+                            <li><strong className="text-zinc-800 dark:text-zinc-200">Who you are</strong> — Role title, years of experience, industry</li>
+                            <li><strong className="text-zinc-800 dark:text-zinc-200">What you bring</strong> — 2–3 key skills or specialities with a notable achievement</li>
+                            <li><strong className="text-zinc-800 dark:text-zinc-200">What you want</strong> — Career goal or value proposition for the next role</li>
+                          </ol>
                         </div>
-                        {showSummaryGuide && (
-                          <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-5 space-y-5 text-sm">
-                            <div>
-                              <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Suggested structure</h4>
-                              <ol className="space-y-2 text-zinc-600 dark:text-zinc-400 list-decimal list-inside">
-                                <li><strong className="text-zinc-800 dark:text-zinc-200">Who you are</strong> — Role title, years of experience, industry</li>
-                                <li><strong className="text-zinc-800 dark:text-zinc-200">What you bring</strong> — 2–3 key skills or specialities with a notable achievement</li>
-                                <li><strong className="text-zinc-800 dark:text-zinc-200">What you want</strong> — Career goal or value proposition for the next role</li>
-                              </ol>
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Examples by role</h4>
-                              <div className="space-y-3">
-                                <details className="group">
-                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Project Manager</summary>
-                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
-                                    "Results-driven Project Manager with 8+ years of experience delivering enterprise software solutions across finance and healthcare sectors. Expert in Agile and Waterfall methodologies, having led cross-functional teams of 15+ to deliver £2M+ programmes on time and under budget. Seeking to leverage deep project leadership and stakeholder management skills at a forward-thinking organisation."
-                                  </p>
-                                </details>
-                                <details className="group">
-                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Software Engineer</summary>
-                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
-                                    "Full-stack Software Engineer with 6 years of experience building scalable web applications using React, Node.js, and AWS. Proven track record of designing systems serving 500k+ daily active users while reducing infrastructure costs by 40%. Passionate about clean architecture, developer experience, and mentoring junior engineers."
-                                  </p>
-                                </details>
-                                <details className="group">
-                                  <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Marketing Manager</summary>
-                                  <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
-                                    "Creative Marketing Manager with 7+ years of experience driving brand growth and demand generation for B2B SaaS companies. Specialist in content marketing, SEO strategy, and paid acquisition — delivering 3x pipeline growth and 150% YoY organic traffic increase. Adept at building and leading high-performing marketing teams in fast-paced scale-up environments."
-                                  </p>
-                                </details>
-                              </div>
-                            </div>
+                        <div>
+                          <h4 className="font-semibold text-zinc-800 dark:text-zinc-200 mb-2">Examples by role</h4>
+                          <div className="space-y-3">
+                            <details className="group">
+                              <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Project Manager</summary>
+                              <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                "Results-driven Project Manager with 8+ years of experience delivering enterprise software solutions across finance and healthcare sectors. Expert in Agile and Waterfall methodologies, having led cross-functional teams of 15+ to deliver £2M+ programmes on time and under budget. Seeking to leverage deep project leadership and stakeholder management skills at a forward-thinking organisation."
+                              </p>
+                            </details>
+                            <details className="group">
+                              <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Software Engineer</summary>
+                              <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                "Full-stack Software Engineer with 6 years of experience building scalable web applications using React, Node.js, and AWS. Proven track record of designing systems serving 500k+ daily active users while reducing infrastructure costs by 40%. Passionate about clean architecture, developer experience, and mentoring junior engineers."
+                              </p>
+                            </details>
+                            <details className="group">
+                              <summary className="cursor-pointer text-zinc-700 dark:text-zinc-300 font-medium hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Marketing Manager</summary>
+                              <p className="mt-2 pl-4 text-zinc-500 dark:text-zinc-400 border-l-2 border-zinc-300 dark:border-zinc-600 italic leading-relaxed">
+                                "Creative Marketing Manager with 7+ years of experience driving brand growth and demand generation for B2B SaaS companies. Specialist in content marketing, SEO strategy, and paid acquisition — delivering 3x pipeline growth and 150% YoY organic traffic increase. Adept at building and leading high-performing marketing teams in fast-paced scale-up environments."
+                              </p>
+                            </details>
                           </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">Write a personalised cover letter to accompany your CV application.</p>
-                        <textarea 
-                          value={data.coverLetter}
-                          onChange={(e) => setData(prev => ({ ...prev, coverLetter: e.target.value }))}
-                          placeholder="Dear Hiring Manager,
-
-I am writing to express my interest in the [Role] position at [Company]..."
-                          className="w-full h-64 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
-                        />
-                      </>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
@@ -2289,7 +2226,7 @@ I am writing to express my interest in the [Role] position at [Company]..."
                         className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                        {isCoverLetterMode ? 'Preview Cover Letter' : 'Generate CV'}
+                        {'Generate CV'}
                       </button>
                     </div>
                   </div>
@@ -2355,7 +2292,7 @@ I am writing to express my interest in the [Role] position at [Company]..."
             <div className="shadow-xl mx-auto w-full max-w-full sm:max-w-[210mm]">
               {!isPro && (
                 <div className="bg-[#FEF3C7] dark:bg-[#451a03] text-[#92400E] dark:text-[#fbbf24] py-2 px-4 text-[10px] font-bold text-center border-b border-[#FDE68A] dark:border-[#78350f] uppercase tracking-wider">
-                  ⚡ Free version — Upgrade to Pro to download your {isCoverLetterMode ? 'cover letter' : 'CV'} as a PDF.
+                   Free version — Upgrade to Pro to download your CV as a PDF.
                 </div>
               )}
               <div 

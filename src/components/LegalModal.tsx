@@ -58,7 +58,7 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
 
           <h4 className="text-white font-bold pt-2">4. How We Use Your Data</h4>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Generate and store your CVs and cover letters</li>
+            <li>Generate and store your CVs</li>
             <li>Manage your account and subscription</li>
             <li>Send service-related emails (e.g., password reset, payment receipts)</li>
             <li>Improve our templates and ATS optimisation</li>

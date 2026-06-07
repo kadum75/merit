@@ -109,7 +109,7 @@ export async function generateCareerContent(
   isPro: boolean = false,
   templateId: string = 'classic'
 ) {
-  const { personalDetails, professionalSummary, coverLetter, experience, education, skills, jobDescription } = data;
+  const { personalDetails, professionalSummary, experience, education, skills, jobDescription } = data;
   const contactLine = buildContactParts(personalDetails).join(" | ");
   const prioritisedSkills = prioritiseSkills(skills, jobDescription);
 
@@ -123,19 +123,6 @@ export async function generateCareerContent(
     default:
       return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
   }
-}
-
-export function generateCoverLetter(data: CVData): string {
-  const { personalDetails, coverLetter } = data;
-  const contactLine = buildContactParts(personalDetails).join(" | ");
-  const location = personalDetails.location ? `\n${personalDetails.location}` : '';
-
-  return [
-    `# ${personalDetails.fullName}${location}`,
-    contactLine,
-    '---',
-    coverLetter || 'Your cover letter content goes here.',
-  ].join('\n\n');
 }
 
 function generateClassic(
@@ -351,14 +338,9 @@ function parseCVText(text: string): Partial<CVData> {
     result.skills = raw.replace(/^,+\s*/, '').replace(/,\s*,+/g, ',').trim();
   }
 
-  // ── 7. Cover letter from text ──
-  // If this looks like a cover letter (single letter body, no section headers),
-  // populate coverLetter instead
+  // ── 7. Fallback: if no sections found, treat as raw text ──
   if (sections.length === 0 && text.length > 100) {
-    const noSections = !SECTION_HEADERS.some(h => h.pattern.test(text));
-    if (noSections) {
-      result.coverLetter = text.trim();
-    }
+    result.professionalSummary = text.trim();
   }
 
   return result;
