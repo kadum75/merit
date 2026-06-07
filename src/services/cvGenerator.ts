@@ -502,13 +502,35 @@ export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): P
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const content = await page.getTextContent();
-        const pageText = content.items
-          .filter((item: any) => 'str' in item)
-          .map((item: any) => item.str)
-          .join(' ');
-        pages.push(pageText);
+        const items = content.items
+          .filter((item: any) => 'str' in item && item.str.trim())
+          .map((item: any) => ({
+            str: item.str,
+            x: item.transform[4],
+            y: item.transform[5],
+          }))
+          .sort((a: any, b: any) => b.y - a.y || a.x - b.x);
+        if (items.length === 0) { pages.push(''); continue; }
+        const lines: string[] = [];
+        let currentLine: { str: string; x: number }[] = [{ str: items[0].str, x: items[0].x }];
+        for (let j = 1; j < items.length; j++) {
+          const prev = items[j - 1];
+          const curr = items[j];
+          if (Math.abs(prev.y - curr.y) < 5) {
+            currentLine.push({ str: curr.str, x: curr.x });
+          } else {
+            currentLine.sort((a, b) => a.x - b.x);
+            lines.push(currentLine.map(l => l.str).join(' '));
+            currentLine = [{ str: curr.str, x: curr.x }];
+          }
+        }
+        if (currentLine.length > 0) {
+          currentLine.sort((a, b) => a.x - b.x);
+          lines.push(currentLine.map(l => l.str).join(' '));
+        }
+        pages.push(lines.join('\n'));
       }
-      text = pages.join('\n');
+      text = pages.join('\n\n');
     } else if (ext === 'docx') {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ arrayBuffer: buffer });
