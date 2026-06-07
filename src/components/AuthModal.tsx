@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, UserPlus, Chrome, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { supabase, isSupabaseConfigValid, syncUserDocument } from '../supabase';
 import { LegalModal, LegalType } from './LegalModal';
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 async function checkPasswordPwned(password: string): Promise<number> {
   const encoder = new TextEncoder();
@@ -32,19 +30,6 @@ interface AuthModalProps {
   onSignUp?: () => void;
 }
 
-declare const turnstile: {
-  render: (container: HTMLElement, opts: {
-    sitekey: string;
-    callback?: (token: string) => void;
-    'error-callback'?: () => void;
-    'expired-callback'?: () => void;
-    theme?: 'light' | 'dark' | 'auto';
-    size?: 'normal' | 'compact' | 'flexible' | 'invisible';
-  }) => string | undefined;
-  remove: (id: string) => void;
-  reset: (id: string) => void;
-};
-
 export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset, onSignUp }: AuthModalProps) {
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('');
@@ -56,58 +41,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
   const [resetSent, setResetSent] = useState(false);
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [confirmedEmail, setConfirmedEmail] = useState('');
-  const [captchaToken, setCaptchaToken] = useState('');
-  const turnstileContainerRef = useRef<HTMLDivElement>(null);
-  const captchaReadyRef = useRef(false);
-
-  const resetTurnstile = useCallback(() => {
-    setCaptchaToken('');
-    captchaReadyRef.current = false;
-    const container = turnstileContainerRef.current;
-    if (container && typeof turnstile !== 'undefined') {
-      try { turnstile.reset(container.id || ''); } catch {}
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || !turnstileContainerRef.current) return;
-
-    const container = turnstileContainerRef.current;
-    container.id = `turnstile-${Date.now()}`;
-
-    let attempts = 0;
-    const renderWidget = () => {
-      if (typeof turnstile === 'undefined') {
-        if (attempts++ < 50) setTimeout(renderWidget, 100);
-        return;
-      }
-      try {
-        turnstile.render(container, {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: (token: string) => {
-            setCaptchaToken(token);
-            captchaReadyRef.current = true;
-          },
-          'error-callback': () => {
-            setCaptchaToken('');
-            captchaReadyRef.current = false;
-          },
-          'expired-callback': () => {
-            setCaptchaToken('');
-            captchaReadyRef.current = false;
-          },
-        });
-      } catch {}
-    };
-
-    renderWidget();
-
-    return () => {
-      if (typeof turnstile !== 'undefined') {
-        try { turnstile.remove(container.id); } catch {}
-      }
-    };
-  }, [TURNSTILE_SITE_KEY, isSignIn]);
   
   // Consent flags
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -131,7 +64,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
-          ...(captchaToken ? { options: { captchaToken } } : {}),
         });
         if (error) throw error;
         onClose();
@@ -152,10 +84,8 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
           password,
           options: {
             emailRedirectTo: 'https://merit-cv.vercel.app?signin=confirmed',
-            ...(captchaToken ? { captchaToken } : {}),
           },
         });
-        resetTurnstile();
         if (error) throw error;
         if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
@@ -164,7 +94,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
         } else if (!data.user) {
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
             email, password,
-            ...(captchaToken ? { options: { captchaToken } } : {}),
           });
           if (signInError || !signInData.user) {
             throw new Error('An account with this email already exists. Please sign in instead.');
@@ -217,7 +146,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
-        ...(captchaToken ? { captchaToken } : {}),
       });
       if (error) throw error;
       setResetSent(true);
@@ -387,10 +315,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
             ) : (
             <><div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl mb-6">
               <button
-                onClick={() => {
-                  setIsSignIn(true);
-                  resetTurnstile();
-                }}
+                onClick={() => setIsSignIn(true)}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
@@ -398,10 +323,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
                 Sign In
               </button>
               <button
-                onClick={() => {
-                  setIsSignIn(false);
-                  resetTurnstile();
-                }}
+                onClick={() => setIsSignIn(false)}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   !isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
@@ -489,12 +411,6 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
                       I agree to the <button type="button" onClick={() => openLegal('privacy')} className="text-zinc-700 dark:text-zinc-300 underline underline-offset-2">Privacy Policy</button> and <button type="button" onClick={() => openLegal('terms')} className="text-zinc-700 dark:text-zinc-300 underline underline-offset-2">Terms of Service</button>. *
                     </span>
                   </label>
-                </div>
-              )}
-
-              {TURNSTILE_SITE_KEY && (
-                <div className="flex justify-center">
-                  <div ref={turnstileContainerRef} />
                 </div>
               )}
 
