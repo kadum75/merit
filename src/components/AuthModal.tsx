@@ -65,10 +65,14 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     setError(null);
 
     try {
+      if (TURNSTILE_SITE_KEY && !captchaToken) {
+        throw new Error('Please complete the security check to continue.');
+      }
       if (isSignIn) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
+          options: { captchaToken },
         });
         if (error) throw error;
         onClose();
@@ -100,7 +104,10 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
           onSignUp?.();
           onClose();
         } else if (!data.user) {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email, password,
+            options: { captchaToken },
+          });
           if (signInError || !signInData.user) {
             throw new Error('An account with this email already exists. Please sign in instead.');
           }
@@ -150,8 +157,12 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     setLoading(true);
     setError(null);
     try {
+      if (TURNSTILE_SITE_KEY && !captchaToken) {
+        throw new Error('Please complete the security check to continue.');
+      }
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin,
+        captchaToken,
       });
       if (error) throw error;
       setResetSent(true);
@@ -321,7 +332,11 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
             ) : (
             <><div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl mb-6">
               <button
-                onClick={() => setIsSignIn(true)}
+                onClick={() => {
+                  setIsSignIn(true);
+                  setCaptchaToken('');
+                  setTurnstileKey(k => k + 1);
+                }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
@@ -329,7 +344,11 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
                 Sign In
               </button>
               <button
-                onClick={() => setIsSignIn(false)}
+                onClick={() => {
+                  setIsSignIn(false);
+                  setCaptchaToken('');
+                  setTurnstileKey(k => k + 1);
+                }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   !isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
                 }`}
@@ -420,7 +439,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
                 </div>
               )}
 
-              {!isSignIn && TURNSTILE_SITE_KEY && (
+              {TURNSTILE_SITE_KEY && (
                 <div className="flex justify-center">
                   <Turnstile
                     key={turnstileKey}
