@@ -73,11 +73,14 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
     if (!TURNSTILE_SITE_KEY || !turnstileContainerRef.current) return;
 
     const container = turnstileContainerRef.current;
-    const id = `turnstile-${Date.now()}`;
-    container.id = id;
+    container.id = `turnstile-${Date.now()}`;
 
+    let attempts = 0;
     const renderWidget = () => {
-      if (typeof turnstile === 'undefined') return;
+      if (typeof turnstile === 'undefined') {
+        if (attempts++ < 50) setTimeout(renderWidget, 100);
+        return;
+      }
       try {
         turnstile.render(container, {
           sitekey: TURNSTILE_SITE_KEY,
@@ -97,31 +100,11 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
       } catch {}
     };
 
-    if (typeof turnstile !== 'undefined') {
-      renderWidget();
-    } else {
-      const existing = document.getElementById('cf-turnstile-script');
-      if (existing && typeof turnstile !== 'undefined') {
-        renderWidget();
-        return;
-      }
-      if (existing) return;
-
-      const script = document.createElement('script');
-      script.id = 'cf-turnstile-script';
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__cfOnLoad';
-      script.async = true;
-      script.defer = true;
-      (window as any).__cfOnLoad = () => {
-        delete (window as any).__cfOnLoad;
-        renderWidget();
-      };
-      document.head.appendChild(script);
-    }
+    renderWidget();
 
     return () => {
       if (typeof turnstile !== 'undefined') {
-        try { turnstile.remove(id); } catch {}
+        try { turnstile.remove(container.id); } catch {}
       }
     };
   }, [TURNSTILE_SITE_KEY, isSignIn]);
