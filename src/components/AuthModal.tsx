@@ -7,6 +7,24 @@ import { LegalModal, LegalType } from './LegalModal';
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
+async function checkPasswordPwned(password: string): Promise<number> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  const prefix = hashHex.slice(0, 5);
+  const suffix = hashHex.slice(5);
+  const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+  if (!res.ok) return 0;
+  const text = await res.text();
+  for (const line of text.split('\n')) {
+    const [hashSuffix, count] = line.split(':');
+    if (hashSuffix === suffix) return parseInt(count, 10);
+  }
+  return 0;
+}
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -57,6 +75,14 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
       } else {
         if (!agreeToTerms) {
           throw new Error('You must agree to the Privacy Policy and Terms of Service.');
+        }
+        const breachCount = await checkPasswordPwned(password);
+        if (breachCount > 0) {
+          throw new Error(
+            `This password has appeared in ${breachCount.toLocaleString()} data ` +
+            `${breachCount === 1 ? 'breach' : 'breaches'} and is not secure. ` +
+            `Please choose a different password.`
+          );
         }
         const { data, error } = await supabase.auth.signUp({
           email,
