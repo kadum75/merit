@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
   User, 
@@ -16,9 +16,10 @@ import {
   ScrollText,
   Home,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { LegalModal, LegalType } from './LegalModal';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_DONATION_ENABLED } from '../lib/pricing';
+import { cvSamples } from '../data/cvSamples';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -49,6 +50,12 @@ export default function LandingPage({
     isOpen: false,
     type: 'privacy'
   });
+
+  const [sampleIndex, setSampleIndex] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setSampleIndex(i => (i + 1) % cvSamples.length), 300000);
+    return () => clearInterval(id);
+  }, []);
 
   const openLegal = (type: LegalType) => {
     setLegalModal({ isOpen: true, type });
@@ -150,63 +157,67 @@ export default function LandingPage({
             <div className="absolute inset-0 bg-gradient-to-tr from-[#3B82F6]/20 to-transparent rounded-full blur-3xl" />
             <div className="relative w-[420px] bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden transform rotate-[1.5deg] hover:rotate-0 transition-transform duration-500">
               <div className="h-2 bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6]" />
-              <div className="px-8 py-7 space-y-5">
-                <div className="text-center space-y-0.5">
-                  <div className="text-xl font-bold text-zinc-900 tracking-tight">Sarah Mitchell</div>
-                  <div className="text-[11px] text-zinc-500 font-medium">Senior Product Manager</div>
-                  <div className="flex items-center justify-center gap-3 mt-1.5">
-                    <span className="text-[9px] text-zinc-400">sarah.m@email.com</span>
-                    <span className="w-1 h-1 rounded-full bg-zinc-300" />
-                    <span className="text-[9px] text-zinc-400">London, UK</span>
-                    <span className="w-1 h-1 rounded-full bg-zinc-300" />
-                    <span className="text-[9px] text-zinc-400">linkedin.com/in/sarah</span>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={sampleIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.4 }}
+                  className="px-8 py-7 space-y-5"
+                >
+                  <div className="text-center space-y-0.5">
+                    <div className="text-xl font-bold text-zinc-900 tracking-tight">{cvSamples[sampleIndex].name}</div>
+                    <div className="text-[11px] text-zinc-500 font-medium">{cvSamples[sampleIndex].title}</div>
+                    <div className="flex items-center justify-center gap-3 mt-1.5">
+                      <span className="text-[9px] text-zinc-400">{cvSamples[sampleIndex].email}</span>
+                      <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                      <span className="text-[9px] text-zinc-400">{cvSamples[sampleIndex].location}</span>
+                      <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                      <span className="text-[9px] text-zinc-400">{cvSamples[sampleIndex].linkedin}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="h-px bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-100" />
-                <div className="space-y-1.5">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Professional Summary</div>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed">
-                    Results-driven Product Manager with 7+ years of experience leading cross-functional teams to deliver SaaS products that drive revenue growth and user engagement.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Experience</div>
+                  <div className="h-px bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-100" />
+                  <div className="space-y-1.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Professional Summary</div>
+                    <p className="text-[10px] text-zinc-500 leading-relaxed">{cvSamples[sampleIndex].summary}</p>
+                  </div>
                   <div className="space-y-2">
-                    <div className="pl-3 border-l-2 border-[#3B82F6]/40">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-zinc-800">Senior PM</span>
-                        <span className="text-[8px] text-zinc-400">2022 — Present</span>
-                      </div>
-                      <span className="text-[9px] text-zinc-500">TechCorp · London</span>
-                      <ul className="mt-1 space-y-0.5">
-                        {['Led product strategy for B2B platform — 40% revenue growth', 'Managed 3 cross-functional squads across 4 time zones'].map((t, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-[9px] text-zinc-500">
-                            <span className="text-[#3B82F6] mt-0.5">●</span>
-                            {t}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="pl-3 border-l-2 border-zinc-200">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-zinc-800">Product Manager</span>
-                        <span className="text-[8px] text-zinc-400">2019 — 2022</span>
-                      </div>
-                      <span className="text-[9px] text-zinc-500">Startup.io · Remote</span>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Experience</div>
+                    <div className="space-y-2">
+                      {cvSamples[sampleIndex].experience.slice(0, 2).map((exp, i) => (
+                        <div key={i} className={`pl-3 border-l-2 ${i === 0 ? 'border-[#3B82F6]/40' : 'border-zinc-200'}`}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold text-zinc-800">{exp.role}</span>
+                            <span className="text-[8px] text-zinc-400">{exp.period}</span>
+                          </div>
+                          <span className="text-[9px] text-zinc-500">{exp.company} · {exp.location}</span>
+                          {exp.achievements.length > 0 && (
+                            <ul className="mt-1 space-y-0.5">
+                              {exp.achievements.slice(0, 2).map((a, j) => (
+                                <li key={j} className="flex items-start gap-1.5 text-[9px] text-zinc-500">
+                                  <span className="text-[#3B82F6] mt-0.5">●</span>
+                                  {a}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Skills</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Product Strategy', 'Agile', 'Data Analytics', 'Leadership', 'Roadmapping'].map(s => (
-                      <span key={s} className="px-2 py-0.5 bg-blue-50 text-[#3B82F6] rounded text-[8px] font-medium">
-                        {s}
-                      </span>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Skills</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cvSamples[sampleIndex].skills.map(s => (
+                        <span key={s} className="px-2 py-0.5 bg-blue-50 text-[#3B82F6] rounded text-[8px] font-medium">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </div>
         </div>
