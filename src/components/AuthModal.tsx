@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, UserPlus, Chrome, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Turnstile } from '@marsidev/react-turnstile';
 import { supabase, isSupabaseConfigValid, syncUserDocument } from '../supabase';
 import { LegalModal, LegalType } from './LegalModal';
 
@@ -33,6 +32,19 @@ interface AuthModalProps {
   onSignUp?: () => void;
 }
 
+declare const turnstile: {
+  render: (container: HTMLElement, opts: {
+    sitekey: string;
+    callback?: (token: string) => void;
+    'error-callback'?: () => void;
+    'expired-callback'?: () => void;
+    theme?: 'light' | 'dark' | 'auto';
+    size?: 'normal' | 'compact' | 'flexible' | 'invisible';
+  }) => string | undefined;
+  remove: (id: string) => void;
+  reset: (id: string) => void;
+};
+
 export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset, onSignUp }: AuthModalProps) {
   const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState('');
@@ -45,7 +57,74 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [confirmedEmail, setConfirmedEmail] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
-  const [turnstileKey, setTurnstileKey] = useState(0);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const captchaReadyRef = useRef(false);
+
+  const resetTurnstile = useCallback(() => {
+    setCaptchaToken('');
+    captchaReadyRef.current = false;
+    const container = turnstileContainerRef.current;
+    if (container && typeof turnstile !== 'undefined') {
+      try { turnstile.reset(container.id || ''); } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !turnstileContainerRef.current) return;
+
+    const container = turnstileContainerRef.current;
+    const id = `turnstile-${Date.now()}`;
+    container.id = id;
+
+    const renderWidget = () => {
+      if (typeof turnstile === 'undefined') return;
+      try {
+        turnstile.render(container, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => {
+            setCaptchaToken(token);
+            captchaReadyRef.current = true;
+          },
+          'error-callback': () => {
+            setCaptchaToken('');
+            captchaReadyRef.current = false;
+          },
+          'expired-callback': () => {
+            setCaptchaToken('');
+            captchaReadyRef.current = false;
+          },
+        });
+      } catch {}
+    };
+
+    if (typeof turnstile !== 'undefined') {
+      renderWidget();
+    } else {
+      const existing = document.getElementById('cf-turnstile-script');
+      if (existing && typeof turnstile !== 'undefined') {
+        renderWidget();
+        return;
+      }
+      if (existing) return;
+
+      const script = document.createElement('script');
+      script.id = 'cf-turnstile-script';
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__cfOnLoad';
+      script.async = true;
+      script.defer = true;
+      (window as any).__cfOnLoad = () => {
+        delete (window as any).__cfOnLoad;
+        renderWidget();
+      };
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      if (typeof turnstile !== 'undefined') {
+        try { turnstile.remove(id); } catch {}
+      }
+    };
+  }, [TURNSTILE_SITE_KEY, isSignIn]);
   
   // Consent flags
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -93,8 +172,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
             ...(captchaToken ? { captchaToken } : {}),
           },
         });
-        setTurnstileKey(k => k + 1);
-        setCaptchaToken('');
+        resetTurnstile();
         if (error) throw error;
         if (data.session) {
           await syncUserDocument(data.user, agreeToTerms);
@@ -328,8 +406,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
               <button
                 onClick={() => {
                   setIsSignIn(true);
-                  setCaptchaToken('');
-                  setTurnstileKey(k => k + 1);
+                  resetTurnstile();
                 }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
@@ -340,8 +417,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
               <button
                 onClick={() => {
                   setIsSignIn(false);
-                  setCaptchaToken('');
-                  setTurnstileKey(k => k + 1);
+                  resetTurnstile();
                 }}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   !isSignIn ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
@@ -435,14 +511,7 @@ export function AuthModal({ isOpen, onClose, resetPasswordMode, onPasswordReset,
 
               {TURNSTILE_SITE_KEY && (
                 <div className="flex justify-center">
-                  <Turnstile
-                    key={turnstileKey}
-                    siteKey={TURNSTILE_SITE_KEY}
-                    onSuccess={setCaptchaToken}
-                    onError={() => setCaptchaToken('')}
-                    onExpire={() => setCaptchaToken('')}
-                    options={{ size: 'flexible' }}
-                  />
+                  <div ref={turnstileContainerRef} />
                 </div>
               )}
 
