@@ -33,8 +33,6 @@ export function createApp() {
   );
   const stripe = isStripeConfigured ? new Stripe(stripeKey) : (null as unknown as Stripe);
 
-  const ADMIN_EMAIL = "rjcosta@gmail.com";
-
   async function verifyAuth(req: express.Request): Promise<{ uid: string; email: string } | null> {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
@@ -43,7 +41,6 @@ export function createApp() {
     try {
       const { data, error } = await supabase.auth.getUser(token);
       if (error || !data?.user) return null;
-      if (data.user.email !== ADMIN_EMAIL) return null;
       return { uid: data.user.id, email: data.user.email || "" };
     } catch {
       return null;

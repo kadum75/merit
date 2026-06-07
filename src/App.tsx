@@ -152,8 +152,6 @@ async function saveServerCVs(cvs: SavedCV[], userId: string) {
   }
 }
 
-const ADMIN_EMAIL = 'rjcosta@gmail.com';
-
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'builder'>('home');
   const [user, setUser] = useState<any>(null);
@@ -459,11 +457,6 @@ export default function App() {
         setIsExchangingCode(false);
         supabase.auth.getUser().then(async ({ data: { user } }) => {
           if (user) {
-            if (user.email !== ADMIN_EMAIL) {
-              await supabase.auth.signOut();
-              toast('Only the administrator can access this system during maintenance.', 'error');
-              return;
-            }
             setUser(user);
           }
         }).catch((err) => {
@@ -479,11 +472,6 @@ export default function App() {
     } else {
       supabase.auth.getUser().then(async ({ data: { user } }) => {
         if (user) {
-          if (user.email !== ADMIN_EMAIL) {
-            await supabase.auth.signOut();
-            toast('Only the administrator can access this system during maintenance.', 'error');
-            return;
-          }
           setUser(user);
           setCurrentView('builder');
         }
@@ -522,11 +510,6 @@ export default function App() {
       }
       accessTokenRef.current = session?.access_token ?? null;
       const currentUser = session?.user ?? null;
-      if (currentUser && currentUser.email !== ADMIN_EMAIL) {
-        await supabase.auth.signOut();
-        toast('Only the administrator can access this system during maintenance.', 'error');
-        return;
-      }
       setUser(currentUser);
       if (currentUser) {
         syncUserDocument(currentUser);
