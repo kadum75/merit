@@ -810,22 +810,22 @@ export default function App() {
       const parsedData = await parseExistingCV(buffer, file.name);
       
       if (parsedData && Object.keys(parsedData).length > 0) {
-        setData(prev => ({
-          ...prev,
+        setData({
+          ...INITIAL_DATA,
           ...parsedData,
           personalDetails: {
-            ...prev.personalDetails,
-            ...(parsedData.personalDetails || {})
+            ...INITIAL_DATA.personalDetails,
+            ...(parsedData.personalDetails || {}),
           },
           experience: (parsedData.experience || []).map((exp: any) => ({
             ...exp,
-            id: Math.random().toString(36).substring(2, 11)
+            id: Math.random().toString(36).substring(2, 11),
           })),
           education: (parsedData.education || []).map((edu: any) => ({
             ...edu,
-            id: Math.random().toString(36).substring(2, 11)
-          }))
-        }));
+            id: Math.random().toString(36).substring(2, 11),
+          })),
+        });
         setStep(1);
         toast('CV parsed — fields populated from extracted data.', 'success');
       } else {
