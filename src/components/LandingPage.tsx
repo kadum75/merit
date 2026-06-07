@@ -51,7 +51,7 @@ export default function LandingPage({
     type: 'privacy'
   });
 
-  const [sampleIndex, setSampleIndex] = useState(0);
+  const [sampleIndex, setSampleIndex] = useState(() => Math.floor(Math.random() * cvSamples.length));
   useEffect(() => {
     const id = setInterval(() => setSampleIndex(i => (i + 1) % cvSamples.length), 300000);
     return () => clearInterval(id);
