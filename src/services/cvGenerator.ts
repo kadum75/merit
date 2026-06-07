@@ -313,9 +313,17 @@ function parseCVText(text: string): Partial<CVData> {
   }
   // Fallback: if no summary section, use text between name/contact and first section header
   if (!result.professionalSummary && before.length > 2) {
-    const afterContact = before.filter(l => !contactLines.has(l) && l !== personalDetails.fullName && !l.includes(',') && !PHONE_RE.test(l) && !EMAIL_RE.test(l));
+    const afterContact = before.filter(l => {
+      const lower = l.toLowerCase();
+      if (contactLines.has(l)) return false;
+      if (l === personalDetails.fullName) return false;
+      if (PHONE_RE.test(l) || EMAIL_RE.test(l)) return false;
+      if (lower.startsWith('http')) return false;
+      if (UK_CITIES.test(l) || /\b(uk|united kingdom|england)\b/i.test(l)) return false;
+      return true;
+    });
     if (afterContact.length > 1) {
-      const maybeSummary = afterContact.slice(personalDetails.location ? 1 : 0).join(' ').trim();
+      const maybeSummary = afterContact.join(' ').trim();
       if (maybeSummary.length > 15) result.professionalSummary = maybeSummary;
     }
   }
@@ -360,7 +368,6 @@ function looksLikeJobTitle(text: string): boolean {
 }
 
 function parseExperienceSection(lines: string[]): WorkExperience[] {
-  // Join with newline, then split by blank-line boundaries
   const text = lines.join('\n');
   const blocks = text.split(/\n\n+/).map(b => b.trim()).filter(b => b.length > 5);
   const entries: WorkExperience[] = [];
@@ -390,55 +397,104 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       entry.isCurrent = /present|current|now/i.test(entry.endDate);
     }
 
-    // Parse first line for role/company
+    // Parse first line for role/company/location
     const firstLine = blockLines[0];
     const cleanFirst = firstLine.replace(DATE_RANGE_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').trim();
 
-    // Try patterns: "Role at Company", "Company – Role", "Company | Role", "Role, Company"
-    const rolePatterns = [
-      { pattern: /(.+?)\s+(?:at|@)\s+(.+)/i, roleGroup: 1, companyGroup: 2 },
-      { pattern: /(.+?)\s*[–\-–]\s*(.+)/, roleGroup: 0, companyGroup: 0 },
-      { pattern: /(.+?)\s*\|\s*(.+)/, roleGroup: 0, companyGroup: 0 },
-      { pattern: /(.+?),\s*(.+?)(?:\s*[–\-–|]\s*.*)?$/, roleGroup: 0, companyGroup: 0 },
-    ];
-
+    // Try split by | or – first (common in UK CVs: "Role | Company | Location" or "Company – Role | Location")
+    const pipeSplit = cleanFirst.split('|').map(s => s.trim()).filter(Boolean);
+    const dashSplit = cleanFirst.split(/[–—]\s*/).map(s => s.trim()).filter(Boolean);
     let parsed = false;
-    for (const rp of rolePatterns) {
-      const m = cleanFirst.match(rp.pattern);
-      if (m) {
-        const first = m[1].trim();
-        const second = m[2].trim();
-        if (first.length < 30 && second.length < 40 && first !== second) {
-          if (rp.roleGroup === 1) {
-            entry.role = first;
-            entry.company = second;
-          } else if (rp.companyGroup === 2) {
-            entry.company = first;
-            entry.role = second;
-          } else {
-            if (looksLikeJobTitle(first)) {
+
+    if (pipeSplit.length >= 3) {
+      if (looksLikeJobTitle(pipeSplit[0])) {
+        entry.role = pipeSplit[0];
+        entry.company = pipeSplit[1];
+        entry.location = pipeSplit.slice(2).filter(l => !looksLikeJobTitle(l)).join(', ');
+      } else {
+        entry.company = pipeSplit[0];
+        entry.role = pipeSplit[1];
+        entry.location = pipeSplit.slice(2).filter(l => !looksLikeJobTitle(l)).join(', ');
+      }
+      parsed = true;
+    } else if (pipeSplit.length === 2) {
+      if (looksLikeJobTitle(pipeSplit[0])) {
+        entry.role = pipeSplit[0];
+        entry.company = pipeSplit[1];
+      } else {
+        entry.company = pipeSplit[0];
+        entry.role = pipeSplit[1];
+      }
+      parsed = true;
+    } else if (dashSplit.length >= 3) {
+      if (looksLikeJobTitle(dashSplit[0])) {
+        entry.role = dashSplit[0];
+        entry.company = dashSplit[1];
+        entry.location = dashSplit.slice(2).filter(l => !looksLikeJobTitle(l)).join(', ');
+      } else {
+        entry.company = dashSplit[0];
+        entry.role = dashSplit[1];
+        entry.location = dashSplit.slice(2).filter(l => !looksLikeJobTitle(l)).join(', ');
+      }
+      parsed = true;
+    } else if (dashSplit.length === 2) {
+      if (looksLikeJobTitle(dashSplit[0])) {
+        entry.role = dashSplit[0];
+        entry.company = dashSplit[1];
+      } else {
+        entry.company = dashSplit[0];
+        entry.role = dashSplit[1];
+      }
+      parsed = true;
+    }
+
+    if (!parsed) {
+      // Fall back to regex patterns: "Role at Company", "Company, Role"
+      const rolePatterns = [
+        { pattern: /(.+?)\s+(?:at|@)\s+(.+)/i, roleGroup: 1, companyGroup: 2 },
+        { pattern: /(.+?),\s*(.+?)(?:\s*[–\-–|]\s*.*)?$/, roleGroup: 0, companyGroup: 0 },
+      ];
+      for (const rp of rolePatterns) {
+        const m = cleanFirst.match(rp.pattern);
+        if (m) {
+          const first = m[1].trim();
+          const second = m[2].trim();
+          if (first.length < 30 && second.length < 40 && first !== second) {
+            if (rp.roleGroup === 1) {
+              entry.role = first;
+              entry.company = second;
+            } else if (looksLikeJobTitle(first)) {
               entry.role = first;
               entry.company = second;
             } else {
               entry.company = first;
               entry.role = second;
             }
+            parsed = true;
+            break;
           }
-          parsed = true;
-          break;
         }
       }
     }
 
     if (!parsed) {
-      // Single line — assume it's a role or company
       entry.role = cleanFirst || blockLines[0];
     }
 
-    // Achievements: all lines after first, minus date lines
+    // If no location found yet, search remaining lines
+    if (!entry.location) {
+      for (const l of blockLines.slice(1)) {
+        if (UK_CITIES.test(l) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(l)) {
+          entry.location = l.replace(/[,;].*/, '').trim();
+          break;
+        }
+      }
+    }
+
+    // Achievements: all lines after first, minus date/location lines
     const achievementLines = blockLines.slice(1).filter(l => {
       const trimmed = l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
-      return trimmed.length > 0 && !DATE_RANGE_RE.test(trimmed);
+      return trimmed.length > 0 && !DATE_RANGE_RE.test(trimmed) && !UK_CITIES.test(trimmed);
     });
     if (achievementLines.length > 0) {
       entry.achievements = achievementLines
@@ -506,10 +562,12 @@ function parseEducationSection(lines: string[]): Education[] {
     // Clean dates out of institution name, and extract location if on same line
     const instParts = entry.institution.split(',').map((s: string) => s.trim());
     if (instParts.length > 1) {
-      const last = instParts[instParts.length - 1];
-      if (UK_CITIES.test(last) && !INSTITUTION_KEYWORDS.test(last) && !DEGREE_KEYWORDS.test(last)) {
-        entry.location = last;
-        entry.institution = instParts.slice(0, -1).join(', ');
+      for (let i = instParts.length - 1; i >= 0; i--) {
+        if (UK_CITIES.test(instParts[i]) && !INSTITUTION_KEYWORDS.test(instParts[i]) && !DEGREE_KEYWORDS.test(instParts[i])) {
+          entry.location = instParts[i];
+          entry.institution = instParts.slice(0, i).join(', ');
+          break;
+        }
       }
     }
     entry.institution = entry.institution.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
