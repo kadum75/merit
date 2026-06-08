@@ -255,7 +255,7 @@ export default function App() {
       sections.push('## Work Experience');
       d.experience.forEach(exp => {
         const dates = `${formatDate(exp.startDate)} — ${exp.isCurrent ? 'Present' : formatDate(exp.endDate)}`;
-        const title = [exp.role, exp.company].filter(Boolean).join(' at ') || exp.role || exp.company;
+        const title = [exp.role, exp.company].filter(Boolean).join(', ') || exp.role || exp.company;
         sections.push(`### ${title}\n*${[exp.location, dates].filter(Boolean).join(' | ')}*`);
         if (exp.achievements) sections.push(exp.achievements.split('\n').map(a => `- ${a.trim().replace(/^[•\-\*%ª]\s*/, '')}`).join('\n'));
       });
@@ -263,11 +263,11 @@ export default function App() {
     if (d.education?.length) {
       sections.push('## Education');
       d.education.forEach(edu => {
-        const parts = [[edu.degree, edu.institution].filter(Boolean).join(' — ') || `${edu.degree || edu.institution}`];
-        if (edu.location) parts.push(`*${edu.location}*`);
-        if (edu.graduationDate) parts.push(`*${formatDate(edu.graduationDate)}*`);
-        if (edu.grade) parts.push(`*${edu.grade}*`);
-        sections.push(parts.join('  \n'));
+        const title = edu.institution || edu.degree || 'Education';
+        sections.push(`### ${title}`);
+        const meta = [edu.degree, edu.grade, edu.graduationDate].filter(Boolean).join(' | ');
+        if (meta) sections.push(`*${meta}*`);
+        if (edu.location && !meta.includes(edu.location)) sections.push(`*${edu.location}*`);
       });
     }
     if (d.skills) sections.push(`## Skills\n\n${d.skills.split(',').map(s => s.trim()).filter(Boolean).join(', ')}`);

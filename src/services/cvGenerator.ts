@@ -34,8 +34,9 @@ function renderExperienceMarkdown(experience: CVData['experience']): string {
     const start = formatUKDate(exp.startDate);
     const end = exp.isCurrent ? "Present" : formatUKDate(exp.endDate);
     const title = [exp.role, exp.company].filter(Boolean).join(', ') || exp.role || exp.company;
-    md += `### ${title} (${start} - ${end})\n`;
-    if (exp.location) md += `*${exp.location}*\n\n`;
+    md += `### ${title}\n`;
+    const meta = [exp.location, `${start} — ${end}`].filter(Boolean).join(' | ');
+    if (meta) md += `*${meta}*\n`;
     if (exp.achievements) {
       const bullets = exp.achievements.split('\n').filter(line => line.trim());
       bullets.forEach(bullet => {
@@ -51,11 +52,11 @@ function renderExperienceMarkdown(experience: CVData['experience']): string {
 function renderEducationMarkdown(education: CVData['education']): string {
   let md = '';
   education.forEach((edu) => {
-    const title = [edu.degree, edu.institution].filter(Boolean).join(', ') || edu.degree || edu.institution;
-    md += `### ${title} (${formatUKDate(edu.graduationDate)})\n`;
-    if (edu.location || edu.grade) {
-      md += `*${[edu.location, edu.grade].filter(Boolean).join(", ")}*\n`;
-    }
+    const title = edu.institution || edu.degree || 'Education';
+    md += `### ${title}\n`;
+    const meta = [edu.degree, edu.grade, edu.graduationDate].filter(Boolean).join(' | ');
+    if (meta) md += `*${meta}*\n`;
+    if (edu.location) md += `*${edu.location}*\n`;
     md += `\n`;
   });
   return md;
