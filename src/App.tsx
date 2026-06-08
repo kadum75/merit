@@ -237,6 +237,13 @@ export default function App() {
       const [y, m] = dateStr.split('-');
       return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
     }
+    const mmYyMatch = dateStr.match(/^(\d{1,2})\/(\d{4})$/);
+    if (mmYyMatch) {
+      const m = parseInt(mmYyMatch[1], 10);
+      const y = mmYyMatch[2];
+      const monthAbbr = Object.values(months)[m - 1] || mmYyMatch[1];
+      return `${monthAbbr} ${y}`;
+    }
     return dateStr;
   };
 
@@ -1036,6 +1043,12 @@ export default function App() {
         pdf.setTextColor(0, 0, 0);
         pdf.text(bulletLines, margin + 5, yPos);
         yPos += (bulletLines.length * 3.5) + 1.5;
+      } else if (/^\*\*(.+)\*\*$/.test(trimmed)) {
+        const boldText = trimmed.replace(/^\*\*(.+)\*\*$/, '$1');
+        addWrappedText(boldText, 9, 'bold', 2);
+      } else if (/^\*(.+)\*$/.test(trimmed) && !trimmed.startsWith('* ')) {
+        const italicText = trimmed.replace(/^\*(.+)\*$/, '$1');
+        addWrappedText(italicText, 9, 'italic', 2);
       } else {
         const isContactInfo = yPos < 50 && trimmed.includes('|');
         if (isContactInfo) {

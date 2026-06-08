@@ -15,6 +15,13 @@ function formatUKDate(dateStr: string): string {
     const [y, m] = dateStr.split('-');
     return `${months[Object.keys(months)[parseInt(m) - 1]] || m} ${y}`;
   }
+  const mmYyMatch = dateStr.match(/^(\d{1,2})\/(\d{4})$/);
+  if (mmYyMatch) {
+    const m = parseInt(mmYyMatch[1], 10);
+    const y = mmYyMatch[2];
+    const monthAbbr = Object.values(months)[m - 1] || mmYyMatch[1];
+    return `${monthAbbr} ${y}`;
+  }
   return dateStr;
 }
 
@@ -229,6 +236,7 @@ const DATE_RANGE_RE = /(\w+\s+\d{4})\s*[–\-–—to]*\s*(\w+\s+\d{4}|present|c
 const YEAR_RE = /\b(?:19|20)\d{2}\b/;
 const UK_CITIES = /\b(london|manchester|birmingham|leeds|glasgow|edinburgh|bristol|liverpool|cardiff|belfast|newcastle|sheffield|oxford|cambridge|nottingham|southampton|portsmouth|leicester|brighton|aberdeen|dundee|reading|bath|york|exeter|norwich|northampton|derby|wolverhampton|swansea|coventry|hull|stoke|plymouth|milton\s*keynes|watford|slough|bournemouth|luton)\b/i;
 const DEGREE_KEYWORDS = /\b(BA|BSc|BEng|BEd|LLB|MA|MSc|MEng|MBA|MPhil|MRes|PhD|DPhil|EngD|PGCE|PGDip|PGCert|PGDE|BTEC|HND|HNC|NVQ|GNVQ|FdSc|FdA|A[\s-]Levels?|AS[\s-]Levels?|GCSE|Bachelor|Master'?s?|Doctorate|Degree|Diploma|Foundation|Certificate|Access\s+to|Higher\s+National|National\s+(Diploma|Certificate))\b/i;
+const GRADE_KEYWORDS = /\b(First|Second|Third|Upper|Lower|2:1|2\.1|2:2|2\.2|1st|2nd|3rd|Merit|Distinction|Pass|Honours?)\b/i;
 const INSTITUTION_KEYWORDS = /\b(University|College|School|Institute|Academy|Polytechnic|Conservatoire)\b/i;
 
 function parseCVText(text: string): Partial<CVData> {
@@ -395,7 +403,10 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
   if (blocks.length <= 1) {
     const dateMatches = text.match(DATE_RANGE_RE);
     if (dateMatches && dateMatches.length > 1) {
-      const parts = text.split(/(?=\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|0?\d\/\d{4})\s*\d{4}\s*[–\-–—])/);
+      // Split before any date-like pattern at the start of a line:
+      // "Jan 2020", "01/2020", "2020" followed by optional range (dash + year/Present)
+      const dateSplitRe = /(?=\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}(?:\s*[–\-–—]\s*(?:\d{4}|Present|Current|Now))?|\b\d{1,2}\/\d{4}(?:\s*[–\-–—]\s*(?:\d{1,2}\/\d{4}|Present|Current|Now))?|\b(?:19|20)\d{2}(?:\s*[–\-–—]\s*(?:(?:19|20)\d{2}|Present|Current|Now))?)/i;
+      const parts = text.split(dateSplitRe);
       if (parts.length > 1) {
         blocks = parts.map(b => b.trim()).filter(b => b.length > 5);
       }
@@ -535,7 +546,7 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     // If company or location still empty, scan remaining lines
     const dataLines: { index: number; trimmed: string }[] = [];
     for (let i = 1; i < blockLines.length; i++) {
-      const trimmed = blockLines[i].replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
+      const trimmed = blockLines[i].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
       if (trimmed.length > 0 && !DATE_RANGE_RE.test(blockLines[i])) {
         dataLines.push({ index: i, trimmed });
       }
@@ -567,7 +578,7 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     const achievementLines: string[] = [];
     for (let i = 1; i < blockLines.length; i++) {
       if (consumedIndices.has(i)) continue;
-      const trimmed = blockLines[i].replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
+      const trimmed = blockLines[i].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
       if (trimmed.length > 0) achievementLines.push(trimmed);
     }
 
@@ -621,7 +632,24 @@ function parseEducationSection(lines: string[]): Education[] {
     // Find institution
     for (const line of [...blockLines]) {
       if (INSTITUTION_KEYWORDS.test(line) || /(?:of|in)\s+[A-Z][A-Za-z]/.test(line)) {
-        entry.institution = line.trim();
+        const candidate = line.trim();
+        // If same line as degree, split intelligently
+        if (candidate === entry.degree) {
+          const parts = candidate.split(/,(?=[^,]*\b(?:University|College|School|Institute|Academy)\b)/i);
+          if (parts.length > 1) {
+            entry.degree = parts[0].trim();
+            entry.institution = parts.slice(1).join(',').trim();
+            break;
+          }
+          // Try splitting by " – " or " — "
+          const dashSplit = candidate.split(/[–—]/);
+          if (dashSplit.length > 1 && INSTITUTION_KEYWORDS.test(dashSplit[1])) {
+            entry.degree = dashSplit[0].trim();
+            entry.institution = dashSplit[1].trim();
+            break;
+          }
+        }
+        entry.institution = candidate;
         break;
       }
     }
@@ -633,6 +661,24 @@ function parseEducationSection(lines: string[]): Education[] {
         entry.institution = nonDegree[0];
         if (YEAR_RE.test(entry.institution) || DATE_RANGE_RE.test(entry.institution)) {
           entry.institution = nonDegree[1] || nonDegree[0];
+        }
+      }
+    }
+
+    // Find grade — scan all lines for grade keywords
+    for (const line of blockLines) {
+      if (GRADE_KEYWORDS.test(line)) {
+        const trimmed = line.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').trim();
+        // Only capture if it looks like a grade line (short or parenthesised)
+        if (trimmed.length < 40 && !INSTITUTION_KEYWORDS.test(trimmed) && !DEGREE_KEYWORDS.test(trimmed)) {
+          entry.grade = trimmed;
+          break;
+        }
+        // Check for parenthesised grade like "(First Class Honours)"
+        const parenGrade = trimmed.match(/\(([^)]*?(?:First|Second|Third|2:1|2\.1|2:2|2\.2|1st|2nd|3rd|Honours?|Merit|Distinction)[^)]*)\)/i);
+        if (parenGrade) {
+          entry.grade = parenGrade[1].trim();
+          break;
         }
       }
     }
