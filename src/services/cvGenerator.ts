@@ -224,10 +224,10 @@ const SECTION_HEADERS = [
 const EMAIL_RE = /[\w.-]+@[\w.-]+\.\w{2,}/;
 const PHONE_RE = /(\+44[\s\-]?\d{4}[\s\-]?\d{3}[\s\-]?\d{3}|\+44[\s\-]?\d{3}[\s\-]?\d{3,4}[\s\-]?\d{4}|0\d{4}[\s\-]?\d{3}[\s\-]?\d{3}|0\d{3}[\s\-]?\d{3,4}[\s\-]?\d{4}|07\d{3}[\s\-]?\d{3}[\s\-]?\d{3}|0\d{4}[\s\-]?\d{6})/;
 const LINKEDIN_RE = /linkedin\.com\/in\/[\w-]+/i;
-const DATE_RANGE_RE = /(\w+\s+\d{4})\s*[–\-–to]*\s*(\w+\s+\d{4}|present|current|now)|(\d{4})\s*[–\-–to]*\s*(\d{4}|present|current|now)|(\d{1,2}\/\d{4})\s*[–\-–to]*\s*(\d{1,2}\/\d{4}|present|current|now)/i;
+const DATE_RANGE_RE = /(\w+\s+\d{4})\s*[–\-–—to]*\s*(\w+\s+\d{4}|present|current|now)|(\d{4})\s*[–\-–—to]*\s*(\d{4}|present|current|now)|(\d{1,2}\/\d{4})\s*[–\-–—to]*\s*(\d{1,2}\/\d{4}|present|current|now)/i;
 const YEAR_RE = /\b(?:19|20)\d{2}\b/;
 const UK_CITIES = /\b(london|manchester|birmingham|leeds|glasgow|edinburgh|bristol|liverpool|cardiff|belfast|newcastle|sheffield|oxford|cambridge|nottingham|southampton|portsmouth|leicester|brighton|aberdeen|dundee|reading|bath|york|exeter|norwich|northampton|derby|wolverhampton|swansea|coventry|hull|stoke|plymouth|milton\s*keynes|watford|slough|bournemouth|luton)\b/i;
-const DEGREE_KEYWORDS = /\b(BA|BSc|BEng|BEd|LLB|MA|MSc|MEng|MBA|MPhil|MRes|PhD|DPhil|EngD|PGCE|PGDip|PGCert|PGDE|BTEC|HND|HNC|NVQ|GNVQ|FdSc|FdA|A[\s-]Level|AS[\s-]Level|GCSE|Bachelor|Master'?s?|Doctorate|Degree|Diploma|Foundation|Certificate|Access\s+to|Higher\s+National|National\s+(Diploma|Certificate))\b/i;
+const DEGREE_KEYWORDS = /\b(BA|BSc|BEng|BEd|LLB|MA|MSc|MEng|MBA|MPhil|MRes|PhD|DPhil|EngD|PGCE|PGDip|PGCert|PGDE|BTEC|HND|HNC|NVQ|GNVQ|FdSc|FdA|A[\s-]Levels?|AS[\s-]Levels?|GCSE|Bachelor|Master'?s?|Doctorate|Degree|Diploma|Foundation|Certificate|Access\s+to|Higher\s+National|National\s+(Diploma|Certificate))\b/i;
 const INSTITUTION_KEYWORDS = /\b(University|College|School|Institute|Academy|Polytechnic|Conservatoire)\b/i;
 
 function parseCVText(text: string): Partial<CVData> {
@@ -372,9 +372,50 @@ function looksLikeJobTitle(text: string): boolean {
   return /\b(Senior|Junior|Lead|Head|Chief|Principal|Staff|Associate|Assistant|Manager|Director|Engineer|Developer|Designer|Analyst|Consultant|Specialist|Coordinator|Administrator|Officer|Executive|Supervisor|Technician|Architect|Scientist|Researcher|Lecturer|Professor|Instructor|Advisor|Representative|Agent|Operative|Worker|Intern|Trainee|Apprentice)\b/i.test(text);
 }
 
+function looksLikeGenericSkill(text: string): boolean {
+  const singleWords = new Set([
+    'communication', 'leadership', 'management', 'problem', 'teamwork',
+    'organisation', 'planning', 'analysis', 'research', 'creativity',
+    'innovation', 'negotiation', 'presentation', 'mentoring', 'coaching',
+    'budgeting', 'forecasting', 'reporting', 'strategy', 'marketing',
+    'sales', 'support', 'training', 'development', 'testing',
+    'engineering', 'accounting', 'finance', 'operations', 'logistics',
+    'procurement', 'recruitment', 'compliance', 'auditing', 'quality',
+  ]);
+  const lower = text.toLowerCase().trim();
+  return singleWords.has(lower) || /^(?:soft|hard|technical|analytical|interpersonal)\s+skill/i.test(text);
+}
+
 function parseExperienceSection(lines: string[]): WorkExperience[] {
   const text = lines.join('\n');
-  const blocks = text.split(/\n\n+/).map(b => b.trim()).filter(b => b.length > 5);
+  let blocks = text.split(/\n\n+/).map(b => b.trim()).filter(b => b.length > 5);
+
+  // Fallback: if only 1 block but multiple date ranges appear, re-split by date boundaries
+  if (blocks.length <= 1) {
+    const dateMatches = text.match(DATE_RANGE_RE);
+    if (dateMatches && dateMatches.length > 1) {
+      const parts = text.split(/(?=\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|0?\d\/\d{4})\s*\d{4}\s*[–\-–—])/);
+      if (parts.length > 1) {
+        blocks = parts.map(b => b.trim()).filter(b => b.length > 5);
+      }
+    }
+  }
+
+  // Merge achievement-only blocks back into their parent entry
+  // (blank lines between header and achievements create separate blocks)
+  const merged: string[] = [];
+  for (const block of blocks) {
+    const firstLine = block.split('\n')[0].trim();
+    const hasDate = DATE_RANGE_RE.test(block);
+    const hasJobTitle = looksLikeJobTitle(firstLine) || firstLine.includes('|') || firstLine.includes('–') || firstLine.includes('—');
+    if (!hasDate && !hasJobTitle && merged.length > 0) {
+      merged[merged.length - 1] += '\n\n' + block;
+    } else {
+      merged.push(block);
+    }
+  }
+  blocks = merged;
+
   const entries: WorkExperience[] = [];
 
   for (const block of blocks) {
@@ -402,9 +443,13 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       entry.isCurrent = /present|current|now/i.test(entry.endDate);
     }
 
+    // Track which line indices are consumed (not achievements)
+    const consumedIndices = new Set<number>();
+    consumedIndices.add(0);
+
     // Parse first line for role/company/location
     const firstLine = blockLines[0];
-    const cleanFirst = firstLine.replace(DATE_RANGE_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').trim();
+    const cleanFirst = firstLine.replace(DATE_RANGE_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').trim();
 
     // Try split by | or – first (common in UK CVs: "Role | Company | Location" or "Company – Role | Location")
     const pipeSplit = cleanFirst.split('|').map(s => s.trim()).filter(Boolean);
@@ -486,27 +531,47 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       entry.role = cleanFirst || blockLines[0];
     }
 
-    // If no location found yet, search remaining lines for short, non-bullet location lines
-    if (!entry.location) {
-      for (const l of blockLines.slice(1)) {
-        const trimmed = l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
-        if (trimmed.length > 0 && trimmed.length < 40 && !looksLikeJobTitle(trimmed) &&
-            (UK_CITIES.test(trimmed) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(trimmed))) {
-          entry.location = trimmed.replace(/[,;].*/, '').trim();
-          break;
-        }
+    // If company or location still empty, scan remaining lines
+    const dataLines: { index: number; trimmed: string }[] = [];
+    for (let i = 1; i < blockLines.length; i++) {
+      const trimmed = blockLines[i].replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
+      if (trimmed.length > 0 && !DATE_RANGE_RE.test(blockLines[i])) {
+        dataLines.push({ index: i, trimmed });
       }
     }
 
-    // Achievements: all lines after first, minus date lines
-    const achievementLines = blockLines.slice(1).filter(l => {
-      const trimmed = l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
-      return trimmed.length > 0 && !DATE_RANGE_RE.test(trimmed);
-    });
+    for (const { index, trimmed } of dataLines) {
+      if (!entry.company && !looksLikeJobTitle(trimmed) && trimmed.length < 40
+          && !looksLikeGenericSkill(trimmed)
+          && !DATE_RANGE_RE.test(trimmed)
+          && !(UK_CITIES.test(trimmed))) {
+        entry.company = trimmed;
+        consumedIndices.add(index);
+        continue;
+      }
+      if (!entry.location && trimmed.length < 40 && !looksLikeJobTitle(trimmed)
+          && (UK_CITIES.test(trimmed) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(trimmed))) {
+        entry.location = trimmed.replace(/[,;].*/, '').trim();
+        consumedIndices.add(index);
+        continue;
+      }
+    }
+
+    // Mark date lines as consumed
+    for (let i = 0; i < blockLines.length; i++) {
+      if (DATE_RANGE_RE.test(blockLines[i])) consumedIndices.add(i);
+    }
+
+    // Achievements: lines not consumed
+    const achievementLines: string[] = [];
+    for (let i = 1; i < blockLines.length; i++) {
+      if (consumedIndices.has(i)) continue;
+      const trimmed = blockLines[i].replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
+      if (trimmed.length > 0) achievementLines.push(trimmed);
+    }
+
     if (achievementLines.length > 0) {
-      entry.achievements = achievementLines
-        .map(l => l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim())
-        .join('\n');
+      entry.achievements = achievementLines.join('\n');
     }
 
     entries.push(entry);
@@ -547,7 +612,7 @@ function parseEducationSection(lines: string[]): Education[] {
     // Find degree
     for (const line of [...blockLines]) {
       if (DEGREE_KEYWORDS.test(line)) {
-        entry.degree = line.trim().replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
+        entry.degree = line.trim().replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
         break;
       }
     }
@@ -560,10 +625,28 @@ function parseEducationSection(lines: string[]): Education[] {
       }
     }
 
-    // Fallback: if no institution found but degree was, use the longest non-degree line
+    // Fallback: if no institution found but degree was, prefer first non-degree line
     if (!entry.institution) {
       const nonDegree = blockLines.filter(l => l !== entry.degree);
-      if (nonDegree.length > 0) entry.institution = nonDegree[nonDegree.length - 1];
+      if (nonDegree.length > 0) {
+        entry.institution = nonDegree[0];
+        if (YEAR_RE.test(entry.institution) || DATE_RANGE_RE.test(entry.institution)) {
+          entry.institution = nonDegree[1] || nonDegree[0];
+        }
+      }
+    }
+
+    // Scan remaining lines for location if not embedded in institution name
+    if (!entry.location) {
+      for (const line of blockLines) {
+        if (line === entry.institution || line === entry.degree) continue;
+        const trimmed = line.replace(YEAR_RE, '').replace(DATE_RANGE_RE, '').trim();
+        if (trimmed.length > 0 && trimmed.length < 40 &&
+            (UK_CITIES.test(trimmed) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(trimmed))) {
+          entry.location = trimmed.replace(/[,;].*/, '').trim();
+          break;
+        }
+      }
     }
 
     // Clean dates out of institution name, and extract location if on same line
@@ -578,7 +661,7 @@ function parseEducationSection(lines: string[]): Education[] {
         }
       }
     }
-    entry.institution = entry.institution.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
+    entry.institution = entry.institution.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
 
     entries.push(entry);
   }
