@@ -137,7 +137,7 @@ function generateClassic(
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `${contactLine}\n\n`;
-  if (professionalSummary) md += `## Professional Summary\n\n${professionalSummary}\n\n`;
+  if (professionalSummary) md += `## Personal Profile\n\n${professionalSummary}\n\n`;
   if (experience.length > 0) md += `## Work Experience\n\n${renderExperienceMarkdown(experience)}`;
   if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
   if (skills) md += `## Skills\n\n${skills}\n`;
@@ -154,7 +154,7 @@ function generateModern(
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `*${contactLine}*\n\n`;
-  if (professionalSummary) md += `## Professional Summary\n\n${professionalSummary}\n\n`;
+  if (professionalSummary) md += `## Personal Profile\n\n${professionalSummary}\n\n`;
   if (skills) md += `## Core Skills\n\n${skills}\n\n`;
   if (experience.length > 0) md += `## Experience\n\n${renderExperienceMarkdown(experience)}`;
   if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
@@ -310,7 +310,7 @@ function parseCVText(text: string): Partial<CVData> {
   });
   personalDetails.location = locationCandidates[locationCandidates.length - 1]?.trim() || '';
 
-  // ── 3. Professional Summary ──
+  // ── 3. Personal Profile ──
 
   const summaryLines = getSection('summary');
   if (summaryLines.length > 0) {

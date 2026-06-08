@@ -250,7 +250,7 @@ export default function App() {
     if (links.length) sections.push(links.join(' | '));
     if (pd.usefulLinks?.length) sections.push(pd.usefulLinks.filter(l => l.label && l.url).map(l => `${l.label}: ${l.url}`).join(' | '));
     sections.push('---');
-    if (d.professionalSummary) sections.push(`## Professional Summary\n\n${d.professionalSummary}`);
+    if (d.professionalSummary) sections.push(`## Personal Profile\n\n${d.professionalSummary}`);
     if (d.experience?.length) {
       sections.push('## Work Experience');
       d.experience.forEach(exp => {
@@ -581,7 +581,7 @@ export default function App() {
 
   const steps = [
     { id: 'personal', title: 'Personal Details', icon: User },
-    { id: 'summary', title: 'Professional Summary', icon: FileText },
+    { id: 'summary', title: 'Personal Profile', icon: FileText },
     { id: 'experience', title: 'Work Experience', icon: Briefcase },
     { id: 'education', title: 'Education', icon: GraduationCap },
     { id: 'skills', title: 'Skills', icon: Wrench },
@@ -1762,10 +1762,10 @@ export default function App() {
                 {step === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-bold dark:text-zinc-100">Professional Summary</h2>
+                      <h2 className="text-2xl font-bold dark:text-zinc-100">Personal Profile</h2>
                     </div>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                      A strong summary is the first thing recruiters read. Write 3–5 sentences covering who you are, what you've achieved, and what you're looking for.
+                      A strong personal profile is the first thing recruiters read. Write 3–5 sentences covering who you are, what you've achieved, and what you're looking for.
                     </p>
                     <textarea 
                       value={data.professionalSummary}

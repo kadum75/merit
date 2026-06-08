@@ -179,7 +179,7 @@ export default function LandingPage({
                   </div>
                   <div className="h-px bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-100" />
                   <div className="space-y-1.5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Professional Summary</div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-700">Personal Profile</div>
                     <p className="text-[10px] text-zinc-500 leading-relaxed">{cvSamples[sampleIndex].summary}</p>
                   </div>
                   <div className="space-y-2">
