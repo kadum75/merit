@@ -264,7 +264,7 @@ function parseCVText(text: string): Partial<CVData> {
   const getSection = (type: string) => {
     const s = sections.find(x => x.type === type);
     if (!s) return [] as string[];
-    return trimmedLines.slice(s.start + 1, s.end).filter(Boolean);
+    return trimmedLines.slice(s.start + 1, s.end);
   };
 
   // ── 2. Personal details ──
@@ -286,12 +286,15 @@ function parseCVText(text: string): Partial<CVData> {
     const lower = line.toLowerCase();
     if (lower.includes('linkedin') || lower.startsWith('http')) continue;
     if (line.length > 1 && line.length < 45) {
-      if (/^[A-Z][a-zà-ü]+(?:\s+[A-Z][a-zà-ü]+){1,3}$/.test(line)) {
+      if (/^[A-Z][a-zà-ü']+(?:[\s-][A-Z][a-zà-ü'.]+){1,3}$/.test(line)) {
         personalDetails.fullName = line;
         nameFallback = '';
         break;
       }
-      if (!nameFallback) nameFallback = line;
+      // Reject lines that look like contact info (email, phone, pipe-separated, @)
+      if (!lower.includes('@') && !PHONE_RE.test(line) && !line.includes('|')) {
+        if (!nameFallback) nameFallback = line;
+      }
     }
   }
   if (!personalDetails.fullName && nameFallback) personalDetails.fullName = nameFallback;
@@ -309,7 +312,7 @@ function parseCVText(text: string): Partial<CVData> {
 
   const summaryLines = getSection('summary');
   if (summaryLines.length > 0) {
-    result.professionalSummary = summaryLines.join(' ').trim();
+    result.professionalSummary = summaryLines.join(' ').replace(/\s{2,}/g, ' ').trim();
   }
   // Fallback: if no summary section, use text between name/contact and first section header
   if (!result.professionalSummary && before.length > 2) {
@@ -322,7 +325,7 @@ function parseCVText(text: string): Partial<CVData> {
       if (UK_CITIES.test(l) || /\b(uk|united kingdom|england)\b/i.test(l)) return false;
       return true;
     });
-    if (afterContact.length > 1) {
+    if (afterContact.length >= 1) {
       const maybeSummary = afterContact.join(' ').trim();
       if (maybeSummary.length > 15) result.professionalSummary = maybeSummary;
     }
@@ -481,20 +484,22 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       entry.role = cleanFirst || blockLines[0];
     }
 
-    // If no location found yet, search remaining lines
+    // If no location found yet, search remaining lines for short, non-bullet location lines
     if (!entry.location) {
       for (const l of blockLines.slice(1)) {
-        if (UK_CITIES.test(l) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(l)) {
-          entry.location = l.replace(/[,;].*/, '').trim();
+        const trimmed = l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
+        if (trimmed.length > 0 && trimmed.length < 40 && !looksLikeJobTitle(trimmed) &&
+            (UK_CITIES.test(trimmed) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(trimmed))) {
+          entry.location = trimmed.replace(/[,;].*/, '').trim();
           break;
         }
       }
     }
 
-    // Achievements: all lines after first, minus date/location lines
+    // Achievements: all lines after first, minus date lines
     const achievementLines = blockLines.slice(1).filter(l => {
       const trimmed = l.replace(/^[•·●\-–—\*\d+\.]\s*/, '').trim();
-      return trimmed.length > 0 && !DATE_RANGE_RE.test(trimmed) && !UK_CITIES.test(trimmed);
+      return trimmed.length > 0 && !DATE_RANGE_RE.test(trimmed);
     });
     if (achievementLines.length > 0) {
       entry.achievements = achievementLines
@@ -563,7 +568,8 @@ function parseEducationSection(lines: string[]): Education[] {
     const instParts = entry.institution.split(',').map((s: string) => s.trim());
     if (instParts.length > 1) {
       for (let i = instParts.length - 1; i >= 0; i--) {
-        if (UK_CITIES.test(instParts[i]) && !INSTITUTION_KEYWORDS.test(instParts[i]) && !DEGREE_KEYWORDS.test(instParts[i])) {
+        if (!INSTITUTION_KEYWORDS.test(instParts[i]) && !DEGREE_KEYWORDS.test(instParts[i]) &&
+            (UK_CITIES.test(instParts[i]) || /\b(uk|united kingdom|england|scotland|wales|northern ireland|ireland)\b/i.test(instParts[i]))) {
           entry.location = instParts[i];
           entry.institution = instParts.slice(0, i).join(', ');
           break;
@@ -607,7 +613,7 @@ export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): P
         for (let j = 1; j < items.length; j++) {
           const prev = items[j - 1];
           const curr = items[j];
-          if (Math.abs(prev.y - curr.y) < 5) {
+          if (Math.abs(prev.y - curr.y) < 8) {
             currentLine.push({ str: curr.str, x: curr.x });
           } else {
             currentLine.sort((a, b) => a.x - b.x);
