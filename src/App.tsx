@@ -1855,56 +1855,71 @@ export default function App() {
                           </button>
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Company</label>
-                              <input 
-                                value={exp.company}
-                                onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Company</label>
+                              <div className="relative">
+                                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input 
+                                  value={exp.company}
+                                  onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
+                                  placeholder="e.g. Balfour Beatty"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Role</label>
-                              <input 
-                                value={exp.role}
-                                onChange={(e) => updateExperience(exp.id, 'role', e.target.value)}
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Role</label>
+                              <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input 
+                                  value={exp.role}
+                                  onChange={(e) => updateExperience(exp.id, 'role', e.target.value)}
+                                  placeholder="e.g. Senior Project Manager"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Start Date</label>
-                              <input 
-                                value={exp.startDate}
-                                onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
-                                placeholder="MM/YYYY"
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Start Date</label>
+                              <div className="relative">
+                                <input 
+                                  value={exp.startDate}
+                                  onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
+                                  placeholder="MM/YYYY"
+                                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">End Date</label>
-                              <input 
-                                value={exp.endDate}
-                                disabled={exp.isCurrent}
-                                onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
-                                placeholder={exp.isCurrent ? 'Present' : 'MM/YYYY'}
-                                className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg focus:outline-none focus:border-zinc-900 disabled:bg-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">End Date</label>
+                              <div className="relative">
+                                <input 
+                                  value={exp.endDate}
+                                  disabled={exp.isCurrent}
+                                  onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
+                                  placeholder={exp.isCurrent ? 'Present' : 'MM/YYYY'}
+                                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                />
+                              </div>
                             </div>
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Location</label>
-                            <input
-                              list="exp-uk-locations"
-                              value={exp.location}
-                              onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
-                              placeholder="London, UK"
-                              className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                            />
-                            <datalist id="exp-uk-locations">
-                              {UK_LOCATIONS.map(loc => (
-                                <option key={loc} value={loc} />
-                              ))}
-                            </datalist>
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Location</label>
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                              <input
+                                list="exp-uk-locations"
+                                value={exp.location}
+                                onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
+                                placeholder="London, UK"
+                                className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                              />
+                              <datalist id="exp-uk-locations">
+                                {UK_LOCATIONS.map(loc => (
+                                  <option key={loc} value={loc} />
+                                ))}
+                              </datalist>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <input 
@@ -1916,14 +1931,17 @@ export default function App() {
                             />
                             <label htmlFor={`current-${exp.id}`} className="text-sm text-zinc-600 dark:text-zinc-400">I currently work here</label>
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Key Achievements (One per line)</label>
-                            <textarea 
-                              value={exp.achievements}
-                              onChange={(e) => updateExperience(exp.id, 'achievements', e.target.value)}
-                              placeholder="e.g. Managed a team of 10 to deliver a £500k project 2 weeks ahead of schedule..."
-                              className="w-full h-24 p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100 resize-none"
-                            />
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Key Achievements</label>
+                            <div className="relative">
+                              <FileText className="absolute left-3 top-3 w-4 h-4 text-zinc-400" />
+                              <textarea 
+                                value={exp.achievements}
+                                onChange={(e) => updateExperience(exp.id, 'achievements', e.target.value)}
+                                placeholder="e.g. Led delivery of a £4.2M railway upgrade programme, completed 3 weeks ahead of schedule"
+                                className="w-full pl-10 pr-4 py-2 h-24 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none"
+                              />
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1960,54 +1978,70 @@ export default function App() {
                           </button>
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Institution</label>
-                              <input 
-                                value={edu.institution}
-                                onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Institution</label>
+                              <div className="relative">
+                                <GraduationCap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input 
+                                  value={edu.institution}
+                                  onChange={(e) => updateEducation(edu.id, 'institution', e.target.value)}
+                                  placeholder="e.g. University of Manchester"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Degree/Qualification</label>
-                              <input 
-                                value={edu.degree}
-                                onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Degree/Qualification</label>
+                              <div className="relative">
+                                <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input 
+                                  value={edu.degree}
+                                  onChange={(e) => updateEducation(edu.id, 'degree', e.target.value)}
+                                  placeholder="e.g. BEng Civil Engineering"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Location</label>
-                              <input
-                                list="edu-uk-locations"
-                                value={edu.location}
-                                onChange={(e) => updateEducation(edu.id, 'location', e.target.value)}
-                                placeholder="Manchester, UK"
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
-                              <datalist id="edu-uk-locations">
-                                {UK_LOCATIONS.map(loc => (
-                                  <option key={loc} value={loc} />
-                                ))}
-                              </datalist>
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Location</label>
+                              <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input
+                                  list="edu-uk-locations"
+                                  value={edu.location}
+                                  onChange={(e) => updateEducation(edu.id, 'location', e.target.value)}
+                                  placeholder="Manchester, UK"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                                <datalist id="edu-uk-locations">
+                                  {UK_LOCATIONS.map(loc => (
+                                    <option key={loc} value={loc} />
+                                  ))}
+                                </datalist>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Graduation Date</label>
-                              <input 
-                                value={edu.graduationDate}
-                                onChange={(e) => updateEducation(edu.id, 'graduationDate', e.target.value)}
-                                placeholder="YYYY"
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Graduation Date</label>
+                              <div className="relative">
+                                <input 
+                                  value={edu.graduationDate}
+                                  onChange={(e) => updateEducation(edu.id, 'graduationDate', e.target.value)}
+                                  placeholder="YYYY"
+                                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">Grade (Optional)</label>
-                              <input 
-                                value={edu.grade}
-                                onChange={(e) => updateEducation(edu.id, 'grade', e.target.value)}
-                                placeholder="e.g. 2:1, Merit"
-                                className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-100"
-                              />
+                            <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Grade (Optional)</label>
+                              <div className="relative">
+                                <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <input 
+                                  value={edu.grade}
+                                  onChange={(e) => updateEducation(edu.id, 'grade', e.target.value)}
+                                  placeholder="e.g. 2:1, Merit"
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
