@@ -615,19 +615,25 @@ export default function LandingPage({
             </div>
             )}
             
-            <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
-              <p className="text-sm">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">Zenstack</a>. All rights reserved.</p>
-              <div className="flex flex-wrap justify-center gap-6">
-              {[
-                { icon: ShieldCheck, label: 'ATS Compatible' },
-                { icon: Zap, label: 'Privacy-First' }
-              ].map((item, i) => (
-                <div key={`row-footer-badges-${i}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40">
-                  <item.icon className="w-3 h-3" />
-                  {item.label}
-                </div>
-              ))}
-            </div>
+            <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex flex-col items-center md:items-start gap-1">
+                <p className="text-sm">© 2026 Zenstack. All rights reserved.</p>
+                <p className="text-xs text-white/40">Zenstack Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-white/50">
+                <button type="button" onClick={() => openLegal('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>
+                <button type="button" onClick={() => openLegal('terms')} className="hover:text-white transition-colors">Terms of Service</button>
+                <button type="button" onClick={() => openLegal('contact')} className="hover:text-white transition-colors">Contact</button>
+                {[
+                  { icon: ShieldCheck, label: 'ATS Compatible' },
+                  { icon: Zap, label: 'Privacy-First' }
+                ].map((item, i) => (
+                  <div key={`row-footer-badges-${i}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40">
+                    <item.icon className="w-3 h-3" />
+                    {item.label}
+                  </div>
+                ))}
+              </div>
           </div>
         </div>
       </div>

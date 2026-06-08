@@ -24,7 +24,8 @@ import {
   Lock,
   FolderOpen, 
   X, 
-  Pencil
+  Pencil,
+  Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
@@ -34,6 +35,7 @@ import { TEMPLATES } from './data/templates';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
 import { AuthModal } from './components/AuthModal';
+import { LegalModal, LegalType } from './components/LegalModal';
 import { CookieConsent } from './components/CookieConsent';
 import { Header } from './components/Header';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -156,6 +158,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalType }>({ isOpen: false, type: 'privacy' });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
   const [cvs, setCVs] = useState<SavedCV[]>(() => loadCVs());
@@ -2349,17 +2352,15 @@ export default function App() {
 
       {/* Footer */}
       <footer className="py-6 px-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-sm text-zinc-500">© 2026 <a href="https://webpagemain-pink.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">Zenstack</a>. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-6">
-            {[
-              { icon: CheckCircle2, label: 'ATS Compatible' },
-            ].map((item, i) => (
-              <div key={`footer-badge-${i}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
-                <item.icon className="w-3 h-3 text-green-500" />
-                {item.label}
-              </div>
-            ))}
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <p className="text-sm text-zinc-500">© 2026 Zenstack. All rights reserved.</p>
+            <p className="text-xs text-zinc-400">Zenstack Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-zinc-500">
+            <button onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Privacy Policy</button>
+            <button onClick={() => setLegalModal({ isOpen: true, type: 'terms' })} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Terms of Service</button>
+            <button onClick={() => setLegalModal({ isOpen: true, type: 'contact' })} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Contact</button>
           </div>
         </div>
       </footer>
@@ -2374,6 +2375,13 @@ export default function App() {
         resetPasswordMode={resetPasswordMode}
         onPasswordReset={() => setResetPasswordMode(false)}
         onSignUp={() => setCurrentView('builder')}
+    />
+
+    <LegalModal
+      isOpen={legalModal.isOpen}
+      onClose={() => setLegalModal({ ...legalModal, isOpen: false })}
+      type={legalModal.type}
+      onSwitchType={(type) => setLegalModal({ isOpen: true, type })}
     />
 
     <AnimatePresence mode="popLayout">

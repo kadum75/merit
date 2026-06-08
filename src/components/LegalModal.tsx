@@ -27,9 +27,9 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
 
           <h4 className="text-white font-bold pt-2">1. Who We Are & Contact</h4>
           <p>
-            Merit is operated by Zenstack. Our Data Protection Officer can be reached at:{' '}
+            Merit is operated by Zenstack Ltd (Company No. 15646884, 71-75 Shelton Street, London, WC2H 9JQ). Our Data Protection Officer can be reached at:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
-            Merit is a new service in the process of registering with the Information Commissioner's Office (ICO). Until registration is complete, we operate under the direct supervision of the ICO's transitional provisions.
+            Merit is registered with the Information Commissioner's Office (ICO) under registration number ZB855489.
           </p>
 
           <h4 className="text-white font-bold pt-2">2. Data We Collect</h4>
@@ -234,7 +234,27 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
             For EU users, you may complain to your local supervisory authority.
           </p>
 
-          <h4 className="text-white font-bold pt-2">15. Contact</h4>
+          <h4 className="text-white font-bold pt-2">15. Accessibility Statement</h4>
+          <p>
+            Merit is committed to ensuring digital accessibility for all users, including those with
+            disabilities. We are actively working to conform to the Web Content Accessibility Guidelines
+            (WCAG) 2.2 Level AA standards.
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>We provide clear focus indicators and keyboard navigation support</li>
+            <li>Colour contrast ratios meet WCAG AA thresholds (4.5:1 for normal text)</li>
+            <li>The interface supports light and dark themes to accommodate visual preferences</li>
+            <li>We use semantic HTML and ARIA labels where appropriate</li>
+            <li>PDF CV exports are generated as tagged documents for screen reader compatibility</li>
+          </ul>
+          <p className="mt-2">
+            We welcome feedback on accessibility. If you encounter any barriers, please contact our
+            DPO at{' '}
+            <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
+            {' '}and we will work to address the issue promptly.
+          </p>
+
+          <h4 className="text-white font-bold pt-2">16. Contact</h4>
           <p>
             Data Protection Officer:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>
