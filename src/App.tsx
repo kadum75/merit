@@ -252,14 +252,15 @@ export default function App() {
       sections.push('## Work Experience');
       d.experience.forEach(exp => {
         const dates = `${formatDate(exp.startDate)} — ${exp.isCurrent ? 'Present' : formatDate(exp.endDate)}`;
-        sections.push(`### ${exp.role} at ${exp.company}\n*${exp.location} | ${dates}*`);
+        const title = [exp.role, exp.company].filter(Boolean).join(' at ') || exp.role || exp.company;
+        sections.push(`### ${title}\n*${[exp.location, dates].filter(Boolean).join(' | ')}*`);
         if (exp.achievements) sections.push(exp.achievements.split('\n').map(a => `- ${a.trim().replace(/^[•\-\*%ª]\s*/, '')}`).join('\n'));
       });
     }
     if (d.education?.length) {
       sections.push('## Education');
       d.education.forEach(edu => {
-        const parts = [`**${edu.degree}** — ${edu.institution}`];
+        const parts = [[edu.degree, edu.institution].filter(Boolean).join(' — ') || `${edu.degree || edu.institution}`];
         if (edu.location) parts.push(`*${edu.location}*`);
         if (edu.graduationDate) parts.push(`*${formatDate(edu.graduationDate)}*`);
         if (edu.grade) parts.push(`*${edu.grade}*`);

@@ -33,7 +33,8 @@ function renderExperienceMarkdown(experience: CVData['experience']): string {
   experience.forEach((exp) => {
     const start = formatUKDate(exp.startDate);
     const end = exp.isCurrent ? "Present" : formatUKDate(exp.endDate);
-    md += `### ${exp.role}, ${exp.company} (${start} - ${end})\n`;
+    const title = [exp.role, exp.company].filter(Boolean).join(', ') || exp.role || exp.company;
+    md += `### ${title} (${start} - ${end})\n`;
     if (exp.location) md += `*${exp.location}*\n\n`;
     if (exp.achievements) {
       const bullets = exp.achievements.split('\n').filter(line => line.trim());
@@ -50,7 +51,8 @@ function renderExperienceMarkdown(experience: CVData['experience']): string {
 function renderEducationMarkdown(education: CVData['education']): string {
   let md = '';
   education.forEach((edu) => {
-    md += `### ${edu.degree}, ${edu.institution} (${formatUKDate(edu.graduationDate)})\n`;
+    const title = [edu.degree, edu.institution].filter(Boolean).join(', ') || edu.degree || edu.institution;
+    md += `### ${title} (${formatUKDate(edu.graduationDate)})\n`;
     if (edu.location || edu.grade) {
       md += `*${[edu.location, edu.grade].filter(Boolean).join(", ")}*\n`;
     }
@@ -347,10 +349,10 @@ function parseCVText(text: string): Partial<CVData> {
 
   // ── 6. Skills ──
 
-  const skillsLines = getSection('skills');
+  const skillsLines = getSection('skills').map(l => l.trim()).filter(Boolean);
   if (skillsLines.length > 0) {
     const raw = skillsLines
-      .join(' ')
+      .join(', ')
       .replace(/[•·●\-–—∙◦‣⁃]\s*/g, ', ')
       .replace(/\s*\|\s*/g, ', ')
       .replace(/\s{2,}/g, ' ')
