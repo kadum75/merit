@@ -395,57 +395,65 @@ function looksLikeGenericSkill(text: string): boolean {
   return singleWords.has(lower) || /^(?:soft|hard|technical|analytical|interpersonal)\s+skill/i.test(text);
 }
 
+function looksLikeEntryHeader(line: string): boolean {
+  if (!line || line.length < 3) return false;
+  if (DATE_RANGE_RE.test(line)) return true;
+  if (looksLikeJobTitle(line)) return true;
+  if (line.includes('|')) return true;
+  if (/[–—]/.test(line)) return true;
+  return false;
+}
+
 function parseExperienceSection(lines: string[]): WorkExperience[] {
-  const text = lines.join('\n');
-  let blocks = text.split(/\n\n+/).map(b => b.trim()).filter(b => b.length > 5);
+  if (lines.length === 0) return [];
 
-  // Fallback: if only 1 block but multiple date ranges appear, re-split by date boundaries
-  if (blocks.length <= 1) {
-    const dateMatches = text.match(DATE_RANGE_RE);
-    if (dateMatches && dateMatches.length > 1) {
-      // Split before any date-like pattern at the start of a line:
-      // "Jan 2020", "01/2020", "2020" followed by optional range (dash + year/Present)
-      const dateSplitRe = /(?=\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}(?:\s*[–\-–—]\s*(?:\d{4}|Present|Current|Now))?|\b\d{1,2}\/\d{4}(?:\s*[–\-–—]\s*(?:\d{1,2}\/\d{4}|Present|Current|Now))?|\b(?:19|20)\d{2}(?:\s*[–\-–—]\s*(?:(?:19|20)\d{2}|Present|Current|Now))?)/i;
-      const parts = text.split(dateSplitRe);
-      if (parts.length > 1) {
-        blocks = parts.map(b => b.trim()).filter(b => b.length > 5);
-      }
+  // Step 1: Process all non-empty lines, build an array of { text, index } entries
+  const allLines = lines.map((l, i) => ({ text: l.trim(), lineIdx: i, isEntryHeader: false }))
+    .filter(l => l.text.length > 0);
+
+  // Step 2: Identify entry headers
+  for (let i = 0; i < allLines.length; i++) {
+    const line = allLines[i];
+    // A line is likely an entry header if:
+    // - It has a date range, OR
+    // - It looks like a job title, OR
+    // - It has pipe separators, OR
+    // - It's followed by a date line (common: "Role\nJan 2020 - Present")
+    const nextLine = i + 1 < allLines.length ? allLines[i + 1].text : '';
+    const hasDate = DATE_RANGE_RE.test(line.text);
+    const isJobTitle = looksLikeJobTitle(line.text);
+    const hasPipe = line.text.includes('|');
+    const nextIsDate = nextLine.length > 0 && DATE_RANGE_RE.test(nextLine);
+    const isShortLine = line.text.length < 60;
+
+    if (isShortLine && (hasDate || isJobTitle || hasPipe || nextIsDate)) {
+      allLines[i].isEntryHeader = true;
     }
   }
 
-  // Merge achievement-only blocks back into their parent entry
-  // (blank lines between header and achievements create separate blocks)
-  const merged: string[] = [];
-  for (const block of blocks) {
-    const firstLine = block.split('\n')[0].trim();
-    const hasDate = DATE_RANGE_RE.test(block);
-    const hasJobTitle = looksLikeJobTitle(firstLine) || firstLine.includes('|') || firstLine.includes('–') || firstLine.includes('—');
-    if (!hasDate && !hasJobTitle && merged.length > 0) {
-      merged[merged.length - 1] += '\n\n' + block;
-    } else {
-      merged.push(block);
-    }
-  }
-  blocks = merged;
-
+  // Step 3: Group lines into entries (one header + following lines)
   const entries: WorkExperience[] = [];
 
-  for (const block of blocks) {
-    const blockLines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    if (blockLines.length === 0) continue;
+  for (let i = 0; i < allLines.length; ) {
+    if (!allLines[i].isEntryHeader) { i++; continue; }
+
+    // Collect all lines from this header to just before the next header
+    const entryLines: string[] = [];
+    entryLines.push(allLines[i].text);
+    let j = i + 1;
+    while (j < allLines.length && !allLines[j].isEntryHeader) {
+      entryLines.push(allLines[j].text);
+      j++;
+    }
+
+    if (entryLines.length === 0) { i = j; continue; }
 
     const entry: WorkExperience = {
-      id: '',
-      company: '',
-      role: '',
-      location: '',
-      startDate: '',
-      endDate: '',
-      isCurrent: false,
-      achievements: '',
+      id: '', company: '', role: '', location: '',
+      startDate: '', endDate: '', isCurrent: false, achievements: '',
     };
 
-    const blockText = blockLines.join('\n');
+    const blockText = entryLines.join('\n');
 
     // Extract date range
     const dateMatch = blockText.match(DATE_RANGE_RE);
@@ -455,15 +463,10 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       entry.isCurrent = /present|current|now/i.test(entry.endDate);
     }
 
-    // Track which line indices are consumed (not achievements)
-    const consumedIndices = new Set<number>();
-    consumedIndices.add(0);
-
     // Parse first line for role/company/location
-    const firstLine = blockLines[0];
+    const firstLine = entryLines[0];
     const cleanFirst = firstLine.replace(DATE_RANGE_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').trim();
 
-    // Try split by | or – first (common in UK CVs: "Role | Company | Location" or "Company – Role | Location")
     const pipeSplit = cleanFirst.split('|').map(s => s.trim()).filter(Boolean);
     const dashSplit = cleanFirst.split(/[–—]\s*/).map(s => s.trim()).filter(Boolean);
     let parsed = false;
@@ -511,52 +514,33 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     }
 
     if (!parsed) {
-      // Fall back to regex patterns: "Role at Company", "Company, Role"
-      const rolePatterns = [
-        { pattern: /(.+?)\s+(?:at|@)\s+(.+)/i, roleGroup: 1, companyGroup: 2 },
-        { pattern: /(.+?),\s*(.+?)(?:\s*[–\-–|]\s*.*)?$/, roleGroup: 0, companyGroup: 0 },
-      ];
-      for (const rp of rolePatterns) {
-        const m = cleanFirst.match(rp.pattern);
-        if (m) {
-          const first = m[1].trim();
-          const second = m[2].trim();
-          if (first.length < 30 && second.length < 40 && first !== second) {
-            if (rp.roleGroup === 1) {
-              entry.role = first;
-              entry.company = second;
-            } else if (looksLikeJobTitle(first)) {
-              entry.role = first;
-              entry.company = second;
-            } else {
-              entry.company = first;
-              entry.role = second;
-            }
-            parsed = true;
-            break;
-          }
-        }
+      const atSplit = cleanFirst.split(/\s+(?:at|for|with|@)\s+/i);
+      if (atSplit.length >= 2) {
+        entry.role = atSplit.slice(0, -1).join(' ');
+        entry.company = atSplit[atSplit.length - 1];
+        parsed = true;
       }
     }
 
     if (!parsed) {
-      entry.role = cleanFirst || blockLines[0];
+      entry.role = cleanFirst || firstLine;
     }
 
-    // If company or location still empty, scan remaining lines
+    // Scan remaining lines for company/location (if not found in header)
+    const consumedIndices = new Set<number>();
+    consumedIndices.add(0);
+
     const dataLines: { index: number; trimmed: string }[] = [];
-    for (let i = 1; i < blockLines.length; i++) {
-      const trimmed = blockLines[i].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
-      if (trimmed.length > 0 && !DATE_RANGE_RE.test(blockLines[i])) {
-        dataLines.push({ index: i, trimmed });
+    for (let k = 1; k < entryLines.length; k++) {
+      const trimmed = entryLines[k].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
+      if (trimmed.length > 0 && !DATE_RANGE_RE.test(entryLines[k])) {
+        dataLines.push({ index: k, trimmed });
       }
     }
 
     for (const { index, trimmed } of dataLines) {
-      if (!entry.company && !looksLikeJobTitle(trimmed) && trimmed.length < 40
-          && !looksLikeGenericSkill(trimmed)
-          && !DATE_RANGE_RE.test(trimmed)
-          && !(UK_CITIES.test(trimmed))) {
+      if (!entry.company && trimmed.length < 40 && !looksLikeJobTitle(trimmed) && !looksLikeGenericSkill(trimmed)
+          && !DATE_RANGE_RE.test(trimmed) && !UK_CITIES.test(trimmed)) {
         entry.company = trimmed;
         consumedIndices.add(index);
         continue;
@@ -570,15 +554,15 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     }
 
     // Mark date lines as consumed
-    for (let i = 0; i < blockLines.length; i++) {
-      if (DATE_RANGE_RE.test(blockLines[i])) consumedIndices.add(i);
+    for (let k = 0; k < entryLines.length; k++) {
+      if (DATE_RANGE_RE.test(entryLines[k])) consumedIndices.add(k);
     }
 
     // Achievements: lines not consumed
     const achievementLines: string[] = [];
-    for (let i = 1; i < blockLines.length; i++) {
-      if (consumedIndices.has(i)) continue;
-      const trimmed = blockLines[i].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
+    for (let k = 1; k < entryLines.length; k++) {
+      if (consumedIndices.has(k)) continue;
+      const trimmed = entryLines[k].replace(/^\d+[\.\)]\s*/, '').replace(/^[•·●\-–—\*]\s*/, '').trim();
       if (trimmed.length > 0) achievementLines.push(trimmed);
     }
 
@@ -587,28 +571,25 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     }
 
     entries.push(entry);
+    i = j;
   }
 
   return entries;
 }
 
 function parseEducationSection(lines: string[]): Education[] {
-  const text = lines.join('\n');
-  const blocks = text.split(/\n\n+/).map(b => b.trim()).filter(b => b.length > 3);
+  const allLines = lines.map(l => l.trim()).filter(Boolean);
+  if (allLines.length === 0) return [];
+
   const entries: Education[] = [];
+  let currentBlock: string[] = [];
 
-  for (const block of blocks) {
-    const blockLines = block.split('\n').map(l => l.trim()).filter(Boolean);
-    if (blockLines.length === 0) continue;
-
+  function flushBlock() {
+    if (currentBlock.length === 0) return;
+    const blockLines = currentBlock;
     const entry: Education = {
-      id: '',
-      institution: '',
-      degree: '',
-      location: '',
-      graduationDate: '',
+      id: '', institution: '', degree: '', location: '', graduationDate: '',
     };
-
     const blockText = blockLines.join(' ');
 
     // Extract year
@@ -622,7 +603,7 @@ function parseEducationSection(lines: string[]): Education[] {
     }
 
     // Find degree
-    for (const line of [...blockLines]) {
+    for (const line of blockLines) {
       if (DEGREE_KEYWORDS.test(line)) {
         entry.degree = line.trim().replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
         break;
@@ -630,10 +611,9 @@ function parseEducationSection(lines: string[]): Education[] {
     }
 
     // Find institution
-    for (const line of [...blockLines]) {
+    for (const line of blockLines) {
       if (INSTITUTION_KEYWORDS.test(line) || /(?:of|in)\s+[A-Z][A-Za-z]/.test(line)) {
         const candidate = line.trim();
-        // If same line as degree, split intelligently
         if (candidate === entry.degree) {
           const parts = candidate.split(/,(?=[^,]*\b(?:University|College|School|Institute|Academy)\b)/i);
           if (parts.length > 1) {
@@ -641,7 +621,6 @@ function parseEducationSection(lines: string[]): Education[] {
             entry.institution = parts.slice(1).join(',').trim();
             break;
           }
-          // Try splitting by " – " or " — "
           const dashSplit = candidate.split(/[–—]/);
           if (dashSplit.length > 1 && INSTITUTION_KEYWORDS.test(dashSplit[1])) {
             entry.degree = dashSplit[0].trim();
@@ -654,7 +633,6 @@ function parseEducationSection(lines: string[]): Education[] {
       }
     }
 
-    // Fallback: if no institution found but degree was, prefer first non-degree line
     if (!entry.institution) {
       const nonDegree = blockLines.filter(l => l !== entry.degree);
       if (nonDegree.length > 0) {
@@ -665,16 +643,14 @@ function parseEducationSection(lines: string[]): Education[] {
       }
     }
 
-    // Find grade — scan all lines for grade keywords
+    // Find grade
     for (const line of blockLines) {
       if (GRADE_KEYWORDS.test(line)) {
         const trimmed = line.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').trim();
-        // Only capture if it looks like a grade line (short or parenthesised)
         if (trimmed.length < 40 && !INSTITUTION_KEYWORDS.test(trimmed) && !DEGREE_KEYWORDS.test(trimmed)) {
           entry.grade = trimmed;
           break;
         }
-        // Check for parenthesised grade like "(First Class Honours)"
         const parenGrade = trimmed.match(/\(([^)]*?(?:First|Second|Third|2:1|2\.1|2:2|2\.2|1st|2nd|3rd|Honours?|Merit|Distinction)[^)]*)\)/i);
         if (parenGrade) {
           entry.grade = parenGrade[1].trim();
@@ -683,7 +659,7 @@ function parseEducationSection(lines: string[]): Education[] {
       }
     }
 
-    // Scan remaining lines for location if not embedded in institution name
+    // Scan remaining lines for location
     if (!entry.location) {
       for (const line of blockLines) {
         if (line === entry.institution || line === entry.degree) continue;
@@ -696,7 +672,7 @@ function parseEducationSection(lines: string[]): Education[] {
       }
     }
 
-    // Clean dates out of institution name, and extract location if on same line
+    // Extract location from institution line if comma-separated
     const instParts = entry.institution.split(',').map((s: string) => s.trim());
     if (instParts.length > 1) {
       for (let i = instParts.length - 1; i >= 0; i--) {
@@ -711,7 +687,18 @@ function parseEducationSection(lines: string[]): Education[] {
     entry.institution = entry.institution.replace(DATE_RANGE_RE, '').replace(YEAR_RE, '').replace(/[–\-–—]\s*(present|current|now)/i, '').replace(/[,;]\s*$/, '').trim();
 
     entries.push(entry);
+    currentBlock = [];
   }
+
+  for (const line of allLines) {
+    const isNewBlock = (DEGREE_KEYWORDS.test(line) || INSTITUTION_KEYWORDS.test(line))
+      && line.length < 80;
+    if (isNewBlock && currentBlock.length > 0) {
+      flushBlock();
+    }
+    currentBlock.push(line);
+  }
+  flushBlock();
 
   return entries;
 }
@@ -750,6 +737,9 @@ export async function parseExistingCV(buffer: ArrayBuffer, fileName?: string): P
           } else {
             currentLine.sort((a, b) => a.x - b.x);
             lines.push(currentLine.map(l => l.str).join(' '));
+            // Insert blank line if y-gap >= 20 (likely paragraph break)
+            const gap = Math.abs(prev.y - curr.y);
+            if (gap >= 20) lines.push('');
             currentLine = [{ str: curr.str, x: curr.x }];
           }
         }
