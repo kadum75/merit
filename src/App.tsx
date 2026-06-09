@@ -41,6 +41,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { useToast } from './components/ToastContext';
 import { supabase, getCurrentMonthString, handleSupabaseError, OperationType, isSupabaseConfigValid, syncUserDocument, missingConfigVars } from './supabase';
 import { UK_LOCATIONS } from './data/uk-locations';
+import { COUNTRY_NAMES, getCitiesForCountry } from './data/countries';
+import { getCountrySkillTips } from './data/transferableSkillsByCountry';
 import { SKILLS } from './data/skills';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL } from './lib/pricing';
 
@@ -60,6 +62,7 @@ const INITIAL_DATA: CVData = {
     email: '',
     phone: '',
     location: '',
+    country: '',
     linkedin: '',
     portfolio: '',
     portfolios: [],
@@ -1605,6 +1608,22 @@ export default function App() {
                         </div>
                       </div>
                       <div className="space-y-2">
+                        <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Country</label>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                          <select
+                            value={data.personalDetails.country || ''}
+                            onChange={(e) => setData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, country: e.target.value } }))}
+                            className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                          >
+                            <option value="">Select country</option>
+                            {COUNTRY_NAMES.map(c => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
                         <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Location</label>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1612,14 +1631,15 @@ export default function App() {
                             list="uk-locations"
                             name="location"
                             value={data.personalDetails.location}
-                            onChange={handlePersonalChange}
-                            placeholder="Search UK locations..."
+                            onChange={(e) => setData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, country: e.target.value } }))}
+                            placeholder={(data.personalDetails.country && data.personalDetails.country !== 'United Kingdom') ? 'Search cities...' : 'Search UK locations...'}
                             className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                           />
                           <datalist id="uk-locations">
-                            {UK_LOCATIONS.map(loc => (
-                              <option key={loc} value={loc} />
-                            ))}
+                            {data.personalDetails.country === 'United Kingdom'
+                              ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
+                              : getCitiesForCountry(data.personalDetails.country || '').map(city => <option key={city} value={city} />)
+                            }
                           </datalist>
                         </div>
                       </div>
@@ -1864,6 +1884,22 @@ export default function App() {
                             </div>
                           </div>
                           <div className="space-y-2">
+                            <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Country</label>
+                            <div className="relative">
+                              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                              <select
+                                value={exp.country || ''}
+                                onChange={(e) => updateExperience(exp.id, 'country', e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                              >
+                                <option value="">Select country</option>
+                                {COUNTRY_NAMES.map(c => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
                             <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Location</label>
                             <div className="relative">
                               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1871,13 +1907,14 @@ export default function App() {
                                 list="exp-uk-locations"
                                 value={exp.location}
                                 onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
-                                placeholder="London, UK"
+                                placeholder={exp.country && exp.country !== 'United Kingdom' ? 'Search cities...' : 'London, UK'}
                                 className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                               />
                               <datalist id="exp-uk-locations">
-                                {UK_LOCATIONS.map(loc => (
-                                  <option key={loc} value={loc} />
-                                ))}
+                                {exp.country === 'United Kingdom'
+                                  ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
+                                  : getCitiesForCountry(exp.country || '').map(city => <option key={city} value={city} />)
+                                }
                               </datalist>
                             </div>
                           </div>
@@ -1963,6 +2000,22 @@ export default function App() {
                               </div>
                             </div>
                             <div className="space-y-2">
+                              <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Country</label>
+                              <div className="relative">
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                                <select
+                                  value={edu.country || ''}
+                                  onChange={(e) => updateEducation(edu.id, 'country', e.target.value)}
+                                  className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
+                                >
+                                  <option value="">Select country</option>
+                                  {COUNTRY_NAMES.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
                               <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Location</label>
                               <div className="relative">
                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -1970,13 +2023,14 @@ export default function App() {
                                   list="edu-uk-locations"
                                   value={edu.location}
                                   onChange={(e) => updateEducation(edu.id, 'location', e.target.value)}
-                                  placeholder="Manchester, UK"
+                                  placeholder={edu.country && edu.country !== 'United Kingdom' ? 'Search cities...' : 'Manchester, UK'}
                                   className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                                 />
                                 <datalist id="edu-uk-locations">
-                                  {UK_LOCATIONS.map(loc => (
-                                    <option key={loc} value={loc} />
-                                  ))}
+                                  {edu.country === 'United Kingdom'
+                                    ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
+                                    : getCitiesForCountry(edu.country || '').map(city => <option key={city} value={city} />)
+                                  }
                                 </datalist>
                               </div>
                             </div>
@@ -2215,6 +2269,28 @@ export default function App() {
                         disabled={!isPro}
                         className="w-full h-24 p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all resize-none disabled:bg-zinc-50/50 dark:disabled:bg-zinc-800/50"
                       />
+                      {data.personalDetails.country && (() => {
+                        const tips = getCountrySkillTips(data.personalDetails.country!);
+                        if (tips.length === 0) return null;
+                        return (
+                          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                              <div>
+                                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                                  {data.personalDetails.country}-Specific Transferable Skills
+                                </p>
+                                <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-1 leading-relaxed">
+                                  Employers in <strong>{data.personalDetails.country}</strong> often value: {tips.join(', ')}.
+                                </p>
+                                <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-1">
+                                  These are especially relevant if you're relocating or new to the {data.personalDetails.country} market.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="flex gap-4 pt-4">

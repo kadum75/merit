@@ -3,6 +3,7 @@ export interface WorkExperience {
   company: string;
   role: string;
   location: string;
+  country?: string;
   startDate: string;
   endDate: string;
   isCurrent: boolean;
@@ -14,6 +15,7 @@ export interface Education {
   institution: string;
   degree: string;
   location: string;
+  country?: string;
   graduationDate: string;
   grade?: string;
 }
@@ -24,6 +26,7 @@ export interface CVData {
     email: string;
     phone: string;
     location: string;
+    country?: string;
     linkedin?: string;
     portfolio?: string;
     portfolios?: string[];
