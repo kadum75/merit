@@ -226,58 +226,67 @@
   }
 }
 
-/* === Template: Classic — Navy + refined gold === */
+/* === Template: Classic — Navy serif + warm gold === */
 .markdown-body.classic {
-  font-family: 'Georgia', 'Times New Roman', serif;
-  line-height: 1.6;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
   color: #1e293b;
 }
 
 .markdown-body.classic h1 {
+  font-family: 'Playfair Display', Georgia, serif;
   color: #1E3A5F;
   border: none;
-  border-bottom: 2px solid #1E3A5F;
-  padding: 0 0 12pt 0;
+  border-bottom: 2.5px solid #B49650;
+  padding: 0 0 14pt 0;
   text-transform: none;
-  letter-spacing: 0;
-  font-size: 24pt;
+  letter-spacing: 0.01em;
+  font-size: 26pt;
   font-weight: 700;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
-  margin-bottom: 6pt;
+  margin-bottom: 4pt;
 }
 
 .markdown-body.classic h1 + p {
   color: #64748b;
-  font-size: 9.5pt;
+  font-size: 9pt;
   margin-top: 0;
-  margin-bottom: 18pt;
+  margin-bottom: 20pt;
+}
+
+.markdown-body.classic h1 + p::after {
+  content: '';
+  display: block;
+  width: 40pt;
+  height: 1px;
+  background: #B49650;
+  margin: 14pt auto 0;
 }
 
 .markdown-body.classic h2 {
   color: #1E3A5F;
   border: none;
-  border-bottom: 1px solid #cbd5e1;
-  padding-bottom: 4pt;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5pt;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 10.5pt;
+  font-size: 10pt;
   font-weight: 700;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
-  margin-top: 22pt;
-  margin-bottom: 12pt;
+  margin-top: 24pt;
+  margin-bottom: 10pt;
 }
 
 .markdown-body.classic h3 {
   color: #1E3A5F;
   font-weight: 700;
   font-size: 11pt;
-  margin-bottom: 2pt;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  margin-bottom: 1pt;
+  margin-top: 14pt;
 }
 
 .markdown-body.classic h3 + p {
-  font-size: 9pt;
+  font-size: 8.5pt;
   color: #64748b;
+  font-style: italic;
   margin-top: 0;
   margin-bottom: 8pt;
 }
@@ -291,29 +300,31 @@
 .markdown-body.classic p:first-of-type {
   color: #64748b;
   font-size: 9.5pt;
-  font-style: italic;
+  font-style: normal;
+  text-align: center;
 }
 
 .markdown-body.classic ul {
-  padding-left: 18pt;
-  margin: 4pt 0 10pt;
+  margin: 4pt 0 12pt;
+  padding: 0;
 }
 
 .markdown-body.classic li {
   font-size: 10pt;
   line-height: 1.5;
   margin-bottom: 3pt;
-  padding-left: 4pt;
+  padding-left: 16pt;
   list-style: none;
   position: relative;
+  color: #334155;
 }
 
 .markdown-body.classic li::before {
-  content: "•";
+  content: "▪";
   color: #1E3A5F;
   position: absolute;
-  left: -12pt;
-  font-size: 9pt;
+  left: 0;
+  font-size: 8pt;
 }
 
 .markdown-body.classic strong {
@@ -328,7 +339,7 @@
 
 .dark .markdown-body.classic h1 {
   color: #e2e8f0;
-  border-bottom-color: #e2e8f0;
+  border-bottom-color: #B49650;
 }
 
 .dark .markdown-body.classic h2 {
@@ -352,9 +363,9 @@
   color: #e2e8f0;
 }
 
-/* === Template: Modern — Slate + Teal, clean hierarchy === */
+/* === Template: Modern — Slate + Teal, clean sans-serif === */
 .markdown-body.modern {
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
   color: #1e293b;
 }
@@ -362,19 +373,20 @@
 .markdown-body.modern h1 {
   text-align: left;
   text-transform: none;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   font-size: 22pt;
-  font-weight: 700;
+  font-weight: 300;
   color: #1e293b;
   border: none;
   padding: 0;
-  margin-bottom: 2pt;
+  margin-bottom: 0;
 }
 
 .markdown-body.modern h1 + p {
   font-size: 9pt;
   color: #94a3b8;
-  margin-top: 0;
+  margin-top: 4pt;
+  margin-bottom: 18pt;
   padding-bottom: 14pt;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -382,26 +394,28 @@
 .markdown-body.modern h2 {
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 9.5pt;
+  font-size: 9pt;
   font-weight: 700;
   color: #0D9488;
   border: none;
   padding: 0;
   margin-top: 22pt;
-  margin-bottom: 12pt;
+  margin-bottom: 10pt;
 }
 
 .markdown-body.modern h3 {
   color: #1e293b;
   font-weight: 700;
   font-size: 11pt;
-  margin-bottom: 1pt;
+  margin-bottom: 0;
+  margin-top: 12pt;
 }
 
 .markdown-body.modern h3 + p {
-  font-size: 9pt;
+  font-size: 8.5pt;
   color: #64748b;
-  margin-top: 0;
+  font-style: italic;
+  margin-top: 1pt;
   margin-bottom: 8pt;
 }
 
@@ -414,30 +428,31 @@
 .markdown-body.modern p:first-of-type {
   text-align: left;
   font-size: 9pt;
-  color: #64748b;
+  color: #94a3b8;
   margin-bottom: 16pt;
 }
 
 .markdown-body.modern ul {
-  padding-left: 18pt;
-  margin: 4pt 0 10pt;
+  margin: 4pt 0 12pt;
+  padding: 0;
 }
 
 .markdown-body.modern li {
   font-size: 10pt;
   line-height: 1.5;
   margin-bottom: 3pt;
-  padding-left: 4pt;
+  padding-left: 16pt;
   list-style: none;
   position: relative;
+  color: #334155;
 }
 
 .markdown-body.modern li::before {
   content: "•";
   color: #0D9488;
   position: absolute;
-  left: -12pt;
-  font-size: 9pt;
+  left: 0;
+  font-size: 10pt;
 }
 
 .markdown-body.modern strong {
@@ -474,14 +489,15 @@
   color: #f1f5f9;
 }
 
-/* === Template: Minimal — Editorial typography-first === */
+/* === Template: Minimal — Editorial serif, generous space === */
 .markdown-body.minimal {
-  font-family: 'Garamond', 'Georgia', 'Times New Roman', serif;
-  line-height: 1.7;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  line-height: 1.8;
   color: #1e293b;
 }
 
 .markdown-body.minimal h1 {
+  font-family: 'Playfair Display', Georgia, serif;
   text-align: left;
   text-transform: none;
   letter-spacing: 0;
@@ -491,86 +507,83 @@
   padding: 0;
   color: #1e293b;
   margin-bottom: 0;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
 }
 
 .markdown-body.minimal h1 + p {
   font-size: 9pt;
   color: #94a3b8;
   margin-top: 4pt;
-  margin-bottom: 20pt;
-  letter-spacing: 0.03em;
+  margin-bottom: 22pt;
+  letter-spacing: 0.02em;
+  padding-bottom: 16pt;
   border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 14pt;
 }
 
 .markdown-body.minimal h2 {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 8.5pt;
+  letter-spacing: 0.18em;
+  font-size: 8pt;
   font-weight: 600;
   border: none;
   padding: 0;
-  margin-top: 24pt;
-  margin-bottom: 10pt;
+  margin-top: 26pt;
+  margin-bottom: 8pt;
   color: #64748b;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
 }
 
 .markdown-body.minimal h3 {
+  font-family: 'Playfair Display', Georgia, serif;
   font-weight: 600;
   color: #1e293b;
   font-size: 11pt;
-  margin-top: 12pt;
-  margin-bottom: 1pt;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  margin-top: 14pt;
+  margin-bottom: 0;
 }
 
 .markdown-body.minimal h3 + p {
-  font-size: 9pt;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 8.5pt;
   color: #94a3b8;
   margin-top: 0;
-  margin-bottom: 8pt;
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  margin-bottom: 6pt;
 }
 
 .markdown-body.minimal p {
   font-size: 10.5pt;
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: 6pt;
 }
 
 .markdown-body.minimal p:first-of-type {
   text-align: left;
-  font-size: 10pt;
-  color: #64748b;
+  font-size: 9pt;
+  color: #94a3b8;
   line-height: 1.6;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .markdown-body.minimal ul {
-  padding-left: 18pt;
   margin: 4pt 0 10pt;
+  padding: 0;
 }
 
 .markdown-body.minimal li {
   font-size: 10.5pt;
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: 2pt;
-  padding-left: 4pt;
+  padding-left: 18pt;
   list-style: none;
   position: relative;
+  color: #334155;
 }
 
 .markdown-body.minimal li::before {
   content: "—";
   color: #cbd5e1;
   position: absolute;
-  left: -14pt;
+  left: 0;
   font-size: 9pt;
-}
-
-.markdown-body.minimal ul {
-  margin-bottom: 8pt;
 }
 
 .markdown-body.minimal hr {
@@ -609,29 +622,29 @@
 
 /* === Template: Professional — Dark header, gold accents, executive === */
 .markdown-body.professional {
-  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
   color: #1e293b;
+  padding: 20pt;
 }
 
 .markdown-body.professional h1 {
   background-color: #0F172A;
   color: #f8fafc;
-  padding: 16pt 20pt;
+  padding: 18pt 20pt;
+  margin: -20pt -20pt 10pt;
   border: none;
-  border-bottom: 2px solid #D4A53C;
+  border-bottom: 3px solid #D4A53C;
   text-transform: none;
   letter-spacing: 0.02em;
-  font-size: 22pt;
+  font-size: 24pt;
   font-weight: 700;
   text-align: left;
-  margin: 0 -20pt 8pt;
-  border-radius: 0;
 }
 
 .markdown-body.professional h1 + p {
-  border-left: 2px solid #D4A53C;
-  padding: 6pt 14pt;
+  border-left: 3px solid #D4A53C;
+  padding: 8pt 14pt;
   margin: 0 0 18pt;
   font-size: 9pt;
   color: #64748b;
@@ -641,25 +654,26 @@
 .markdown-body.professional h2 {
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 9.5pt;
+  font-size: 9pt;
   font-weight: 700;
   color: #0F172A;
   border: none;
   border-left: 3px solid #D4A53C;
   padding-left: 10pt;
   margin-top: 22pt;
-  margin-bottom: 12pt;
+  margin-bottom: 10pt;
 }
 
 .markdown-body.professional h3 {
-  color: #334155;
+  color: #0F172A;
   font-weight: 700;
   font-size: 11pt;
   margin-bottom: 1pt;
+  margin-top: 14pt;
 }
 
 .markdown-body.professional h3 + p {
-  font-size: 9pt;
+  font-size: 8.5pt;
   color: #64748b;
   margin-top: 0;
   margin-bottom: 8pt;
@@ -673,33 +687,33 @@
 
 .markdown-body.professional p:first-of-type {
   text-align: left;
-  font-size: 9.5pt;
+  font-size: 9pt;
   color: #64748b;
-  padding: 0 0;
   margin-bottom: 16pt;
 }
 
 .markdown-body.professional ul {
-  padding-left: 18pt;
   margin: 4pt 0 10pt;
+  padding: 0;
 }
 
 .markdown-body.professional li {
   font-size: 10pt;
   line-height: 1.5;
   margin-bottom: 3pt;
-  padding-left: 4pt;
+  padding-left: 16pt;
   list-style: none;
   position: relative;
+  color: #334155;
 }
 
 .markdown-body.professional li::before {
-  content: ">";
+  content: "▸";
   color: #D4A53C;
   font-weight: 700;
   position: absolute;
-  left: -14pt;
-  font-size: 9pt;
+  left: 0;
+  font-size: 8pt;
 }
 
 .markdown-body.professional strong {
@@ -717,14 +731,14 @@
 }
 
 .dark .markdown-body.professional h1 + p {
-  border-left-color: #f6e05e;
+  border-left-color: #D4A53C;
   background: #1e293b;
   color: #94a3b8;
 }
 
 .dark .markdown-body.professional h2 {
   color: #e2e8f0;
-  border-left-color: #f6e05e;
+  border-left-color: #D4A53C;
 }
 
 .dark .markdown-body.professional h3 {
@@ -736,7 +750,7 @@
 }
 
 .dark .markdown-body.professional li::before {
-  color: #f6e05e;
+  color: #D4A53C;
 }
 
 .dark .markdown-body.professional strong {

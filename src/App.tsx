@@ -835,7 +835,7 @@ export default function App() {
 
     // Helper to add text with wrapping
     const addWrappedText = (text: string, fontSize: number, fontStyle: string = 'normal', marginBottom: number = 5) => {
-      pdf.setFont('helvetica', fontStyle);
+      pdf.setFont(tpl.fontName, fontStyle);
       pdf.setFontSize(fontSize);
       const lines = pdf.splitTextToSize(text, contentWidth);
       
@@ -872,7 +872,7 @@ export default function App() {
           pdf.setFillColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.rect(margin, yPos - 2, contentWidth, 14, 'F');
           pdf.setTextColor(255, 255, 255);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(tpl.nameSize);
           pdf.text(name, margin + 4, yPos + 9);
           pdf.setDrawColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
@@ -886,14 +886,14 @@ export default function App() {
           pdf.setFillColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
           pdf.rect(margin, yPos, 4, 12, 'F');
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(tpl.nameSize);
           pdf.text(name, margin + 10, yPos + 9);
           pdf.setTextColor(0, 0, 0);
           yPos += 14;
         } else if (isMinimalTemplate) {
           // Minimal: left-aligned, no border, light weight
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(tpl.fontName, 'normal');
           pdf.setFontSize(tpl.nameSize);
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.text(name, margin, yPos);
@@ -904,7 +904,7 @@ export default function App() {
           pdf.setDrawColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.setLineWidth(1.5);
           pdf.line(margin, yPos - 2, pageWidth - margin, yPos - 2);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(tpl.nameSize);
           pdf.text(name, pageWidth / 2, yPos + 6, { align: 'center' });
           yPos += 8;
@@ -922,7 +922,7 @@ export default function App() {
           pdf.setDrawColor(200, 200, 200);
           pdf.setLineWidth(0.3);
           pdf.line(margin, yPos - 2, pageWidth - margin, yPos - 2);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(11);
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.text(heading.toUpperCase(), margin, yPos + 4);
@@ -930,7 +930,7 @@ export default function App() {
           yPos += 8;
         } else if (isModernTemplate) {
           // Modern: inline underline
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(9);
           pdf.setTextColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
           pdf.text(heading.toUpperCase(), margin, yPos);
@@ -943,7 +943,7 @@ export default function App() {
           yPos += 8;
         } else if (isMinimalTemplate) {
           // Minimal: no border, just bold
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(10);
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.text(heading, margin, yPos);
@@ -953,7 +953,7 @@ export default function App() {
           // Professional: gold left border
           pdf.setFillColor(tpl.secondaryColor[0], tpl.secondaryColor[1], tpl.secondaryColor[2]);
           pdf.rect(margin, yPos - 3, 3, 10, 'F');
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(tpl.fontName, 'bold');
           pdf.setFontSize(10);
           pdf.setTextColor(tpl.primaryColor[0], tpl.primaryColor[1], tpl.primaryColor[2]);
           pdf.text(heading.toUpperCase(), margin + 8, yPos + 3);
@@ -961,7 +961,7 @@ export default function App() {
           yPos += 8;
         }
       } else if (trimmed.startsWith('### ')) {
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(tpl.fontName, 'bold');
         pdf.setFontSize(10);
         const subHeading = trimmed.replace('### ', '');
         if (isModernTemplate) {
@@ -976,7 +976,7 @@ export default function App() {
         yPos += 5;
         pdf.setDrawColor(0, 0, 0);
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(tpl.fontName, 'normal');
         pdf.setFontSize(9);
         const bulletText = trimmed.substring(2);
         const bulletLines = pdf.splitTextToSize(bulletText, contentWidth - 5);
@@ -1010,17 +1010,17 @@ export default function App() {
         const isContactInfo = yPos < 50 && trimmed.includes('|');
         if (isContactInfo) {
           if (isMinimalTemplate || isModernTemplate) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(tpl.fontName, 'normal');
             pdf.setFontSize(8);
             pdf.setTextColor(160, 174, 192);
             pdf.text(trimmed, margin, yPos);
           } else if (isProTemplate) {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(tpl.fontName, 'normal');
             pdf.setFontSize(9);
             pdf.setTextColor(120, 120, 120);
             pdf.text(trimmed, margin + 18, yPos);
           } else {
-            pdf.setFont('helvetica', 'normal');
+            pdf.setFont(tpl.fontName, 'normal');
             pdf.setFontSize(9);
             pdf.setTextColor(100, 100, 100);
             pdf.text(trimmed, pageWidth / 2, yPos, { align: 'center' });
