@@ -275,6 +275,7 @@ export default function App() {
         if (edu.location && !meta.includes(edu.location)) sections.push(`*${edu.location}*`);
       });
     }
+    if (d.transferableSkillsFocus) sections.push(`## Key Skills\n\n${d.transferableSkillsFocus}`);
     if (d.skills) sections.push(`## Skills\n\n${d.skills.split(',').map(s => s.trim()).filter(Boolean).join(', ')}`);
     return sections.join('\n\n');
   };

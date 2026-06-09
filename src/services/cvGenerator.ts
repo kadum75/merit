@@ -119,19 +119,19 @@ export async function generateCareerContent(
   isPro: boolean = false,
   templateId: string = 'classic'
 ) {
-  const { personalDetails, professionalSummary, experience, education, skills, jobDescription } = data;
+  const { personalDetails, professionalSummary, experience, education, skills, jobDescription, transferableSkillsFocus } = data;
   const contactLine = buildContactParts(personalDetails).join(" | ");
   const prioritisedSkills = prioritiseSkills(skills, jobDescription);
 
   switch (templateId) {
     case 'modern':
-      return generateModern(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
+      return generateModern(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills, transferableSkillsFocus);
     case 'minimal':
-      return generateMinimal(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
+      return generateMinimal(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills, transferableSkillsFocus);
     case 'professional':
-      return generateProfessional(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
+      return generateProfessional(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills, transferableSkillsFocus);
     default:
-      return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills);
+      return generateClassic(personalDetails.fullName, contactLine, professionalSummary, experience, education, prioritisedSkills, transferableSkillsFocus);
   }
 }
 
@@ -142,10 +142,12 @@ function generateClassic(
   experience: CVData['experience'],
   education: CVData['education'],
   skills: string,
+  transferableSkillsFocus?: string,
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `${contactLine}\n\n`;
   if (professionalSummary) md += `## Personal Profile\n\n${professionalSummary}\n\n`;
+  if (transferableSkillsFocus) md += `## Key Skills\n\n${transferableSkillsFocus}\n\n`;
   if (experience.length > 0) md += `## Work Experience\n\n${renderExperienceMarkdown(experience)}`;
   if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
   if (skills) md += `## Skills\n\n${skills}\n`;
@@ -159,10 +161,12 @@ function generateModern(
   experience: CVData['experience'],
   education: CVData['education'],
   skills: string,
+  transferableSkillsFocus?: string,
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `*${contactLine}*\n\n`;
   if (professionalSummary) md += `## Personal Profile\n\n${professionalSummary}\n\n`;
+  if (transferableSkillsFocus) md += `## Key Skills\n\n${transferableSkillsFocus}\n\n`;
   if (skills) md += `## Core Skills\n\n${skills}\n\n`;
   if (experience.length > 0) md += `## Experience\n\n${renderExperienceMarkdown(experience)}`;
   if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
@@ -176,11 +180,15 @@ function generateMinimal(
   experience: CVData['experience'],
   education: CVData['education'],
   skills: string,
+  transferableSkillsFocus?: string,
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `${contactLine}\n\n`;
   if (professionalSummary) {
     md += `${professionalSummary}\n\n`;
+  }
+  if (transferableSkillsFocus) {
+    md += `## Key Skills\n\n${transferableSkillsFocus}\n\n`;
   }
   if (experience.length > 0) {
     md += `## Work Experience\n\n${renderExperienceMarkdown(experience)}`;
@@ -202,10 +210,12 @@ function generateProfessional(
   experience: CVData['experience'],
   education: CVData['education'],
   skills: string,
+  transferableSkillsFocus?: string,
 ): string {
   let md = `# ${fullName}\n\n`;
   md += `${contactLine}\n\n`;
   if (professionalSummary) md += `${professionalSummary}\n\n`;
+  if (transferableSkillsFocus) md += `## Key Skills\n\n${transferableSkillsFocus}\n\n`;
   if (experience.length > 0) md += `## Experience\n\n${renderExperienceMarkdown(experience)}`;
   if (education.length > 0) md += `## Education\n\n${renderEducationMarkdown(education)}`;
   if (skills) md += `## Skills\n\n${skills}\n`;
