@@ -378,7 +378,7 @@ function parseCVText(text: string): Partial<CVData> {
 }
 
 function looksLikeJobTitle(text: string): boolean {
-  return /\b(Senior|Junior|Lead|Head|Chief|Principal|Staff|Associate|Assistant|Manager|Director|Engineer|Developer|Designer|Analyst|Consultant|Specialist|Coordinator|Administrator|Officer|Executive|Supervisor|Technician|Architect|Scientist|Researcher|Lecturer|Professor|Instructor|Advisor|Representative|Agent|Operative|Worker|Intern|Trainee|Apprentice)\b/i.test(text);
+  return /\b(Senior|Junior|Lead|Head|Chief|Principal|Staff|Associate|Assistant|Manager|Director|Engineer|Developer|Designer|Analyst|Consultant|Specialist|Coordinator|Administrator|Officer|Executive|Supervisor|Technician|Architect|Scientist|Researcher|Lecturer|Professor|Instructor|Advisor|Representative|Agent|Operative|Worker|Intern|Trainee|Apprentice|CEO|CTO|CFO|COO|VP|SVP|President|Founder|Co.?Founder|Contractor|Freelancer|Volunteer|Chairman|Chairwoman|Trustee)\b/i.test(text);
 }
 
 function looksLikeGenericSkill(text: string): boolean {
@@ -414,11 +414,6 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
   // Step 2: Identify entry headers
   for (let i = 0; i < allLines.length; i++) {
     const line = allLines[i];
-    // A line is likely an entry header if:
-    // - It has a date range, OR
-    // - It looks like a job title, OR
-    // - It has pipe separators, OR
-    // - It's followed by a date line (common: "Role\nJan 2020 - Present")
     const nextLine = i + 1 < allLines.length ? allLines[i + 1].text : '';
     const hasDate = DATE_RANGE_RE.test(line.text);
     const isJobTitle = looksLikeJobTitle(line.text);
@@ -427,6 +422,15 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     const isShortLine = line.text.length < 60;
 
     if (isShortLine && (hasDate || isJobTitle || hasPipe || nextIsDate)) {
+      allLines[i].isEntryHeader = true;
+    }
+  }
+
+  // Second pass: mark remaining substantial lines as headers
+  // (catches entries whose first line doesn't match header heuristics)
+  for (let i = 0; i < allLines.length; i++) {
+    if (allLines[i].isEntryHeader) continue;
+    if (allLines[i].text.length >= 15 && !allLines[i].text.startsWith('-') && !allLines[i].text.startsWith('*')) {
       allLines[i].isEntryHeader = true;
     }
   }
@@ -523,6 +527,18 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
     }
 
     if (!parsed) {
+      // Try comma-separated "Role, Company"
+      const commaSplit = cleanFirst.split(/\s*,\s*/).filter(Boolean);
+      if (commaSplit.length >= 2 && commaSplit[0].length < 40 && commaSplit[1].length < 40) {
+        if (looksLikeJobTitle(commaSplit[0]) && !looksLikeJobTitle(commaSplit[1]) && !looksLikeGenericSkill(commaSplit[1])) {
+          entry.role = commaSplit[0];
+          entry.company = commaSplit[1];
+          parsed = true;
+        }
+      }
+    }
+
+    if (!parsed) {
       entry.role = cleanFirst || firstLine;
     }
 
@@ -547,6 +563,14 @@ function parseExperienceSection(lines: string[]): WorkExperience[] {
       }
       if (!entry.location && trimmed.length < 40 && !looksLikeJobTitle(trimmed)
           && (UK_CITIES.test(trimmed) || /\b(uk|united kingdom|england|scotland|wales)\b/i.test(trimmed))) {
+        // Only treat as location if trimmed text IS primarily a location, not a company name containing a city
+        const cityMatch = trimmed.match(UK_CITIES);
+        if (cityMatch) {
+          const city = cityMatch[0];
+          const extra = trimmed.replace(city, '').replace(/[,;()]/g, '').trim();
+          // If there's significant extra text beyond the city, it's probably a company name
+          if (extra.length > 4) continue; // has significant extra text → probably a company name, not a location
+        }
         entry.location = trimmed.replace(/[,;].*/, '').trim();
         consumedIndices.add(index);
         continue;
@@ -595,7 +619,7 @@ function parseEducationSection(lines: string[]): Education[] {
     // Extract year
     const yearMatch = blockText.match(DATE_RANGE_RE);
     if (yearMatch) {
-      entry.graduationDate = (yearMatch[1] || yearMatch[3] || yearMatch[5] || '').trim();
+      entry.graduationDate = (yearMatch[2] || yearMatch[4] || yearMatch[6] || '').trim();
     }
     if (!entry.graduationDate) {
       const singleYear = blockText.match(YEAR_RE);
@@ -675,7 +699,7 @@ function parseEducationSection(lines: string[]): Education[] {
     // Extract location from institution line if comma-separated
     const instParts = entry.institution.split(',').map((s: string) => s.trim());
     if (instParts.length > 1) {
-      for (let i = instParts.length - 1; i >= 0; i--) {
+      for (let i = 0; i < instParts.length; i++) {
         if (!INSTITUTION_KEYWORDS.test(instParts[i]) && !DEGREE_KEYWORDS.test(instParts[i]) &&
             (UK_CITIES.test(instParts[i]) || /\b(uk|united kingdom|england|scotland|wales|northern ireland|ireland)\b/i.test(instParts[i]))) {
           entry.location = instParts[i];
