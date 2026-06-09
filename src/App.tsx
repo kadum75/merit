@@ -20,7 +20,6 @@ import {
   Linkedin,
   Globe,
   Loader2,
-  Upload,
   Lock,
   FolderOpen, 
   X, 
@@ -30,7 +29,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import { CVData, WorkExperience, Education, SavedCV } from './types';
-import { generateCareerContent, parseExistingCV } from './services/cvGenerator';
+import { generateCareerContent } from './services/cvGenerator';
 import { TEMPLATES } from './data/templates';
 import { cn } from './lib/utils';
 import LandingPage from './components/LandingPage';
@@ -171,7 +170,6 @@ export default function App() {
   });
   const [step, setStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isParsing, setIsParsing] = useState(false);
   const [previewCount, setPreviewCount] = useState(0);
   const [lastPreviewReset, setLastPreviewReset] = useState<any>(null);
   const [isStripeConfigured, setIsStripeConfigured] = useState(true);
@@ -808,47 +806,6 @@ export default function App() {
       toast(message, 'error');
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsParsing(true);
-    try {
-      const buffer = await file.arrayBuffer();
-      const parsedData = await parseExistingCV(buffer, file.name);
-      
-      if (parsedData && Object.keys(parsedData).length > 0) {
-        setData({
-          ...INITIAL_DATA,
-          ...parsedData,
-          personalDetails: {
-            ...INITIAL_DATA.personalDetails,
-            ...(parsedData.personalDetails || {}),
-          },
-          experience: (parsedData.experience || []).map((exp: any) => ({
-            ...exp,
-            id: Math.random().toString(36).substring(2, 11),
-          })),
-          education: (parsedData.education || []).map((edu: any) => ({
-            ...edu,
-            id: Math.random().toString(36).substring(2, 11),
-          })),
-        });
-        setStep(1);
-        toast('CV parsed — fields populated from extracted data.', 'success');
-      } else {
-        toast('Could not extract text from this file. Supported formats: .pdf, .docx. Check browser console for details.', 'error');
-      }
-    } catch (error) {
-      console.error('Parsing failed:', error);
-      toast('Failed to parse CV. Please try again or fill manually.', 'error');
-    } finally {
-      setIsParsing(false);
-      // Reset input so same file can be uploaded again
-      e.target.value = '';
     }
   };
 
@@ -1504,17 +1461,6 @@ export default function App() {
                 >
                   Load Sample
                 </button>
-                <label className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full cursor-pointer flex items-center gap-1">
-                  {isParsing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
-                  {isParsing ? 'Parsing...' : 'Upload CV'}
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept=".pdf,.docx"
-                    onChange={handleFileUpload}
-                    disabled={isParsing}
-                  />
-                </label>
               </div>
 
               {(generatedContent || isPro) && (
