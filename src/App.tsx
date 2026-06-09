@@ -1631,7 +1631,7 @@ export default function App() {
                             list="uk-locations"
                             name="location"
                             value={data.personalDetails.location}
-                            onChange={(e) => setData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, location: e.target.value } }))}
+                            onChange={handlePersonalChange}
                             placeholder={(data.personalDetails.country && data.personalDetails.country !== 'United Kingdom') ? 'Search cities...' : 'Search UK locations...'}
                             className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                           />
