@@ -1631,14 +1631,14 @@ export default function App() {
                             list="uk-locations"
                             name="location"
                             value={data.personalDetails.location}
-                            onChange={(e) => setData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, country: e.target.value } }))}
+                            onChange={(e) => setData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, location: e.target.value } }))}
                             placeholder={(data.personalDetails.country && data.personalDetails.country !== 'United Kingdom') ? 'Search cities...' : 'Search UK locations...'}
                             className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                           />
                           <datalist id="uk-locations">
-                            {data.personalDetails.country === 'United Kingdom'
+                            {(!data.personalDetails.country || data.personalDetails.country === 'United Kingdom')
                               ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
-                              : getCitiesForCountry(data.personalDetails.country || '').map(city => <option key={city} value={city} />)
+                              : getCitiesForCountry(data.personalDetails.country).map(city => <option key={city} value={city} />)
                             }
                           </datalist>
                         </div>
@@ -1911,9 +1911,9 @@ export default function App() {
                                 className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                               />
                               <datalist id="exp-uk-locations">
-                                {exp.country === 'United Kingdom'
+                                {(!exp.country || exp.country === 'United Kingdom')
                                   ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
-                                  : getCitiesForCountry(exp.country || '').map(city => <option key={city} value={city} />)
+                                  : getCitiesForCountry(exp.country).map(city => <option key={city} value={city} />)
                                 }
                               </datalist>
                             </div>
@@ -2027,9 +2027,9 @@ export default function App() {
                                   className="w-full pl-10 pr-4 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 dark:focus:border-zinc-100 transition-all"
                                 />
                                 <datalist id="edu-uk-locations">
-                                  {edu.country === 'United Kingdom'
+                                  {(!edu.country || edu.country === 'United Kingdom')
                                     ? UK_LOCATIONS.map(loc => <option key={loc} value={loc} />)
-                                    : getCitiesForCountry(edu.country || '').map(city => <option key={city} value={city} />)
+                                    : getCitiesForCountry(edu.country).map(city => <option key={city} value={city} />)
                                   }
                                 </datalist>
                               </div>
