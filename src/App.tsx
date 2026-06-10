@@ -163,7 +163,8 @@ export default function App() {
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalType }>({ isOpen: false, type: 'privacy' });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
-  const [cvs, setCVs] = useState<SavedCV[]>(() => loadCVs());
+  const [cvs, setCVs] = useState<SavedCV[]>([]);
+  const [cvsInitialized, setCVsInitialized] = useState(false);
   const [activeCVId, setActiveCVId] = useState<string | null>(() => {
     try {
       return localStorage.getItem(ACTIVE_CV_KEY);
@@ -397,34 +398,47 @@ export default function App() {
     }
   }, [activeCVId]);
 
-  // Auto-create first CV
+  // Load CVs: Supabase for signed-in users, localStorage fallback for everyone
   useEffect(() => {
-    if (cvs.length === 0) {
+    let cancelled = false;
+    if (user?.id) {
+      loadServerCVs(user.id).then(serverCVs => {
+        if (cancelled) return;
+        if (serverCVs.length > 0) {
+          setCVs(serverCVs);
+          localStorage.setItem(CV_STORAGE_KEY, JSON.stringify(serverCVs));
+        } else {
+          const localCVs = loadCVs();
+          setCVs(localCVs);
+          if (localCVs.length > 0) {
+            saveServerCVs(localCVs, user.id);
+          }
+        }
+        setCVsInitialized(true);
+      }).catch(() => {
+        const localCVs = loadCVs();
+        if (!cancelled) {
+          setCVs(localCVs);
+          setCVsInitialized(true);
+        }
+      });
+    } else {
+      const localCVs = loadCVs();
+      setCVs(localCVs);
+      setCVsInitialized(true);
+    }
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // Auto-create first CV only after initial load completes
+  useEffect(() => {
+    if (cvsInitialized && cvs.length === 0) {
       const first = createSavedCV('General');
       setCVs([first]);
       saveCVs([first]);
       setActiveCVId(first.id);
     }
-  }, []);
-
-  // Sync CVs from server when user signs in
-  useEffect(() => {
-    if (!user?.id) return;
-    let cancelled = false;
-    loadServerCVs(user.id).then(serverCVs => {
-      if (cancelled) return;
-      if (serverCVs.length > 0) {
-        setCVs(serverCVs);
-        localStorage.setItem('merit-cvs', JSON.stringify(serverCVs));
-      } else {
-        const localCVs = loadCVs();
-        if (localCVs.length > 0) {
-          saveServerCVs(localCVs, user.id);
-        }
-      }
-    });
-    return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [cvsInitialized, cvs.length]);
 
   // Debounced server sync whenever CVs change and user is logged in
   const serverSyncTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
