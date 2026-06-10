@@ -24,6 +24,7 @@ import { cvSamples } from '../data/cvSamples';
 interface LandingPageProps {
   onStart: () => void;
   isPro: boolean;
+  isDemo: boolean;
   user: any;
   onSignInClick: () => void;
   onSignOut: () => void;
@@ -37,6 +38,7 @@ interface LandingPageProps {
 export default function LandingPage({ 
   onStart, 
   isPro, 
+  isDemo,
   user, 
   onSignInClick, 
   onSignOut, 
@@ -69,6 +71,11 @@ export default function LandingPage({
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-[#0F172A] dark:text-zinc-100">
+      {isDemo && (
+        <div className="bg-emerald-500 text-white text-center py-1 text-xs font-bold tracking-wider">
+          Demo Mode — All Pro features enabled for testing
+        </div>
+      )}
       {false && (
         <div className="bg-amber-500 text-white text-center py-2 text-sm font-bold">
           Payment system not yet configured - contact the site owner

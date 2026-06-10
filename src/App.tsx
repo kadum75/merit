@@ -196,6 +196,7 @@ async function saveServerCVs(cvs: SavedCV[], userId: string) {
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'builder'>('home');
   const [user, setUser] = useState<any>(null);
+  const [isDemo, setIsDemo] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalType }>({ isOpen: false, type: 'privacy' });
@@ -371,7 +372,7 @@ export default function App() {
   function handleCreateCV(role: string) {
     const trimmed = role.trim();
     if (!trimmed) return;
-    if (cvs.length >= 4) return;
+    if (!isDemo && cvs.length >= 4) return;
     const newCV = createSavedCV(trimmed);
     const next = [...cvs, newCV];
     setCVs(next);
@@ -500,6 +501,15 @@ export default function App() {
   // Auth: handle PKCE exchange, session recovery, and auth state changes
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has('demo')) {
+      setIsDemo(true);
+      setIsPro(true);
+      setCurrentView('builder');
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+
     const authCode = urlParams.get('code');
     const authError = urlParams.get('error') || urlParams.get('error_description');
 
@@ -600,6 +610,10 @@ export default function App() {
 
   // Supabase User Data Listener (for isPro status)
   useEffect(() => {
+    if (isDemo) {
+      setIsPro(true);
+      return;
+    }
     if (!user) {
       setIsPro(false);
       return;
@@ -636,7 +650,7 @@ export default function App() {
     // Poll for changes every 60 seconds as a lightweight realtime alternative
     const interval = setInterval(fetchUserData, 60000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, isDemo]);
 
   // Check Stripe Config
   useEffect(() => {
@@ -1311,6 +1325,7 @@ export default function App() {
       <Header
         user={user}
         isPro={isPro}
+        isDemo={isDemo}
         isStripeConfigured={isStripeConfigured}
         theme={theme}
         currentView={currentView}
@@ -1334,6 +1349,7 @@ export default function App() {
           <LandingPage 
             onStart={() => setCurrentView('builder')} 
             isPro={isPro}
+            isDemo={isDemo}
             user={user}
             onSignInClick={() => setIsAuthModalOpen(true)}
             onSignOut={handleSignOut}
@@ -1449,7 +1465,7 @@ export default function App() {
                             </button>
                           </div>
                         </div>
-                      ) : cvsInitialized && cvs.length < 4 ? (
+                      ) : cvsInitialized && (isDemo || cvs.length < 4) ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowNewCVInput(true)}
@@ -1459,7 +1475,7 @@ export default function App() {
                               New CV
                             </button>
                           </div>
-                        ) : cvsInitialized && !isPro ? (
+                        ) : cvsInitialized && !isDemo && !isPro ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowUpgradeModal(true)}

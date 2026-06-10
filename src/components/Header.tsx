@@ -7,6 +7,7 @@ import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIP
 interface HeaderProps {
   user: User | null;
   isPro: boolean;
+  isDemo: boolean;
   isStripeConfigured: boolean;
   theme: 'light' | 'dark';
   currentView: 'home' | 'builder';
@@ -19,7 +20,7 @@ interface HeaderProps {
 }
 
 export function Header({
-  user, isPro, isStripeConfigured, theme, currentView,
+  user, isPro, isDemo, isStripeConfigured, theme, currentView,
   onNavigateHome, onSignInClick, onSignOut, onManageSubscription,
   onCheckout, onToggleTheme,
 }: HeaderProps) {
@@ -41,34 +42,43 @@ export function Header({
           <button onClick={onNavigateHome} className="flex items-center gap-1.5 lg:gap-2 group">
             <img src="/favicon.svg" alt="Merit" className="w-6 h-6" />
             <span className="text-zinc-900 dark:text-white font-bold text-lg tracking-tight">Merit</span>
+            {isDemo && (
+              <span className="ml-1.5 text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                Demo
+              </span>
+            )}
           </button>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex gap-1 sm:gap-1.5">
-              <button
-                onClick={() => onCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
-              >
-                Pro Monthly
-              </button>
-              <button
-                onClick={() => onCheckout(STRIPE_PRICE_ANNUAL, 'annual')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-all"
-              >
-                Pro Annual
-              </button>
-              {STRIPE_DONATION_ENABLED && (
-              <button
-                onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation')}
-                className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
-              >
-                Donate
-              </button>
-              )}
-          </div>
+          {!isDemo && (
+            <div className="flex gap-1 sm:gap-1.5">
+                <button
+                  onClick={() => onCheckout(STRIPE_PRICE_MONTHLY, 'monthly')}
+                  className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:border-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-all"
+                >
+                  Pro Monthly
+                </button>
+                <button
+                  onClick={() => onCheckout(STRIPE_PRICE_ANNUAL, 'annual')}
+                  className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-all"
+                >
+                  Pro Annual
+                </button>
+                {STRIPE_DONATION_ENABLED && (
+                <button
+                  onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation')}
+                  className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
+                >
+                  Donate
+                </button>
+                )}
+            </div>
+          )}
 
-          {user ? (
+          {isDemo ? (
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Pro</span>
+          ) : user ? (
             <UserMenu
               user={user}
               isPro={isPro}
