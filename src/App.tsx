@@ -1317,7 +1317,7 @@ export default function App() {
                 >
                   <FolderOpen className="w-4 h-4" />
                   <span className="max-w-[120px] truncate">{activeCV?.jobRole ?? 'CV'}</span>
-                  <span className="text-[10px] text-zinc-400 font-bold">{cvs.length}/4</span>
+                  <span className="text-[10px] text-zinc-400 font-bold">{cvsInitialized ? `${cvs.length}/4` : '...'}</span>
                 </button>
 
                 <AnimatePresence>
@@ -1329,54 +1329,61 @@ export default function App() {
                       className="absolute left-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50"
                     >
                       <div className="p-2 space-y-1">
-                        {cvs.map(cv => (
-                          <div key={cv.id} className="group relative">
-                            {editingCVId === cv.id ? (
-                              <div className="flex items-center gap-1 p-1">
-                                <input
-                                  value={editRoleValue}
-                                  onChange={e => setEditRoleValue(e.target.value)}
-                                  onKeyDown={e => { if (e.key === 'Enter') handleRenameCV(cv.id); if (e.key === 'Escape') setEditingCVId(null); }}
-                                  className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                                  autoFocus
-                                />
-                                <button onClick={() => handleRenameCV(cv.id)} className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded">
-                                  <CheckCircle2 className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => setEditingCVId(null)} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => switchCV(cv.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                  cv.id === activeCVId
-                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
-                                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                                }`}
-                              >
-                                <FileText className="w-4 h-4 shrink-0" />
-                                <span className="flex-1 truncate text-left">{cv.jobRole}</span>
-                                <span className="text-[10px] text-zinc-400">{cv.generatedContent ? '✓' : ''}</span>
-                                <button
-                                  onClick={e => { e.stopPropagation(); startRename(cv); }}
-                                  className="p-1 text-zinc-300 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <Pencil className="w-3 h-3" />
-                                </button>
-                                {cvs.length > 1 && (
-                                  <button
-                                    onClick={e => { e.stopPropagation(); if (confirm(`Delete "${cv.jobRole}"?`)) handleDeleteCV(cv.id); }}
-                                    className="p-1 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </button>
-                            )}
+                        {!cvsInitialized ? (
+                          <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-zinc-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Loading CVs...
                           </div>
-                        ))}
+                        ) : (
+                          cvs.map(cv => (
+                            <div key={cv.id} className="group relative">
+                              {editingCVId === cv.id ? (
+                                <div className="flex items-center gap-1 p-1">
+                                  <input
+                                    value={editRoleValue}
+                                    onChange={e => setEditRoleValue(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter') handleRenameCV(cv.id); if (e.key === 'Escape') setEditingCVId(null); }}
+                                    className="flex-1 px-2 py-1 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                                    autoFocus
+                                  />
+                                  <button onClick={() => handleRenameCV(cv.id)} className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={() => setEditingCVId(null)} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded">
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => switchCV(cv.id)}
+                                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                                    cv.id === activeCVId
+                                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold'
+                                      : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                                  }`}
+                                >
+                                  <FileText className="w-4 h-4 shrink-0" />
+                                  <span className="flex-1 truncate text-left">{cv.jobRole}</span>
+                                  <span className="text-[10px] text-zinc-400">{cv.generatedContent ? '✓' : ''}</span>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); startRename(cv); }}
+                                    className="p-1 text-zinc-300 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Pencil className="w-3 h-3" />
+                                  </button>
+                                  {cvs.length > 1 && (
+                                    <button
+                                      onClick={e => { e.stopPropagation(); if (confirm(`Delete "${cv.jobRole}"?`)) handleDeleteCV(cv.id); }}
+                                      className="p-1 text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          ))
+                        )}
                       </div>
 
                       {showNewCVInput ? (
@@ -1395,7 +1402,7 @@ export default function App() {
                             </button>
                           </div>
                         </div>
-                      ) : cvs.length < 4 ? (
+                      ) : cvsInitialized && cvs.length < 4 ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowNewCVInput(true)}
@@ -1405,7 +1412,7 @@ export default function App() {
                               New CV
                             </button>
                           </div>
-                        ) : !isPro ? (
+                        ) : cvsInitialized && !isPro ? (
                           <div className="border-t border-zinc-100 dark:border-zinc-800 p-2">
                             <button
                               onClick={() => setShowUpgradeModal(true)}
