@@ -79,6 +79,44 @@ const INITIAL_DATA: CVData = {
 const CV_STORAGE_KEY = 'merit-cvs';
 const ACTIVE_CV_KEY = 'merit-active-cv-id';
 
+const SAMPLE_DATA: CVData = {
+  personalDetails: {
+    fullName: 'Alex Thompson',
+    email: 'alex.thompson@example.co.uk',
+    phone: '+44 7700 900123',
+    location: 'Manchester, UK',
+    linkedin: 'linkedin.com/in/alexthompson-pm',
+    portfolio: 'alexthompson.design',
+    portfolios: ['alexthompson.design'],
+    usefulLinks: [
+      { label: 'GitHub', url: 'github.com/alexthompson' },
+      { label: 'Stack Overflow', url: 'stackoverflow.com/users/alexthompson' },
+    ],
+  },
+  professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
+  experience: [{
+    id: '1',
+    company: 'TechFlow Solutions',
+    role: 'Senior Project Manager',
+    location: 'London',
+    startDate: '01/2020',
+    endDate: 'Present',
+    isCurrent: true,
+    achievements: 'Led a cross-functional team of 15 to launch a new SaaS platform\nManaged a budget of £1.2M with 10% cost savings\nImplemented Jira workflows that improved team velocity by 25%',
+  }],
+  education: [{
+    id: '1',
+    institution: 'University of Manchester',
+    degree: 'BSc Computer Science',
+    location: 'Manchester',
+    graduationDate: '2018',
+    grade: 'First Class Honours',
+  }],
+  skills: 'Agile, Scrum, Prince2, Stakeholder Management, Risk Mitigation, Budgeting, Jira, Confluence',
+  jobDescription: 'We are looking for a Senior Project Manager to lead our digital transformation initiatives. The ideal candidate will have experience in Agile delivery, budget management, and leading high-performing teams.',
+  transferableSkillsFocus: 'Highlight my leadership and team management skills from my time as a sports captain and my retail management experience.',
+};
+
 function generateId() {
   return Math.random().toString(36).substring(2, 11);
 }
@@ -189,6 +227,7 @@ export default function App() {
   });
   const { toast } = useToast();
   const accessTokenRef = useRef<string | null>(null);
+  const pendingOnboardingRef = useRef(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const [blurred, setBlurred] = useState(false);
   const [showSummaryGuide, setShowSummaryGuide] = useState(false);
@@ -437,6 +476,13 @@ export default function App() {
       setCVs([first]);
       saveCVs([first]);
       setActiveCVId(first.id);
+      if (pendingOnboardingRef.current) {
+        pendingOnboardingRef.current = false;
+        setTimeout(() => {
+          setData(SAMPLE_DATA);
+          setStep(5);
+        }, 100);
+      }
     }
   }, [cvsInitialized, cvs.length]);
 
@@ -508,6 +554,7 @@ export default function App() {
 
     if (urlParams.get('checkout_success') === 'true') {
       window.history.replaceState({}, '', window.location.pathname);
+      toast('Welcome to Pro! You can now download unlimited CVs.', 'success');
     }
 
     if (urlParams.get('view') === 'builder') {
@@ -1441,46 +1488,10 @@ export default function App() {
                   Clear All
                 </button>
                 <button 
-                  onClick={() => {
-                    setData({
-                      personalDetails: {
-                        fullName: 'Alex Thompson',
-                        email: 'alex.thompson@example.co.uk',
-                        phone: '+44 7700 900123',
-                        location: 'Manchester, UK',
-                        linkedin: 'linkedin.com/in/alexthompson-pm',
-                        portfolio: 'alexthompson.design',
-                        portfolios: ['alexthompson.design'],
-                        usefulLinks: [
-                          { label: 'GitHub', url: 'github.com/alexthompson' },
-                          { label: 'Stack Overflow', url: 'stackoverflow.com/users/alexthompson' },
-                        ],
-                      },
-                      professionalSummary: 'Results-driven Project Manager with experience in delivering complex software solutions. Expert in Agile methodologies and stakeholder management.',
-                      experience: [{
-                        id: '1',
-                        company: 'TechFlow Solutions',
-                        role: 'Senior Project Manager',
-                        location: 'London',
-                        startDate: '01/2020',
-                        endDate: 'Present',
-                        isCurrent: true,
-                        achievements: 'Led a cross-functional team of 15 to launch a new SaaS platform\nManaged a budget of £1.2M with 10% cost savings\nImplemented Jira workflows that improved team velocity by 25%',
-                      }],
-                      education: [{
-                        id: '1',
-                        institution: 'University of Manchester',
-                        degree: 'BSc Computer Science',
-                        location: 'Manchester',
-                        graduationDate: '2018',
-                        grade: 'First Class Honours',
-                      }],
-                      skills: 'Agile, Scrum, Prince2, Stakeholder Management, Risk Mitigation, Budgeting, Jira, Confluence',
-                      jobDescription: 'We are looking for a Senior Project Manager to lead our digital transformation initiatives. The ideal candidate will have experience in Agile delivery, budget management, and leading high-performing teams.',
-                      transferableSkillsFocus: 'Highlight my leadership and team management skills from my time as a sports captain and my retail management experience.',
-                    });
-                    setStep(5);
-                  }}
+                   onClick={() => {
+                     setData(SAMPLE_DATA);
+                     setStep(5);
+                   }}
                   className="text-[10px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-widest px-2 sm:px-3 py-1 border border-zinc-200 dark:border-zinc-700 rounded-full"
                 >
                   Load Sample
@@ -2464,7 +2475,11 @@ export default function App() {
         onClose={() => { setIsAuthModalOpen(false); setResetPasswordMode(false); }}
         resetPasswordMode={resetPasswordMode}
         onPasswordReset={() => setResetPasswordMode(false)}
-        onSignUp={() => setCurrentView('builder')}
+        onSignUp={() => {
+          pendingOnboardingRef.current = true;
+          setCurrentView('builder');
+          toast('Welcome to Merit! Edit or generate your CV right away.', 'success');
+        }}
     />
 
     <LegalModal

@@ -69,15 +69,11 @@ export default function LandingPage({
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-[#0F172A] dark:text-zinc-100">
-      {!isStripeConfigured && (
+      {false && (
         <div className="bg-amber-500 text-white text-center py-2 text-sm font-bold">
           Payment system not yet configured - contact the site owner
         </div>
       )}
-
-      <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-center py-2 text-sm font-semibold border-b border-amber-200 dark:border-amber-800">
-        This website is under construction — some features may be incomplete
-      </div>
 
       {/* 2. HERO SECTION */}
       <section className="bg-[#0F172A] pt-20 pb-32 px-6 lg:px-16 overflow-hidden" aria-label="Hero">
