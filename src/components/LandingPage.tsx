@@ -134,10 +134,6 @@ export default function LandingPage({
                   Donate
                 </button>
               </div>
-              <p className="text-white/40 text-xs text-center sm:text-left italic">
-                Note: Full ATS optimization is a Pro feature. Free CVs are not guaranteed to bypass all ATS systems.
-              </p>
-
               <div className="flex flex-wrap gap-6">
                 {[
                   'ATS-Optimised',
@@ -278,9 +274,7 @@ export default function LandingPage({
             {user ? 'Build Your CV' : 'Get Started Now'}
             <ArrowRight className="w-5 h-5" />
           </button>
-          <p className="text-zinc-400 text-xs italic">
-            Note: Full ATS optimization is a Pro feature. Free CVs are not guaranteed to bypass all ATS systems.
-          </p>
+
         </div>
       </section>
 
@@ -365,7 +359,7 @@ export default function LandingPage({
                   { text: 'Professional formatting', included: true },
                   { text: 'Basic single template only', included: true },
                   { text: 'CV structure generation', included: true },
-                  { text: 'ATS-optimised format', included: true },
+                  { text: 'ATS-friendly formatting', included: true },
                   { text: 'PDF Download', included: false },
                   { text: 'No job description tailoring', included: false },
                   { text: 'No template choices', included: false },
@@ -387,9 +381,6 @@ export default function LandingPage({
                 >
                   Start Free CV
                 </button>
-                <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-500 leading-tight italic">
-                  Note: Full ATS optimization is a Pro feature. Free CVs are not guaranteed to bypass all ATS systems.
-                </p>
                 <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">No credit card required</p>
               </div>
             </div>
