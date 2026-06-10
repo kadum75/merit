@@ -27,7 +27,7 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
 
           <h4 className="text-white font-bold pt-2">1. Who We Are & Contact</h4>
           <p>
-            Merit is operated by Zenstack Ltd (Company No. 15646884, 71-75 Shelton Street, London, WC2H 9JQ). Our Data Protection Officer can be reached at:{' '}
+            Merit is operated by ZenGale Ltd (Company No. 15646884, 71-75 Shelton Street, London, WC2H 9JQ). Our Data Protection Officer can be reached at:{' '}
             <a href="mailto:rjcosta@gmail.com" className="text-blue-400 underline">rjcosta@gmail.com</a>.
             Merit is registered with the Information Commissioner's Office (ICO) under registration number ZB855489.
           </p>
@@ -277,7 +277,7 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
           <p className="font-semibold text-white">Last Updated: 3 June 2026</p>
           <p>
             These Terms of Service ("Terms") govern your use of Merit (the "Service"), operated by 
-            Zenstack ("we", "our", "us"). By creating an account or using the Service, you agree to 
+            ZenGale ("we", "our", "us"). By creating an account or using the Service, you agree to 
             these Terms. If you do not agree, do not use the Service.
           </p>
 
@@ -331,7 +331,7 @@ export function LegalModal({ isOpen, onClose, type, onSwitchType }: LegalModalPr
           <h4 className="text-white font-bold pt-2">6. Intellectual Property</h4>
           <ul className="list-disc pl-5 space-y-1">
             <li><span className="text-white">Your content</span> — you retain full ownership of the CV content, work history, and personal information you provide</li>
-            <li><span className="text-white">Our IP</span> — Merit templates, design, branding, software, and underlying technology are owned by Zenstack</li>
+            <li><span className="text-white">Our IP</span> — Merit templates, design, branding, software, and underlying technology are owned by ZenGale</li>
             <li><span className="text-white">License</span> — you grant us a limited license to process, store, and display your content solely to provide the Service</li>
             <li><span className="text-white">Model training</span> — we do not use your CV content to train AI or machine learning models</li>
           </ul>

@@ -552,7 +552,7 @@ export default function LandingPage({
             </div>
 
           </div>
-          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (Zenstack account)</p>
+          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (ZenGale account)</p>
         </div>
       </section>
 
@@ -611,8 +611,8 @@ export default function LandingPage({
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col items-center md:items-start gap-1">
-                <p className="text-sm">© 2026 Zenstack. All rights reserved.</p>
-                <p className="text-xs text-white/40">Zenstack Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
+                <p className="text-sm">© 2026 ZenGale. All rights reserved.</p>
+                <p className="text-xs text-white/40">ZenGale Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-white/50">
                 <button type="button" onClick={() => openLegal('privacy')} className="hover:text-white transition-colors">Privacy Policy</button>

@@ -900,8 +900,8 @@ export default function App() {
     pdf.setProperties({
       title: 'Merit Generated CV',
       subject: `ATS-Optimised CV - Generated on ${new Date().toLocaleDateString('en-GB')}`,
-      author: 'Zenstack',
-      keywords: 'Zenstack, ATS-Optimised',
+      author: 'ZenGale',
+      keywords: 'ZenGale, ATS-Optimised',
       creator: 'Merit'
     });
 
@@ -2471,8 +2471,8 @@ export default function App() {
       <footer className="py-6 px-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <p className="text-sm text-zinc-500">© 2026 Zenstack. All rights reserved.</p>
-            <p className="text-xs text-zinc-400">Zenstack Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
+            <p className="text-sm text-zinc-500">© 2026 ZenGale. All rights reserved.</p>
+            <p className="text-xs text-zinc-400">ZenGale Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-zinc-500">
             <button onClick={() => setLegalModal({ isOpen: true, type: 'privacy' })} className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">Privacy Policy</button>
