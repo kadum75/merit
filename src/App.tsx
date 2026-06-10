@@ -1364,7 +1364,7 @@ export default function App() {
                 >
                   <FolderOpen className="w-4 h-4" />
                   <span className="max-w-[120px] truncate">{activeCV?.jobRole ?? 'CV'}</span>
-                  <span className="text-[10px] text-zinc-400 font-bold">{cvsInitialized ? `${cvs.length}/4` : '...'}</span>
+                  <span className="text-[10px] text-zinc-400 font-bold">{cvsInitialized ? cvs.length : '...'}</span>
                 </button>
 
                 <AnimatePresence>
