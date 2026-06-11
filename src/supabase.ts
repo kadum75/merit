@@ -58,49 +58,52 @@ function createStubSupabase() {
     return builder;
   };
 
+  let isSignedIn = false;
   let authListeners: Array<(event: string, session: any) => void> = [];
+  let currentSession: any | null = null;
+
+  function emit(event: string, session: any | null) {
+    isSignedIn = event === 'SIGNED_IN';
+    currentSession = session;
+    authListeners.forEach(cb => cb(event, session));
+  }
 
   return {
     auth: {
       onAuthStateChange: (callback: (event: string, session: any) => void) => {
         authListeners.push(callback);
-        // Immediately emit SIGNED_IN so the app boots as logged-in
-        setTimeout(() => callback('SIGNED_IN', fakeSession), 0);
         return {
           data: { subscription: { unsubscribe: () => { authListeners = []; } } },
         };
       },
       signOut: () => {
-        authListeners.forEach(cb => cb('SIGNED_OUT', null));
+        emit('SIGNED_OUT', null);
         return Promise.resolve({ error: null });
       },
       signInWithOAuth: ({ provider }: { provider: string }) => {
         console.info(`[Supabase Stub] signInWithOAuth(${provider}) — no-op without real Supabase`);
-        authListeners.forEach(cb => cb('SIGNED_IN', fakeSession));
+        const session = { ...fakeSession, user: { ...fakeUser } };
+        emit('SIGNED_IN', session);
         return Promise.resolve({ data: { provider, url: window.location.origin }, error: null });
       },
       signInWithPassword: ({ email, password }: { email: string; password: string }) => {
         console.info(`[Supabase Stub] signInWithPassword demo login`);
-        authListeners.forEach(cb => cb('SIGNED_IN', {
-          ...fakeSession,
-          user: { ...fakeUser, email },
-        }));
-        return Promise.resolve({ data: { user: { ...fakeUser, email }, session: fakeSession }, error: null });
+        const session = { ...fakeSession, user: { ...fakeUser, email } };
+        emit('SIGNED_IN', session);
+        return Promise.resolve({ data: { user: session.user, session }, error: null });
       },
       signUp: ({ email, password, options }: { email: string; password: string; options?: { captchaToken?: string; emailRedirectTo?: string } }) => {
         console.info(`[Supabase Stub] signUp for ${email}${options?.captchaToken ? ' (with captcha)' : ''}`);
-        authListeners.forEach(cb => cb('SIGNED_IN', {
-          ...fakeSession,
-          user: { ...fakeUser, email },
-        }));
-        return Promise.resolve({ data: { user: { ...fakeUser, email }, session: fakeSession }, error: null });
+        const session = { ...fakeSession, user: { ...fakeUser, email } };
+        emit('SIGNED_IN', session);
+        return Promise.resolve({ data: { user: session.user, session }, error: null });
       },
       resetPasswordForEmail: (email: string) => {
         console.info(`[Supabase Stub] resetPasswordForEmail(${email})`);
         return Promise.resolve({ data: {}, error: null });
       },
-      getSession: () => Promise.resolve({ data: { session: fakeSession }, error: null }),
-      getUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
+      getSession: () => Promise.resolve({ data: { session: currentSession }, error: null }),
+      getUser: () => Promise.resolve({ data: { user: currentSession?.user || null }, error: null }),
       updateUser: () => Promise.resolve({ data: { user: fakeUser }, error: null }),
       resend: ({ type, email }: { type: string; email: string }) => {
         console.info(`[Supabase Stub] resend(${type}) for ${email}`);

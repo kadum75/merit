@@ -48,7 +48,7 @@ export function createApp() {
   }
 
   async function checkRateLimit(userId: string, endpoint: string, maxRequests: number = 30, windowMinutes: number = 1): Promise<boolean> {
-    if (!supabase) return true; // Allow if DB is down
+    if (!supabase) return false; // Block if DB is down (fail closed)
     const now = new Date();
     const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000).toISOString();
     try {
@@ -61,7 +61,7 @@ export function createApp() {
         .order('window_start', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (error) return true;
+      if (error) return false;
       const count = data?.request_count || 0;
       if (count >= maxRequests) return false;
       if (data) {
@@ -78,7 +78,7 @@ export function createApp() {
       }
       return true;
     } catch {
-      return true; // Allow on error (fail open)
+      return false; // Block on error (fail closed)
     }
   }
 
@@ -361,10 +361,9 @@ export function createApp() {
         return res.status(500).json({ error: "Database not initialized" });
       }
 
-      const currentMonth = new Date().toISOString().slice(0, 7);
       const { data: userData } = await supabase
         .from("users")
-        .select("preview_count, last_preview_reset, is_pro")
+        .select("is_pro")
         .eq("uid", user.uid)
         .single();
 
@@ -372,24 +371,21 @@ export function createApp() {
         return res.json({ allowed: true, remaining: -1 });
       }
 
-      let count = userData?.preview_count || 0;
-      let reset = userData?.last_preview_reset || "";
+      // Atomic increment via SQL function (read + write in one call)
+      const { data, error } = await supabase.rpc("increment_preview_count", { p_uid: user.uid });
 
-      if (reset !== currentMonth) {
-        count = 0;
-        reset = currentMonth;
+      if (error) {
+        console.error("Preview count RPC error:", error);
+        return res.status(500).json({ error: "Failed to update preview count" });
       }
 
-      if (count >= 3) {
+      const newCount = data?.[0]?.preview_count || 1;
+
+      if (newCount > 3) {
         return res.json({ allowed: false, remaining: 0 });
       }
 
-      await supabase
-        .from("users")
-        .update({ preview_count: count + 1, last_preview_reset: currentMonth })
-        .eq("uid", user.uid);
-
-      res.json({ allowed: true, remaining: 2 - count });
+      res.json({ allowed: true, remaining: 3 - newCount });
     } catch (err) {
       console.error("Preview count error:", err);
       res.status(500).json({ error: "Failed to validate preview count" });

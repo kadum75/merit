@@ -12,6 +12,8 @@ coverage/
 .netlify/*
 netlify/functions/*.js
 .opencode/
+.agents/
+skills-lock.json
 *.png
 create-*.cjs
 create-*.js
