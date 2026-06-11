@@ -148,10 +148,10 @@ export default function LandingPage({
           >
             <div className="space-y-4">
               <div className="relative">
-                {/* Invisible spacer — reserves height of tallest slogan across all screen sizes */}
-                <div className="invisible text-5xl md:text-6xl font-extrabold text-white leading-[1.1]" aria-hidden="true">
+                {/* Invisible spacer — grid stacks all slogans in same cell, height = tallest */}
+                <div className="invisible grid grid-cols-1 text-5xl md:text-6xl font-extrabold text-white leading-[1.1]" aria-hidden="true">
                   {slogans.map(s => (
-                    <span key={s} className="block">{s}</span>
+                    <span key={s} className="col-start-1 row-start-1">{s}</span>
                   ))}
                 </div>
                 <div className="absolute inset-0">
