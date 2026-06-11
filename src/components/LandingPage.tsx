@@ -138,7 +138,7 @@ export default function LandingPage({
       )}
 
       {/* 2. HERO SECTION */}
-      <section className="bg-[#0F172A] pt-20 pb-32 px-6 lg:px-16 overflow-hidden" aria-label="Hero">
+      <section className="bg-[#0F172A] pt-10 pb-24 px-6 lg:px-16 overflow-hidden" aria-label="Hero">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
