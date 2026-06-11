@@ -44,7 +44,7 @@ import { UK_LOCATIONS } from './data/uk-locations';
 import { COUNTRY_NAMES, getCitiesForCountry } from './data/countries';
 import { getCountrySkillTips } from './data/transferableSkillsByCountry';
 import { SKILLS } from './data/skills';
-import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL } from './lib/pricing';
+import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION } from './lib/pricing';
 
 const GENERAL_SKILLS = [
   'Leadership', 'Team Management', 'Project Management', 'Communication',
@@ -199,6 +199,7 @@ export default function App() {
   const [isDemo, setIsDemo] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showDonationToast, setShowDonationToast] = useState(false);
   const [legalModal, setLegalModal] = useState<{ isOpen: boolean; type: LegalType }>({ isOpen: false, type: 'privacy' });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [resetPasswordMode, setResetPasswordMode] = useState(false);
@@ -599,8 +600,8 @@ export default function App() {
     pendingCheckoutRef.current = true;
     (async () => {
       try {
-        const { priceId, planType } = JSON.parse(pending);
-        await handleCheckout(priceId, planType);
+        const { priceId, planType, donationAmount } = JSON.parse(pending);
+        await handleCheckout(priceId, planType, donationAmount);
       } catch {
         pendingCheckoutRef.current = false;
         sessionStorage.removeItem('merit-pending-checkout');
@@ -878,6 +879,7 @@ export default function App() {
 
       if (!content) throw new Error('No content received');
       setGeneratedContent(content);
+      setShowDonationToast(true);
     } catch (error: any) {
       console.error('Generation failed:', error);
       const message = error?.message || 'Failed to generate content. Please try again.';
@@ -1329,14 +1331,14 @@ export default function App() {
     window.location.href = '/';
   };
 
-  const handleCheckout = async (priceId: string, planType: string) => {
+  const handleCheckout = async (priceId: string, planType: string, donationAmount?: string) => {
     if (!isStripeConfigured) {
       toast("Payments coming soon - please check back shortly!", 'info');
       return;
     }
 
     if (!user) {
-      sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType }));
+      sessionStorage.setItem('merit-pending-checkout', JSON.stringify({ priceId, planType, donationAmount }));
       setIsAuthModalOpen(true);
       return;
     }
@@ -1360,6 +1362,7 @@ export default function App() {
           email: user.email,
           priceId,
           planType,
+          donationAmount,
           returnView: currentView
         }),
       });
@@ -2520,8 +2523,20 @@ export default function App() {
                     <p className="text-sm font-medium text-zinc-400 dark:text-zinc-500">Preview hidden — switch back to view</p>
                   </div>
                 ) : (
-                <div className={`markdown-body ${activeTemplateId}`}>
-                  <Markdown>{generatedContent}</Markdown>
+                <div className="h-full flex flex-col">
+                  {showDonationToast && (
+                    <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-800 shrink-0">
+                      <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                        Loved your CV? <button onClick={() => handleCheckout(STRIPE_PRICE_DONATION, "donation", "3")} className="underline font-bold hover:text-amber-900 dark:hover:text-amber-200">Support Merit</button> to keep it free for everyone
+                      </p>
+                      <button onClick={() => setShowDonationToast(false)} className="p-1 rounded-md hover:bg-amber-200/50 dark:hover:bg-amber-800/50 transition-colors shrink-0">
+                        <X className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                      </button>
+                    </div>
+                  )}
+                  <div className={`markdown-body ${activeTemplateId} flex-1 overflow-y-auto`}>
+                    <Markdown>{generatedContent}</Markdown>
+                  </div>
                 </div>
                 )
               ) : hasFormData ? (

@@ -236,13 +236,43 @@ export function createApp() {
         return res.status(429).json({ error: "Too many requests. Please wait before trying again." });
       }
 
-      const { uid, email, priceId, planType, returnView } = req.body;
-      if (!priceId || !uid || !email) {
-        return res.status(400).json({ error: "Missing required fields (priceId, uid, email)" });
+      const { uid, email, priceId, planType, returnView, donationAmount } = req.body;
+      if (!uid || !email) {
+        return res.status(400).json({ error: "Missing required fields (uid, email)" });
       }
 
       if (uid !== user.uid || email !== user.email) {
         return res.status(403).json({ error: "Forbidden: uid/email does not match authenticated user" });
+      }
+
+      // Custom amount donations — skip price ID check, create on-the-fly price
+      if (planType === "donation" && donationAmount) {
+        const amount = parseInt(donationAmount);
+        if (isNaN(amount) || amount < 1 || amount > 1000) {
+          return res.status(400).json({ error: "Donation amount must be between £1 and £1,000" });
+        }
+        const appUrl = process.env.VITE_APP_URL || process.env.APP_URL || "https://merit-cv.vercel.app";
+        const viewParam = returnView === 'builder' ? '&view=builder' : '';
+        const session = await stripe.checkout.sessions.create({
+          customer_email: email,
+          line_items: [{
+            price_data: {
+              currency: 'gbp',
+              product_data: { name: 'Donation to Merit' },
+              unit_amount: amount * 100,
+            },
+            quantity: 1,
+          }],
+          mode: 'payment',
+          metadata: { uid, planType, donation_amount: String(amount) },
+          success_url: `${appUrl}?checkout_success=true${viewParam}`,
+          cancel_url: `${appUrl}?view=${returnView || 'home'}`,
+        });
+        return res.json({ url: session.url });
+      }
+
+      if (!priceId) {
+        return res.status(400).json({ error: "Missing required field (priceId)" });
       }
 
       const ALLOWED_PRICE_IDS = [

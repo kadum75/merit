@@ -36,7 +36,7 @@ interface LandingPageProps {
   isStripeConfigured: boolean;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
-  handleCheckout: (priceId: string, planType: string) => Promise<void>;
+  handleCheckout: (priceId: string, planType: string, donationAmount?: string) => Promise<void>;
 }
 
 export default function LandingPage({ 
@@ -75,6 +75,15 @@ export default function LandingPage({
   useEffect(() => {
     const id = setInterval(() => setSloganIndex(i => (i + 1) % slogans.length), 4000);
     return () => clearInterval(id);
+  }, []);
+
+  const [donationTier, setDonationTier] = useState('5');
+  const [customAmount, setCustomAmount] = useState('');
+  const [donorCount, setDonorCount] = useState(42);
+  useEffect(() => {
+    supabase.from('users').select('uid', { count: 'estimated', head: true }).eq('plan_type', 'donation').then(({ count }) => {
+      if (count) setDonorCount(count);
+    }).catch(() => {});
   }, []);
 
   const [email, setEmail] = useState('');
@@ -204,7 +213,7 @@ export default function LandingPage({
                     if (!isStripeConfigured) {
                       document.getElementById('support-section')?.scrollIntoView({ behavior: 'smooth' });
                     } else {
-                      handleCheckout(STRIPE_PRICE_DONATION, "donation");
+                      handleCheckout(STRIPE_PRICE_DONATION, "donation", "5");
                     }
                   }}
                   className="text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full border border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-500 transition-all"
@@ -634,31 +643,58 @@ export default function LandingPage({
             /* Donation Card */
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 rounded-3xl space-y-8 flex flex-col shadow-sm">
               <div className="space-y-2">
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400 mb-4">
-                  <Coffee className="w-6 h-6" />
+                <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-2xl flex items-center justify-center text-rose-600 dark:text-rose-400 mb-4">
+                  <Heart className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold dark:text-white">One-time Donation</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">£1+</span>
-                  <span className="text-zinc-400 text-sm font-normal"> / any amount</span>
-                </div>
-              </div>
-              <div className="space-y-4 flex-1">
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-                  Support the development of Merit with a contribution of any amount. This helps us maintain our platform for everyone.
+                <h3 className="text-xl font-bold dark:text-white">Help Job Seekers</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  Your contribution keeps Merit free for everyone who needs it. Every bit helps.
                 </p>
-                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-100 dark:border-amber-800">
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-amber-700 flex items-center gap-1.5">
-                    <Star className="w-3 h-3" /> Note: No features unlocked
-                  </p>
-                  <p className="text-[10px] text-amber-600 mt-1">Donations are purely for support.</p>
+                <div className="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                  <Heart className="w-3 h-3 fill-rose-400 text-rose-400" />
+                  <span><strong className="text-zinc-700 dark:text-zinc-300">{donorCount}</strong> supporters</span>
                 </div>
               </div>
-              <button 
-                onClick={() => handleCheckout(STRIPE_PRICE_DONATION, "donation")}
-                className="w-full py-4 bg-[#F59E0B] hover:bg-[#D97706] text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20"
+
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Choose amount</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {['3', '5', '10'].map(amount => (
+                    <button
+                      key={amount}
+                      onClick={() => { setDonationTier(amount); setCustomAmount(''); }}
+                      className={`py-3 rounded-xl font-bold text-sm transition-all ${
+                        donationTier === amount && !customAmount
+                          ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20'
+                          : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                      }`}
+                    >
+                      £{amount}
+                    </button>
+                  ))}
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-medium text-sm">£</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="1000"
+                    value={customAmount}
+                    onChange={e => { setCustomAmount(e.target.value); setDonationTier(''); }}
+                    placeholder="Custom"
+                    className="w-full pl-8 pr-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:text-white placeholder-zinc-400"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const amount = customAmount || donationTier;
+                  handleCheckout(STRIPE_PRICE_DONATION, "donation", amount);
+                }}
+                className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-rose-500/20"
               >
-                Donate
+                Donate £{customAmount || donationTier}
               </button>
             </div>
             )}
@@ -752,11 +788,11 @@ export default function LandingPage({
             {STRIPE_DONATION_ENABLED && (
             <div className="flex flex-col items-center gap-4">
               <button
-                onClick={() => handleCheckout(STRIPE_PRICE_DONATION, 'donation')}
-                className="inline-flex items-center gap-2 bg-[#F59E0B] hover:bg-[#D97706] text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-orange-500/10"
+                onClick={() => handleCheckout(STRIPE_PRICE_DONATION, 'donation', '5')}
+                className="inline-flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-rose-500/10"
               >
-                <Coffee className="w-4 h-4" />
-                Support Merit
+                <Heart className="w-4 h-4" />
+                Donate £5
               </button>
               <p className="text-xs text-white/40">Help keep Merit free for all job seekers</p>
             </div>

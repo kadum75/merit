@@ -15,7 +15,7 @@ interface HeaderProps {
   onSignInClick: () => void;
   onSignOut: () => void;
   onManageSubscription?: () => void;
-  onCheckout: (priceId: string, planType: string) => void;
+  onCheckout: (priceId: string, planType: string, donationAmount?: string) => void;
   onToggleTheme: () => void;
 }
 
@@ -67,7 +67,7 @@ export function Header({
                 </button>
                 {STRIPE_DONATION_ENABLED && (
                 <button
-                  onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation')}
+                  onClick={() => onCheckout(STRIPE_PRICE_DONATION, 'donation', '5')}
                   className="text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-2 sm:px-2.5 py-1 rounded-full border border-green-500/30 text-green-600 dark:text-green-400 hover:border-green-500 hover:text-green-700 dark:hover:text-green-300 transition-all"
                 >
                   Donate
