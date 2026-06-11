@@ -1132,6 +1132,7 @@ export default function App() {
   };
 
   const copyToClipboard = async () => {
+    if (!isPro) { setShowUpgradeModal(true); return; }
     const text = generatedContent || livePreview;
     if (!text) return;
     try {
