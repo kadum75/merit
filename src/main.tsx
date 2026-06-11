@@ -2,7 +2,10 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import { ToastProvider } from './components/ToastContext';
+import { initSentry } from './lib/sentry';
 import './index.css';
+
+initSentry();
 
 // Suppress Vite HMR WebSocket errors in AI Studio iframe
 if (typeof window !== 'undefined') {

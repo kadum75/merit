@@ -15,11 +15,14 @@ import {
   Lock,
   ScrollText,
   Home,
+  Mail,
+  Bell,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LegalModal, LegalType } from './LegalModal';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_DONATION_ENABLED } from '../lib/pricing';
 import { cvSamples } from '../data/cvSamples';
+import { supabase } from '../supabase';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -58,6 +61,43 @@ export default function LandingPage({
     const id = setInterval(() => setSampleIndex(i => (i + 1) % cvSamples.length), 300000);
     return () => clearInterval(id);
   }, []);
+
+  const [email, setEmail] = useState('');
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [emailError, setEmailError] = useState('');
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
+    setEmailStatus('submitting');
+    try {
+      const { error } = await supabase.from('email_subscribers').insert({
+        email: email.toLowerCase().trim(),
+        source: 'landing_page',
+        marketing_consent: marketingConsent,
+      });
+      if (error) {
+        if (error.code === '23505') {
+          setEmailError('You are already subscribed!');
+        } else {
+          setEmailError('Something went wrong. Please try again.');
+        }
+        setEmailStatus('error');
+        return;
+      }
+      setEmailStatus('success');
+      setEmail('');
+      setMarketingConsent(false);
+    } catch {
+      setEmailError('Something went wrong. Please try again.');
+      setEmailStatus('error');
+    }
+  };
 
   const openLegal = (type: LegalType) => {
     setLegalModal({ isOpen: true, type });
@@ -468,6 +508,79 @@ export default function LandingPage({
         </div>
       </section>
 
+      {/* EMAIL CAPTURE SECTION */}
+      <section className="py-24 px-6 lg:px-16 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800" aria-label="Stay updated">
+        <div className="max-w-2xl mx-auto text-center space-y-8">
+          <div className="space-y-4">
+            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto">
+              <Bell className="w-7 h-7 text-[#3B82F6]" />
+            </div>
+            <h2 className="text-4xl font-bold tracking-tight dark:text-white">Stay Updated</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
+              Get UK-specific CV tips, ATS insights, and new template announcements straight to your inbox.
+            </p>
+          </div>
+
+          {emailStatus === 'success' ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-8 bg-green-50 dark:bg-green-900/20 rounded-2xl border border-green-200 dark:border-green-800"
+            >
+              <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-3" />
+              <p className="text-lg font-bold text-green-700 dark:text-green-300">You're subscribed!</p>
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1">We'll send you UK-specific CV tips and updates.</p>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleEmailSubmit} className="space-y-5">
+              <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setEmailError(''); }}
+                    placeholder="your@email.com"
+                    disabled={emailStatus === 'submitting'}
+                    className="w-full pl-11 pr-4 py-3.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent disabled:opacity-50 dark:text-white placeholder-zinc-400"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={emailStatus === 'submitting'}
+                  className="px-6 py-3.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 shrink-0"
+                >
+                  {emailStatus === 'submitting' ? (
+                    <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Subscribing...</span>
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </div>
+
+              {emailError && (
+                <p className="text-sm text-red-500 dark:text-red-400 flex items-center justify-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full" /> {emailError}
+                </p>
+              )}
+
+              <label className="flex items-start justify-center gap-2.5 max-w-lg mx-auto cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={e => setMarketingConsent(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#3B82F6] rounded"
+                />
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 text-left leading-relaxed group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+                  I agree to receive career tips and product updates. You can unsubscribe at any time. See our{' '}
+                  <button type="button" onClick={() => openLegal('privacy')} className="underline hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy Policy</button>.
+                </span>
+              </label>
+            </form>
+          )}
+        </div>
+      </section>
+
       {/* SUPPORT US SECTION */}
       <section id="support-section" className="py-24 px-6 lg:px-16 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto space-y-16">
@@ -552,7 +665,7 @@ export default function LandingPage({
             </div>
 
           </div>
-          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (ZenGale account)</p>
+          <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Secure payments powered by Stripe (Merit account)</p>
         </div>
       </section>
 
@@ -611,7 +724,7 @@ export default function LandingPage({
             
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col items-center md:items-start gap-1">
-                <p className="text-sm">© 2026 ZenGale. All rights reserved.</p>
+                <p className="text-sm">© 2026 Merit. All rights reserved.</p>
                 <p className="text-xs text-white/40">ZenGale Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-white/50">

@@ -1143,51 +1143,135 @@ export default function App() {
     }
   };
 
-  const downloadDOC = () => {
+  const downloadDOC = async () => {
     if (!isPro) { setShowUpgradeModal(true); return; }
     const content = generatedContent || livePreview;
     if (!content) return;
-    
-    // Very basic markdown to simple HTML conversion for better Word compatibility
-    const escapeHtml = (str: string) =>
-      str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
-    const htmlContent = content
-      .replace(/^# (.*$)/gm, (_, c) => '<h1>' + escapeHtml(c) + '</h1>')
-      .replace(/^## (.*$)/gm, (_, c) => '<h2>' + escapeHtml(c) + '</h2>')
-      .replace(/^### (.*$)/gm, (_, c) => '<h3>' + escapeHtml(c) + '</h3>')
-      .replace(/^\* (.*$)/gm, (_, c) => '<li>' + escapeHtml(c) + '</li>')
-      .replace(/^- (.*$)/gm, (_, c) => '<li>' + escapeHtml(c) + '</li>')
-      .replace(/\*\*(.*?)\*\*/g, (_, c) => '<strong>' + escapeHtml(c) + '</strong>')
-      .replace(/\*(.*?)\*/g, (_, c) => '<em>' + escapeHtml(c) + '</em>')
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br/>');
+    const {
+      Document, Packer, Paragraph, TextRun,
+      HeadingLevel, AlignmentType, BorderStyle,
+    } = await import('docx');
 
     const tpl = activeTemplate.pdf;
-    const primaryHex = `rgb(${tpl.primaryColor.join(',')})`;
-    const secondaryHex = `rgb(${tpl.secondaryColor.join(',')})`;
+    const rgb = (c: [number, number, number]) => '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+    const primaryHex = rgb(tpl.primaryColor);
+    const secondaryHex = rgb(tpl.secondaryColor);
+    const fontName = tpl.fontName;
 
-    const fullHtml = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head><meta charset='utf-8'></head>
-      <body>
-        <style>
-          body { font-family: Calibri, Arial, sans-serif; line-height: 1.5; }
-          h1 { color: ${primaryHex}; font-size: 24pt; border-bottom: 1pt solid ${primaryHex}; ${activeTemplateId === 'professional' ? `background: ${primaryHex}; color: white; padding: 8pt;` : ''} }
-          h2 { color: ${activeTemplateId === 'classic' ? '#111827' : primaryHex}; font-size: 18pt; margin-top: 20pt; border-bottom: 1pt solid ${activeTemplateId === 'classic' ? '#e5e7eb' : primaryHex}; }
-          h3 { color: ${activeTemplateId === 'modern' || activeTemplateId === 'professional' ? secondaryHex : primaryHex}; font-size: 14pt; margin-top: 15pt; }
-          li { margin-bottom: 5pt; }
-        </style>
-        ${htmlContent}
-      </body>
-      </html>
-    `;
+    function parseInline(text: string) {
+      const parts: (string | import('docx').TextRun)[] = [];
+      const regex = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+      let last = 0;
+      for (const m of text.matchAll(regex)) {
+        if (m.index > last) parts.push(text.slice(last, m.index));
+        if (m[2]) parts.push(new TextRun({ text: m[2], bold: true, font: fontName, size: 20 }));
+        if (m[3]) parts.push(new TextRun({ text: m[3], italics: true, font: fontName, size: 20 }));
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) parts.push(text.slice(last));
+      return parts;
+    }
 
-    const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
+    function runs(text: string) {
+      return parseInline(text).map(p => typeof p === 'string'
+        ? new TextRun({ text: p, font: fontName, size: 20 })
+        : p
+      );
+    }
+
+    const lines = content.split('\n');
+    const children: any[] = [];
+    let listBuffer: any[] | null = null;
+
+    function flushList() {
+      if (listBuffer) { children.push(...listBuffer); listBuffer = null; }
+    }
+
+    for (const raw of lines) {
+      const trimmed = raw.trim();
+      if (!trimmed) { flushList(); continue; }
+
+      // H1 — Name
+      const h1 = trimmed.match(/^# (.+)/);
+      if (h1) {
+        flushList();
+        children.push(new Paragraph({
+          children: [new TextRun({ text: h1[1], bold: true, size: 52, font: fontName, color: primaryHex })],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 },
+        }));
+        continue;
+      }
+
+      // H2 — Section title
+      const h2 = trimmed.match(/^## (.+)/);
+      if (h2) {
+        flushList();
+        children.push(new Paragraph({
+          children: [new TextRun({ text: h2[1], bold: true, size: 28, font: fontName, color: primaryHex })],
+          spacing: { before: 300, after: 100 },
+          border: { bottom: { color: primaryHex, size: 6, style: BorderStyle.SINGLE } },
+        }));
+        continue;
+      }
+
+      // H3 — Job title, institution
+      const h3 = trimmed.match(/^### (.+)/);
+      if (h3) {
+        flushList();
+        children.push(new Paragraph({
+          children: [new TextRun({ text: h3[1], bold: true, size: 24, font: fontName, color: secondaryHex })],
+          spacing: { before: 200, after: 60 },
+        }));
+        continue;
+      }
+
+      // Bullet point
+      const bullet = trimmed.match(/^[-•·●]\s+(.+)/);
+      if (bullet) {
+        listBuffer = listBuffer || [];
+        listBuffer.push(new Paragraph({
+          children: runs(bullet[1]),
+          spacing: { after: 40 },
+          bullet: { level: 0 },
+        }));
+        continue;
+      }
+
+      // Italic whole-line (meta: dates, location)
+      const italicLine = trimmed.match(/^\*(.+)\*$/);
+      if (italicLine) {
+        flushList();
+        children.push(new Paragraph({
+          children: [new TextRun({ text: italicLine[1], italics: true, size: 20, font: fontName, color: '666666' })],
+          spacing: { after: 100 },
+        }));
+        continue;
+      }
+
+      // Regular paragraph
+      flushList();
+      children.push(new Paragraph({
+        children: runs(trimmed),
+        spacing: { after: 80 },
+      }));
+    }
+
+    flushList();
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children,
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_CV.doc`;
+    link.download = `${data.personalDetails.fullName.replace(/\s+/g, '_')}_CV.docx`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -2471,7 +2555,7 @@ export default function App() {
       <footer className="py-6 px-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <p className="text-sm text-zinc-500">© 2026 ZenGale. All rights reserved.</p>
+            <p className="text-sm text-zinc-500">© 2026 Merit. All rights reserved.</p>
             <p className="text-xs text-zinc-400">ZenGale Ltd · 71-75 Shelton Street, London, WC2H 9JQ · Company No. 15646884</p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-xs font-medium text-zinc-500">

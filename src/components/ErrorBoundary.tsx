@@ -1,4 +1,5 @@
 import React, { Component, type ReactNode } from 'react';
+import * as Sentry from '@sentry/react';
 import { logError } from '../supabase';
 
 interface Props { children: ReactNode }
@@ -10,6 +11,7 @@ export class ErrorBoundary extends Component<Props, State> {
   static getDerivedStateFromError() { return { hasError: true }; }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    Sentry.captureException(error, { contexts: { react: { componentStack: info.componentStack } } });
     logError(error, { componentStack: info.componentStack });
   }
 
