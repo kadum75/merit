@@ -2606,7 +2606,14 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
           >
-            <div className="p-8 text-center space-y-6">
+            <div className="relative p-8 text-center space-y-6">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="absolute top-4 right-4 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
                 <Star className="w-8 h-8 text-amber-600 fill-current" />
               </div>
