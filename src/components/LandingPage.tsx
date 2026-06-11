@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LegalModal, LegalType } from './LegalModal';
+import { SocialShare } from './SocialShare';
 import { STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_DONATION, STRIPE_DONATION_ENABLED } from '../lib/pricing';
 import { cvSamples } from '../data/cvSamples';
 import { supabase } from '../supabase';
@@ -257,9 +258,9 @@ export default function LandingPage({
                   </div>
                 </motion.div>
               </AnimatePresence>
-            </div>
           </div>
         </div>
+      </div>
       </section>
 
       {/* 3. HOW IT WORKS SECTION */}
@@ -505,6 +506,11 @@ export default function LandingPage({
             </div>
 
           </div>
+
+          <div className="flex flex-col items-center gap-3 pt-8">
+            <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Share Merit with your network</p>
+            <SocialShare label={false} />
+          </div>
         </div>
       </section>
 
@@ -722,6 +728,10 @@ export default function LandingPage({
             </div>
             )}
             
+            <div className="flex items-center gap-6">
+              <SocialShare variant="muted" />
+            </div>
+
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-col items-center md:items-start gap-1">
                 <p className="text-sm">© 2026 Merit. All rights reserved.</p>
