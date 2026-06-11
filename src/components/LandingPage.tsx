@@ -147,7 +147,7 @@ export default function LandingPage({
             className="space-y-8"
           >
             <div className="space-y-4">
-              <div className="relative h-[8rem] md:h-[5.5rem] overflow-hidden">
+              <div className="relative h-[11rem] md:h-[5.5rem]">
                 <AnimatePresence mode="wait">
                   <motion.h1
                     key={sloganIndex}
@@ -155,7 +155,7 @@ export default function LandingPage({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.4 }}
-                    className="absolute inset-0 text-5xl md:text-6xl font-extrabold text-white leading-[1.1] flex items-start"
+                    className="absolute inset-0 text-5xl md:text-6xl font-extrabold text-white leading-[1.1]"
                   >
                     {slogans[sloganIndex]}
                   </motion.h1>
