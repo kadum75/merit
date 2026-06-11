@@ -147,20 +147,18 @@ export default function LandingPage({
             className="space-y-8"
           >
             <div className="space-y-4">
-              <div className="relative h-[4.5rem] md:h-[5.5rem]">
-                <AnimatePresence mode="wait">
-                  <motion.h1
-                    key={sloganIndex}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.4 }}
-                    className="text-5xl md:text-6xl font-extrabold text-white leading-[1.1] absolute"
-                  >
-                    {slogans[sloganIndex]}
-                  </motion.h1>
-                </AnimatePresence>
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={sloganIndex}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.4 }}
+                  className="text-5xl md:text-6xl font-extrabold text-white leading-[1.1]"
+                >
+                  {slogans[sloganIndex]}
+                </motion.h1>
+              </AnimatePresence>
               <p className="text-xl text-white/70 max-w-xl leading-relaxed">
                 Merit helps you write, structure and optimise your CV for every role you apply for — in minutes.
               </p>
